@@ -108,6 +108,61 @@ ALTER SEQUENCE public.libraries_id_seq OWNED BY public.libraries.id;
 
 
 --
+-- Name: users; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.users (
+    id integer NOT NULL,
+    active boolean DEFAULT true NOT NULL,
+    level text DEFAULT 'info'::text NOT NULL,
+    library_id integer NOT NULL,
+    notes text,
+    password text NOT NULL,
+    username text NOT NULL
+);
+
+
+--
+-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.users_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
+
+
+--
+-- Name: users_library_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.users_library_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: users_library_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.users_library_id_seq OWNED BY public.users.library_id;
+
+
+--
 -- Name: authors id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -129,6 +184,20 @@ ALTER TABLE ONLY public.libraries ALTER COLUMN id SET DEFAULT nextval('public.li
 
 
 --
+-- Name: users id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
+
+
+--
+-- Name: users library_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.users ALTER COLUMN library_id SET DEFAULT nextval('public.users_library_id_seq'::regclass);
+
+
+--
 -- Name: authors authors_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -142,6 +211,14 @@ ALTER TABLE ONLY public.authors
 
 ALTER TABLE ONLY public.libraries
     ADD CONSTRAINT libraries_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
 
 
 --
@@ -159,11 +236,26 @@ CREATE UNIQUE INDEX uk_libraries_name ON public.libraries USING btree (name);
 
 
 --
+-- Name: uk_users_username; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX uk_users_username ON public.users USING btree (username);
+
+
+--
 -- Name: authors fk_authors_library_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.authors
     ADD CONSTRAINT fk_authors_library_id FOREIGN KEY (library_id) REFERENCES public.libraries(id);
+
+
+--
+-- Name: users fk_users_library_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT fk_users_library_id FOREIGN KEY (library_id) REFERENCES public.libraries(id);
 
 
 --
