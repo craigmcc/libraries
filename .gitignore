@@ -1,0 +1,9 @@
+.env.*
+.idea/
+.migraterc
+build/
+config/config.json
+dist/
+node_modules/
+personal.csv
+test/database.sqlite
