@@ -52,6 +52,7 @@
     "csvtojson": "^2.0.10",
     "custom-env": "^2.0.1",
     "date-fns": "^2.19.0",
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "zapatos": "^3.5.0"
   }
 }
