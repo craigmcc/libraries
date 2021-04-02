@@ -146,6 +146,77 @@ ALTER SEQUENCE public.authors_series_series_id_seq OWNED BY public.authors_serie
 
 
 --
+-- Name: authors_stories; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.authors_stories (
+    id integer NOT NULL,
+    author_id integer NOT NULL,
+    story_id integer NOT NULL
+);
+
+
+--
+-- Name: authors_stories_author_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.authors_stories_author_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: authors_stories_author_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.authors_stories_author_id_seq OWNED BY public.authors_stories.author_id;
+
+
+--
+-- Name: authors_stories_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.authors_stories_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: authors_stories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.authors_stories_id_seq OWNED BY public.authors_stories.id;
+
+
+--
+-- Name: authors_stories_story_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.authors_stories_story_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: authors_stories_story_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.authors_stories_story_id_seq OWNED BY public.authors_stories.story_id;
+
+
+--
 -- Name: authors_volumes; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -304,6 +375,132 @@ ALTER SEQUENCE public.series_library_id_seq OWNED BY public.series.library_id;
 
 
 --
+-- Name: series_stories; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.series_stories (
+    id integer NOT NULL,
+    series_id integer NOT NULL,
+    story_id integer NOT NULL,
+    ordinal smallint
+);
+
+
+--
+-- Name: series_stories_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.series_stories_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: series_stories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.series_stories_id_seq OWNED BY public.series_stories.id;
+
+
+--
+-- Name: series_stories_series_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.series_stories_series_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: series_stories_series_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.series_stories_series_id_seq OWNED BY public.series_stories.series_id;
+
+
+--
+-- Name: series_stories_story_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.series_stories_story_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: series_stories_story_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.series_stories_story_id_seq OWNED BY public.series_stories.story_id;
+
+
+--
+-- Name: stories; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.stories (
+    id integer NOT NULL,
+    active boolean DEFAULT true NOT NULL,
+    copyright smallint,
+    library_id integer NOT NULL,
+    name text NOT NULL,
+    notes text
+);
+
+
+--
+-- Name: stories_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.stories_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: stories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.stories_id_seq OWNED BY public.stories.id;
+
+
+--
+-- Name: stories_library_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.stories_library_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: stories_library_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.stories_library_id_seq OWNED BY public.stories.library_id;
+
+
+--
 -- Name: users; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -417,6 +614,77 @@ ALTER SEQUENCE public.volumes_library_id_seq OWNED BY public.volumes.library_id;
 
 
 --
+-- Name: volumes_stories; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.volumes_stories (
+    id integer NOT NULL,
+    volume_id integer NOT NULL,
+    story_id integer NOT NULL
+);
+
+
+--
+-- Name: volumes_stories_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.volumes_stories_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: volumes_stories_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.volumes_stories_id_seq OWNED BY public.volumes_stories.id;
+
+
+--
+-- Name: volumes_stories_story_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.volumes_stories_story_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: volumes_stories_story_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.volumes_stories_story_id_seq OWNED BY public.volumes_stories.story_id;
+
+
+--
+-- Name: volumes_stories_volume_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.volumes_stories_volume_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: volumes_stories_volume_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.volumes_stories_volume_id_seq OWNED BY public.volumes_stories.volume_id;
+
+
+--
 -- Name: authors id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -449,6 +717,27 @@ ALTER TABLE ONLY public.authors_series ALTER COLUMN author_id SET DEFAULT nextva
 --
 
 ALTER TABLE ONLY public.authors_series ALTER COLUMN series_id SET DEFAULT nextval('public.authors_series_series_id_seq'::regclass);
+
+
+--
+-- Name: authors_stories id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.authors_stories ALTER COLUMN id SET DEFAULT nextval('public.authors_stories_id_seq'::regclass);
+
+
+--
+-- Name: authors_stories author_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.authors_stories ALTER COLUMN author_id SET DEFAULT nextval('public.authors_stories_author_id_seq'::regclass);
+
+
+--
+-- Name: authors_stories story_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.authors_stories ALTER COLUMN story_id SET DEFAULT nextval('public.authors_stories_story_id_seq'::regclass);
 
 
 --
@@ -494,6 +783,41 @@ ALTER TABLE ONLY public.series ALTER COLUMN library_id SET DEFAULT nextval('publ
 
 
 --
+-- Name: series_stories id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.series_stories ALTER COLUMN id SET DEFAULT nextval('public.series_stories_id_seq'::regclass);
+
+
+--
+-- Name: series_stories series_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.series_stories ALTER COLUMN series_id SET DEFAULT nextval('public.series_stories_series_id_seq'::regclass);
+
+
+--
+-- Name: series_stories story_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.series_stories ALTER COLUMN story_id SET DEFAULT nextval('public.series_stories_story_id_seq'::regclass);
+
+
+--
+-- Name: stories id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.stories ALTER COLUMN id SET DEFAULT nextval('public.stories_id_seq'::regclass);
+
+
+--
+-- Name: stories library_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.stories ALTER COLUMN library_id SET DEFAULT nextval('public.stories_library_id_seq'::regclass);
+
+
+--
 -- Name: users id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -522,6 +846,27 @@ ALTER TABLE ONLY public.volumes ALTER COLUMN library_id SET DEFAULT nextval('pub
 
 
 --
+-- Name: volumes_stories id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.volumes_stories ALTER COLUMN id SET DEFAULT nextval('public.volumes_stories_id_seq'::regclass);
+
+
+--
+-- Name: volumes_stories volume_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.volumes_stories ALTER COLUMN volume_id SET DEFAULT nextval('public.volumes_stories_volume_id_seq'::regclass);
+
+
+--
+-- Name: volumes_stories story_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.volumes_stories ALTER COLUMN story_id SET DEFAULT nextval('public.volumes_stories_story_id_seq'::regclass);
+
+
+--
 -- Name: authors authors_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -535,6 +880,14 @@ ALTER TABLE ONLY public.authors
 
 ALTER TABLE ONLY public.authors_series
     ADD CONSTRAINT authors_series_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: authors_stories authors_stories_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.authors_stories
+    ADD CONSTRAINT authors_stories_pkey PRIMARY KEY (id);
 
 
 --
@@ -562,6 +915,22 @@ ALTER TABLE ONLY public.series
 
 
 --
+-- Name: series_stories series_stories_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.series_stories
+    ADD CONSTRAINT series_stories_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: stories stories_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.stories
+    ADD CONSTRAINT stories_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -578,10 +947,25 @@ ALTER TABLE ONLY public.volumes
 
 
 --
+-- Name: volumes_stories volumes_stories_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.volumes_stories
+    ADD CONSTRAINT volumes_stories_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: ix_series_library_id_name; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX ix_series_library_id_name ON public.series USING btree (library_id, name);
+
+
+--
+-- Name: ix_stories_library_id_name; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_stories_library_id_name ON public.stories USING btree (library_id, name);
 
 
 --
@@ -613,6 +997,20 @@ CREATE UNIQUE INDEX uk_authors_series_series_id_author_id ON public.authors_seri
 
 
 --
+-- Name: uk_authors_stories_author_id_story_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX uk_authors_stories_author_id_story_id ON public.authors_stories USING btree (author_id, story_id);
+
+
+--
+-- Name: uk_authors_stories_story_id_author_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX uk_authors_stories_story_id_author_id ON public.authors_stories USING btree (story_id, author_id);
+
+
+--
 -- Name: uk_authors_volumes_author_id_volume_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -634,10 +1032,38 @@ CREATE UNIQUE INDEX uk_libraries_name ON public.libraries USING btree (name);
 
 
 --
+-- Name: uk_series_stories_series_id_story_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX uk_series_stories_series_id_story_id ON public.series_stories USING btree (series_id, story_id);
+
+
+--
+-- Name: uk_series_stories_story_id_series_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX uk_series_stories_story_id_series_id ON public.series_stories USING btree (story_id, series_id);
+
+
+--
 -- Name: uk_users_username; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX uk_users_username ON public.users USING btree (username);
+
+
+--
+-- Name: uk_volumes_stories_story_id_volume_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX uk_volumes_stories_story_id_volume_id ON public.volumes_stories USING btree (story_id, volume_id);
+
+
+--
+-- Name: uk_volumes_stories_volume_id_story_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX uk_volumes_stories_volume_id_story_id ON public.volumes_stories USING btree (volume_id, story_id);
 
 
 --
@@ -665,6 +1091,22 @@ ALTER TABLE ONLY public.authors_series
 
 
 --
+-- Name: authors_stories fk_authors_stories_author_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.authors_stories
+    ADD CONSTRAINT fk_authors_stories_author_id FOREIGN KEY (author_id) REFERENCES public.authors(id);
+
+
+--
+-- Name: authors_stories fk_authors_stories_story_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.authors_stories
+    ADD CONSTRAINT fk_authors_stories_story_id FOREIGN KEY (story_id) REFERENCES public.stories(id);
+
+
+--
 -- Name: authors_volumes fk_authors_volumes_authors_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -689,6 +1131,30 @@ ALTER TABLE ONLY public.series
 
 
 --
+-- Name: series_stories fk_series_stories_series_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.series_stories
+    ADD CONSTRAINT fk_series_stories_series_id FOREIGN KEY (series_id) REFERENCES public.series(id);
+
+
+--
+-- Name: series_stories fk_series_stories_story_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.series_stories
+    ADD CONSTRAINT fk_series_stories_story_id FOREIGN KEY (story_id) REFERENCES public.stories(id);
+
+
+--
+-- Name: stories fk_stories_library_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.stories
+    ADD CONSTRAINT fk_stories_library_id FOREIGN KEY (library_id) REFERENCES public.libraries(id);
+
+
+--
 -- Name: users fk_users_library_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -702,6 +1168,22 @@ ALTER TABLE ONLY public.users
 
 ALTER TABLE ONLY public.volumes
     ADD CONSTRAINT fk_volumes_library_id FOREIGN KEY (library_id) REFERENCES public.libraries(id);
+
+
+--
+-- Name: volumes_stories fk_volumes_stories_story_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.volumes_stories
+    ADD CONSTRAINT fk_volumes_stories_story_id FOREIGN KEY (story_id) REFERENCES public.stories(id);
+
+
+--
+-- Name: volumes_stories fk_volumes_stories_volume_id; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.volumes_stories
+    ADD CONSTRAINT fk_volumes_stories_volume_id FOREIGN KEY (volume_id) REFERENCES public.volumes(id);
 
 
 --
