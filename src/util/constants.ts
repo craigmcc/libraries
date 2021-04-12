@@ -4,9 +4,6 @@
 
 // External Modules ----------------------------------------------------------
 
-import * as db from "zapatos/db";
-import type * as s from "zapatos/schema";
-
 // Internal Modules ----------------------------------------------------------
 
 // Public Objects ------------------------------------------------------------
@@ -44,4 +41,3 @@ export const VOLUME_ID_COLUMN = "volume_id";
 
 // Default ORDER BY Values ---------------------------------------------------
 
-export const LIBRARIES_ORDER_BY = { by: LIBRARIES_TABLE, direction: "ASC" };

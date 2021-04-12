@@ -7,33 +7,14 @@
 require("custom-env").env(true);
 export const NODE_ENV = process.env.NODE_ENV ? process.env.NODE_ENV : "production";
 
-import * as db from "zapatos/db";
-import type * as s from "zapatos/schema";
-
-import pg from "pg";
-export const pool =
-    new pg.Pool({ connectionString: process.env.DATABASE_URL });
-pool.on("error", err => console.error(err));
-
 // Internal Modules ----------------------------------------------------------
+
+// Configure Models and Associations -----------------------------------------
+
+// TODO - models and associations
 
 // Configure and Start Server ------------------------------------------------
 
-//console.info("db:", db);
+// TODO - start server
 
-// Look up all defined libraries
-
-const lookup = async () => {
-
-//    const libraries: s.libraries.Selectable[]
-//        = await db.select("libraries", db.all).run(pool);
-
-    const libraries: s.libraries.JSONSelectable[]
-        = await db.select("libraries", db.all).run(pool);
-
-    console.info("type:     ", typeof libraries);
-    console.info("libraries:", libraries);
-}
-
-lookup();
 
