@@ -24,7 +24,13 @@ pool.on("error", err => console.error(err));
 // Look up all defined libraries
 
 const lookup = async () => {
-    const libraries = await db.select("libraries", db.all).run(pool);
+
+//    const libraries: s.libraries.Selectable[]
+//        = await db.select("libraries", db.all).run(pool);
+
+    const libraries: s.libraries.JSONSelectable[]
+        = await db.select("libraries", db.all).run(pool);
+
     console.info("type:     ", typeof libraries);
     console.info("libraries:", libraries);
 }
