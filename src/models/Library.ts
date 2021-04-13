@@ -9,13 +9,29 @@ import { Column, DataType, HasMany, Table } from "sequelize-typescript";
 // Internal Modules ----------------------------------------------------------
 
 import AbstractModel from "./AbstractModel";
+import {
+    validateLibraryNameUnique,
+    validateLibraryScopeUnique
+} from "../util/async-validators";
+import {BadRequest} from "../util/http-errors";
 
 // Public Objects ------------------------------------------------------------
 
 @Table({
     tableName: "libraries",
     validate: {
-        // TODO - libraries validate
+        isLibraryNameUnique: async function(this: Library): Promise<void> {
+            if (!(await validateLibraryNameUnique(this))) {
+                throw new BadRequest
+                (`name: Name '${this.name}' is already in use`);
+            }
+        },
+        isLibraryScopeUnique: async function(this: Library): Promise<void> {
+            if (!(await validateLibraryScopeUnique(this))) {
+                throw new BadRequest
+                (`scope: Scope '${this.scope}' is already in use`);
+            }
+        },
     }
 })
 export class Library extends AbstractModel<Library> {
@@ -42,7 +58,6 @@ export class Library extends AbstractModel<Library> {
             notNull: {
                 msg: "name: Is required"
             },
-            // TODO - name validate
         }
     })
     name!: string;
@@ -63,7 +78,6 @@ export class Library extends AbstractModel<Library> {
             notNull: {
                 msg: "scope: Is required"
             },
-            // TODO - scope validate
         }
     })
     scope!: string;
