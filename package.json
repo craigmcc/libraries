@@ -64,7 +64,12 @@
     "date-fns": "^2.19.0",
     "dotenv": "^8.2.0",
     "express": "^5.0.0-alpha.8",
+    "morgan": "^1.10.0",
     "pg": "^8.5.1",
+    "pg-hstore": "^2.3.3",
+    "pino": "^6.11.2",
+    "pino-pretty": "^4.7.1",
+    "rotating-file-stream": "^2.1.5",
     "sequelize": "^6.6.2",
     "sequelize-typescript": "^2.1.0"
   }
