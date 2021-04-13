@@ -31,7 +31,7 @@ export const Database = ((NODE_ENV != "test")
     : new Sequelize("database", "username", "password", {
             dialect: "sqlite",
             logging: false,
-            storage: "./test/sqlite"
+            storage: "./test/database.sqlite"
         })
 );
 

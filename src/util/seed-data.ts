@@ -1,8 +1,28 @@
+// Seed ----------------------------------------------------------------------
+
+// Seed data for tests.
+
 // External Modules ----------------------------------------------------------
 
 // Internal Modules ----------------------------------------------------------
 
+import Library from "../models/Library";
+
 // Seed Data -----------------------------------------------------------------
+
+// ***** Libraries *****
+
+// NOTE: Tests never touch any libraries except these!!!
+export const LIBRARIES: Partial<Library>[] = [
+    {
+        name: "Test Library",
+        scope: "test",
+    },
+    {
+        name: "Extra Library",
+        scope: "extra",
+    },
+];
 
 // ***** Authors *****
 

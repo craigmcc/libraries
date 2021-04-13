@@ -23,7 +23,7 @@ export class LibraryServices extends AbstractServices<Library> {
 
     public async all(query?: any): Promise<Library[]> {
         let options: FindOptions = appendQuery({
-            order: SortOrder.Libraries
+            order: SortOrder.LIBRARIES
         }, query);
         return Library.findAll(options);
     }
@@ -110,7 +110,7 @@ export class LibraryServices extends AbstractServices<Library> {
 
     public async active(query?: any): Promise<Library[]> {
         let options: FindOptions = appendQuery({
-            order: SortOrder.Libraries,
+            order: SortOrder.LIBRARIES,
             where: {
                 active: true
             }
@@ -135,7 +135,7 @@ export class LibraryServices extends AbstractServices<Library> {
 
     public async name(name: string, query?: any): Promise<Library[]> {
         let options: FindOptions = appendQuery({
-            order: SortOrder.Libraries,
+            order: SortOrder.LIBRARIES,
             where: {
                 name: { [Op.iLike]: `%${name}%` }
             }

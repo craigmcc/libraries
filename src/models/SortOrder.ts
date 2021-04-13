@@ -8,17 +8,17 @@ import { Order } from "sequelize";
 
 // Public Objects ------------------------------------------------------------
 
-export const Authors: Order  = [
+export const AUTHORS: Order  = [
     [ "libraryId", "ASC" ],
     [ "lastName", "ASC" ],
     [ "firstName", "ASC" ],
 ];
 
-export const Libraries: Order = [
+export const LIBRARIES: Order = [
     [ "name", "ASC" ],
 ];
 
-export const Stories: Order = [
+export const STORIES: Order = [
     [ "libraryId", "ASC" ],
     [ "name", "ASC" ],
 ];
