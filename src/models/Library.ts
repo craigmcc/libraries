@@ -9,6 +9,7 @@ import { Column, DataType, HasMany, Table } from "sequelize-typescript";
 // Internal Modules ----------------------------------------------------------
 
 import AbstractModel from "./AbstractModel";
+import Author from "./Author";
 import {
     validateLibraryNameUnique,
     validateLibraryScopeUnique
@@ -48,6 +49,9 @@ export class Library extends AbstractModel<Library> {
         }
     })
     active!: boolean;
+
+    @HasMany(() => Author)
+    authors!: Author[];
 
     @Column({
         allowNull: false,

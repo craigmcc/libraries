@@ -9,6 +9,7 @@ import { Sequelize } from "sequelize-typescript";
 
 // Internal Modules ----------------------------------------------------------
 
+import Author from "./Author";
 import Library from "./Library";
 
 // Configure Database Instance -----------------------------------------------
@@ -36,7 +37,8 @@ export const Database = ((NODE_ENV != "test")
 );
 
 Database.addModels([
-    Library
+    Author,
+    Library,
 ]);
 
 export default Database;

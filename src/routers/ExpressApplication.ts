@@ -18,6 +18,7 @@ import {
     handleServerError,
     handleValidationError
 } from "../util/middleware";
+import logger from "../util/server-logger";
 
 // Public Objects ------------------------------------------------------------
 
@@ -42,7 +43,11 @@ app.use(bodyParser.urlencoded({
 
 // Configure static file routing
 const CLIENT_BASE: string = path.resolve("./") + "/client/build";
-console.info("Static File Path: " + CLIENT_BASE);
+logger.info({
+    context: "Startup",
+    msg: "Static File Path",
+    path: CLIENT_BASE
+});
 app.use(express.static(CLIENT_BASE));
 
 // Configure application-specific routing

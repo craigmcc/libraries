@@ -11,9 +11,46 @@ import {Op} from "sequelize";
 
 // Internal Modules ----------------------------------------------------------
 
+import Author from "../models/Author";
 import Library from "../models/Library";
 
 // Public Objects ------------------------------------------------------------
+
+export const validateAuthorId
+    = async (library_id: number, author_id: number | undefined): Promise<boolean> =>
+{
+    if (author_id) {
+        const author = await Author.findByPk(author_id);
+        if (!author) {
+            return false;
+        } else {
+            return author.library_id === library_id;
+        }
+    } else {
+        return true;
+    }
+}
+
+export const validateAuthorNameUnique
+    = async (author: Author): Promise<boolean> =>
+{
+    if (author) {
+        let options: any = {
+            where: {
+                first_name: author.first_name,
+                last_name: author.last_name,
+                library_id: author.library_id,
+            }
+        }
+        if (author.id) {
+            options.where.id = { [Op.ne]: author.id }
+        }
+        const results: Author[] = await Author.findAll(options);
+        return (results.length === 0);
+    } else {
+        return true;
+    }
+}
 
 export const validateLibraryId = async (libraryId: number): Promise<boolean> => {
     if (libraryId) {

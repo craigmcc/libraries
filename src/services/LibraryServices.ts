@@ -14,6 +14,7 @@ import Library from "../models/Library";
 import * as SortOrder from "../models/SortOrder";
 import {NotFound} from "../util/http-errors";
 import {appendPagination} from "../util/query-parameters";
+import Author from "../models/Author";
 
 // Public Classes ------------------------------------------------------------
 
@@ -157,15 +158,21 @@ const appendQuery = (options: FindOptions, query?: any): FindOptions => {
     options = appendPagination(options, query);
 
     // Inclusion parameters
-    let include: string[] = [];
-/*
+    let include = [];
     if ("" === query.withAuthors) {
         include.push(Author);
     }
-    if ("" === query.withStories) {
-        include.push(Story);
-    }
-*/
+    /*
+        if ("" === query.withSeries) {
+            include.push(Series);
+        }
+        if ("" === query.withStories) {
+            include.push(Story);
+        }
+        if ("" === query.withVolumes) {
+            include.push(Volume);
+        }
+    */
     if (include.length > 0) {
         options.include = include;
     }
