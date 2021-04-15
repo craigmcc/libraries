@@ -22,13 +22,17 @@ export class AuthorServices {
     // Standard CRUD Methods -------------------------------------------------
 
     public async all(libraryId: number, query?: any): Promise<Author[]> {
+        const library = await Library.findByPk(libraryId);
+        if (!library) {
+            throw new NotFound(
+                `libraryId: Missing Library ${libraryId}`,
+                "AuthorServices.all"
+            );
+        }
         let options: FindOptions = appendQuery({
             order: SortOrder.AUTHORS,
-            where: {
-                library_id: libraryId
-            }
         }, query);
-        return Author.findAll(options);
+        return await library.$get("authors", options);
     }
 
     public async find(libraryId: number, authorId: number, query?: any): Promise<Author> {
@@ -49,6 +53,13 @@ export class AuthorServices {
     }
 
     public async insert(libraryId: number, author: Author): Promise<Author> {
+        const library = await Library.findByPk(libraryId);
+        if (!library) {
+            throw new NotFound(
+                `libraryId: Missing Library ${libraryId}`,
+                "AuthorServices.insert"
+            );
+        }
         let transaction;
         try {
             transaction = await Database.transaction();
@@ -68,10 +79,17 @@ export class AuthorServices {
     }
 
     public async remove(libraryId: number, authorId: number): Promise<Author> {
+        const library = await Library.findByPk(libraryId);
+        if (!library) {
+            throw new NotFound(
+                `libraryId: Missing Library ${libraryId}`,
+                "AuthorServices.remove"
+            );
+        }
         const options = {
             where: {
-                author_id: authorId,
-                library_id: libraryId,
+                id: authorId,
+                library_id: libraryId
             }
         }
         let removed = await Author.findOne(options);
@@ -92,6 +110,13 @@ export class AuthorServices {
     }
 
     public async update(libraryId: number, authorId: number, author: Author): Promise<Author> {
+        const library = await Library.findByPk(libraryId);
+        if (!library) {
+            throw new NotFound(
+                `libraryId: Missing Library ${libraryId}`,
+                "AuthorServices.update"
+            );
+        }
         let transaction;
         try {
             transaction = await Database.transaction();
@@ -100,12 +125,15 @@ export class AuthorServices {
             let result: [number, Author[]] = await Author.update(author, {
                 fields: fieldsWithId,
                 transaction: transaction,
-                where: { id: libraryId }
+                where: {
+                    id: authorId,
+                    library_id: libraryId
+                }
             });
             if (result[0] < 1) {
                 throw new NotFound(
                     `authorId: Cannot update Author ${authorId}`,
-                    "AuthorServices.update()");
+                    "AuthorServices.update");
             }
             await transaction.commit();
             transaction = null;
@@ -123,29 +151,40 @@ export class AuthorServices {
     // ***** Author Lookups *****
 
     public async active(libraryId: number, query?: any): Promise<Author[]> {
+        const library = await Library.findByPk(libraryId);
+        if (!library) {
+            throw new NotFound(
+                `libraryId: Missing Library ${libraryId}`,
+                "AuthorServices.active"
+            );
+        }
         let options: FindOptions = appendQuery({
             order: SortOrder.AUTHORS,
             where: {
                 active: true,
-                library_id: libraryId,
             }
         }, query);
-        return Author.findAll(options);
+        return await library.$get("authors", options);
     }
 
     public async exact(libraryId: number, firstName: string, lastName: string, query?: any): Promise<Author> {
+        const library = await Library.findByPk(libraryId);
+        if (!library) {
+            throw new NotFound(
+                `libraryId: Missing Library ${libraryId}`,
+                "AuthorServices.exact"
+            );
+        }
         let options: FindOptions = appendQuery({
             where: {
-                first_name: firstName,
-                last_name: lastName,
-                library_id: libraryId,
+                active: true
             }
         }, query);
-        let results = await Author.findAll(options);
+        let results = await library.$get("authors", options);
         if (results.length !== 1) {
             throw new NotFound(
                 `name: Missing Author '${firstName} ${lastName}'`,
-                "AuthorServices.exact()");
+                "AuthorServices.exact");
         }
         return results[0];
     }
