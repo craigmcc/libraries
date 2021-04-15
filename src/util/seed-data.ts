@@ -7,46 +7,50 @@
 // Internal Modules ----------------------------------------------------------
 
 import Library from "../models/Library";
+import Author from "../models/Author";
 
 // Seed Data -----------------------------------------------------------------
 
 // ***** Libraries *****
 
+export const FIRST_LIBRARY = "Test Library";
+export const SECOND_LIBRARY = "Extra Library";
+
 // NOTE: Tests never touch any libraries except these!!!
 export const LIBRARIES: Partial<Library>[] = [
     {
-        name: "Test Library",
+        name: FIRST_LIBRARY,
         scope: "test",
     },
     {
-        name: "Extra Library",
+        name: SECOND_LIBRARY,
         scope: "extra",
     },
 ];
 
 // ***** Authors *****
 
-// for "First Seed Library" (ids to be interpolated)
-export const authorsFirst = [
+// For FIRST_LIBRARY (library_id to be interpolated)
+export const AUTHORS_FIRST_LIBRARY: Partial<Author>[] = [
     {
-        "firstName": "Fred",
-        "lastName": "Flintstone",
+        "first_name": "Fred",
+        "last_name": "Flintstone",
     },
     {
-        "firstName": "Wilma",
-        "lastName": "Flintstone",
+        "first_name": "Wilma",
+        "last_name": "Flintstone",
     },
 ];
 
-// For "Second Seed Library" (ids to be interpolated)
-export const authorsSecond = [
+// For SECOND_LIBRARY (library_id to be interpolated)
+export const AUTHORS_SECOND_LIBRARY: Partial<Author>[] = [
     {
-        "firstName": "Barney",
-        "lastName": "Rubble",
+        "first_name": "Barney",
+        "last_name": "Rubble",
     },
     {
-        "firstName": "Betty",
-        "lastName": "Rubble",
+        "first_name": "Betty",
+        "last_name": "Rubble",
     },
 ];
 

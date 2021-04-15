@@ -9,9 +9,10 @@ import {Op} from "sequelize";
 // Internal Modules ----------------------------------------------------------
 
 import {NotFound} from "./http-errors";
-import Library from "../models/Library";
 import * as SeedData from "./seed-data";
+import Author from "../models/Author";
 import Database from "../models/Database";
+import Library from "../models/Library";
 
 // Public Objects ------------------------------------------------------------
 
@@ -51,6 +52,21 @@ export const reloadTestData = async (): Promise<void> => {
     const libraries: Library[] = [];
     SeedData.LIBRARIES.forEach(async library => {
         libraries.push(await Library.create(library));
+    });
+
+    // Recreate authors for first library
+    const authorsFirst: Author[] = [];
+    SeedData.AUTHORS_FIRST_LIBRARY.forEach(async author => {
+        author.library_id = libraries[0].id;
+        authorsFirst.push(await Author.create(author));
+
+    });
+
+    // Recreate authors for second library
+    const authorsSecond: Author[] = [];
+    SeedData.AUTHORS_SECOND_LIBRARY.forEach(async author => {
+        author.library_id = libraries[1].id;
+        authorsSecond.push(await Author.create(author));
     });
 
     // TODO - Recreate associated subordinate data
