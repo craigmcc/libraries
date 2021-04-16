@@ -32,43 +32,73 @@ export const reloadTestData = async (): Promise<void> => {
     // Synchronize database to create tables if needed
     await Database.sync();
 
-    // Remove any existing test libraries (which should cascade)
-    SeedData.LIBRARIES.forEach(async library => {
+    // Reload test data in top-down order
+    await removeLibraries(SeedData.LIBRARIES);
+    const leftovers: Library[] = await Library.findAll();
+    console.info("LEFTOVER LIBRARIES: ", leftovers.length);
+    const libraries: Library[] = await reloadLibraries(SeedData.LIBRARIES);
+    console.info("RELOADED LIBRARIES: ", libraries);
+/*
+    const authorsFirst: Author[] = await reloadAuthors(libraries[0], SeedData.AUTHORS_FIRST_LIBRARY);
+    const authorsSecond: Author[] = await reloadAuthors(libraries[1], SeedData.AUTHORS_SECOND_LIBRARY);
+*/
+
+}
+
+// Private Objects -----------------------------------------------------------
+
+const reloadAuthors
+    = async (library: Library, authors: Partial<Author>[]): Promise<Author[]> =>
+{
+    console.info(`Reloading Authors for Library: ${JSON.stringify(library)}`);
+    const results: Author[] = [];
+    authors.forEach(async author => {
         try {
-            if (library.name) {
-                const found = await findLibraryByName(library.name);
-                await Library.destroy({
-                    where: { id: found.id }
-                });
-            }
+            author.library_id = library.id;
+            console.info(`  Reloading author: ${JSON.stringify(author)}`);
+            const inserted = await Author.create(author);
+            console.info(`  Reloaded author:  ${JSON.stringify(inserted)}`);
+            results.push(inserted);
         } catch (error) {
-            if (!(error instanceof NotFound)) {
-                throw error;
-            }
+            console.info("    Reloading Author ERROR", error);
+            throw error;
         }
     });
+    console.info("Reloaded Authors for Library: ", results);
+    return results;
+}
 
-    // Recreate the test libraries, saving their information
-    const libraries: Library[] = [];
-    SeedData.LIBRARIES.forEach(async library => {
-        libraries.push(await Library.create(library));
+const reloadLibraries
+    = async (libraries: Partial<Library>[]): Promise<Library[]> =>
+{
+    console.info("Reloading Libraries: start");
+    const results: Library[] = [];
+    libraries.forEach(async library => {
+        try {
+            console.info(`  Reloading Library: ${JSON.stringify(library)}`);
+            const inserted = await Library.create(library);
+            console.info(`  Reloaded Library:  ${JSON.stringify(inserted)}`);
+            results.push(inserted);
+        } catch (error ) {
+            console.info("    Reloading Library ERROR", error);
+            throw error;
+        }
     });
+    console.info("Reloading Libraries: results: ", results);
+    return results;
+}
 
-    // Recreate authors for first library
-    const authorsFirst: Author[] = [];
-    SeedData.AUTHORS_FIRST_LIBRARY.forEach(async author => {
-        author.library_id = libraries[0].id;
-        authorsFirst.push(await Author.create(author));
-
+const removeLibraries = async (libraries: Partial<Library>[]): Promise<void> => {
+    console.info("Removing Libraries");
+    libraries.forEach(async library => {
+        try {
+            console.info(`  Removing Library '${library.name}'`);
+            await Library.destroy({
+                where: {name: library.name}
+            })
+        } catch (error) {
+            console.info("    Removing Library ERROR ", error);
+            throw error;
+        }
     });
-
-    // Recreate authors for second library
-    const authorsSecond: Author[] = [];
-    SeedData.AUTHORS_SECOND_LIBRARY.forEach(async author => {
-        author.library_id = libraries[1].id;
-        authorsSecond.push(await Author.create(author));
-    });
-
-    // TODO - Recreate associated subordinate data
-
 }

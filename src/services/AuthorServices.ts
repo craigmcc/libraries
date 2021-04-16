@@ -36,13 +36,19 @@ export class AuthorServices {
     }
 
     public async find(libraryId: number, authorId: number, query?: any): Promise<Author> {
+        const library = await Library.findByPk(libraryId);
+        if (!library) {
+            throw new NotFound(
+                `libraryId: Missing Library ${libraryId}`,
+                "AuthorServices.find"
+            );
+        }
         let options: FindOptions = appendQuery({
             where: {
                 id: authorId,
-                library_id: libraryId,
             }
         }, query);
-        let results = await Author.findAll(options);
+        let results = await library.$get("authors", options);
         if (results.length === 1) {
             return results[0];
         } else {

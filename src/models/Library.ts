@@ -50,7 +50,10 @@ export class Library extends AbstractModel<Library> {
     })
     active!: boolean;
 
-    @HasMany(() => Author)
+    @HasMany(() => Author, {
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+    })
     authors!: Author[];
 
     @Column({
