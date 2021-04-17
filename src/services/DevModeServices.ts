@@ -21,15 +21,19 @@ export class DevModeServices {
 
     // Returns array of test Library instances with nested children
     public async reloadTestData(): Promise<Library[]> {
+/*
         logger.info({
             context: "DevModeServices.reloadTestData",
             msg: "Reloading started"
         });
+*/
         await reloadTestData();
+/*
         logger.info({
             context: "DevModeServices.reloadTestData",
             msg: "Reloading ended"
         });
+*/
         const results = await Library.findAll({
             include: [
                 Author,
@@ -38,11 +42,13 @@ export class DevModeServices {
                 name: {[Op.ne]: "Personal Library"}
             }
         });
+/*
         logger.info({
             context: "DevModeServices.reloadTestData",
             msg: "Reloading returning",
             results: results
         });
+*/
         return results;
     }
 
