@@ -8,6 +8,7 @@ import {FindOptions, Op} from "sequelize";
 
 // Internal Modules ----------------------------------------------------------
 
+import Author from "../models/Author";
 import Database from "../models/Database";
 import Library from "../models/Library";
 import Volume from "../models/Volume";
@@ -229,6 +230,9 @@ const appendQuery = (options: FindOptions, query?: any): FindOptions => {
 
     // Inclusion parameters
     let include = [];
+    if ("" === query.withAuthors) {
+        include.push(Author);
+    }
     if ("" === query.withLibrary) {
         include.push(Library);
     }

@@ -130,7 +130,8 @@ ALTER SEQUENCE public.authors_library_id_seq OWNED BY public.authors.library_id;
 CREATE TABLE public.authors_series (
     id integer NOT NULL,
     author_id integer NOT NULL,
-    series_id integer NOT NULL
+    series_id integer NOT NULL,
+    principal boolean DEFAULT false NOT NULL
 );
 
 
@@ -201,7 +202,8 @@ ALTER SEQUENCE public.authors_series_series_id_seq OWNED BY public.authors_serie
 CREATE TABLE public.authors_stories (
     id integer NOT NULL,
     author_id integer NOT NULL,
-    story_id integer NOT NULL
+    story_id integer NOT NULL,
+    principal boolean DEFAULT false NOT NULL
 );
 
 
@@ -272,7 +274,8 @@ ALTER SEQUENCE public.authors_stories_story_id_seq OWNED BY public.authors_stori
 CREATE TABLE public.authors_volumes (
     id integer NOT NULL,
     author_id integer NOT NULL,
-    volume_id integer NOT NULL
+    volume_id integer NOT NULL,
+    principal boolean DEFAULT false NOT NULL
 );
 
 

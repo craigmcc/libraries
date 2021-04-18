@@ -5,11 +5,13 @@
 
 // External Modules ----------------------------------------------------------
 
-import {BelongsTo, Column, DataType, ForeignKey, HasMany, Index, Table} from "sequelize-typescript";
+import {BelongsTo, BelongsToMany, Column, DataType, ForeignKey, HasMany, Index, Table} from "sequelize-typescript";
 
 // Internal Modules ----------------------------------------------------------
 
 import AbstractModel from "./AbstractModel";
+import Author from "./Author";
+import AuthorVolume from "./AuthorVolume";
 import Library from "./Library";
 import {
     validateLibraryId
@@ -43,6 +45,9 @@ export class Volume extends AbstractModel<Volume> {
         }
     })
     active!: boolean;
+
+    @BelongsToMany(() => Author, () => AuthorVolume)
+    authors!: Array<Author & {AuthorVolume: AuthorVolume}>;
 
     @Column({
         allowNull: true,

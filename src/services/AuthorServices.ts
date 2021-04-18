@@ -12,6 +12,7 @@ import Author from "../models/Author";
 import Database from "../models/Database";
 import Library from "../models/Library";
 import * as SortOrder from "../models/SortOrder";
+import Volume from "../models/Volume";
 import {NotFound} from "../util/http-errors";
 import {appendPagination} from "../util/query-parameters";
 
@@ -255,10 +256,10 @@ const appendQuery = (options: FindOptions, query?: any): FindOptions => {
         if ("" === query.withStories) {
             include.push(Story);
         }
-        if ("" === query.withVolumes) {
-            include.push(Volume);
-        }
     */
+    if ("" === query.withVolumes) {
+        include.push(Volume);
+    }
     if (include.length > 0) {
         options.include = include;
     }
