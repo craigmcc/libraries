@@ -11,6 +11,8 @@ import {Router} from "express";
 import AuthorRouter from "./AuthorRouter";
 import DevModeRouter from "./DevModeRouter";
 import LibraryRouter from "./LibraryRouter";
+import VolumeRouter from "./VolumeRouter";
+import {VOLUMES} from "../models/SortOrder";
 
 // Public Objects ------------------------------------------------------------
 
@@ -25,3 +27,4 @@ export default ApiRouter;
 ApiRouter.use("/authors", AuthorRouter);
 ApiRouter.use("/devmode", DevModeRouter);
 ApiRouter.use("/libraries", LibraryRouter);
+ApiRouter.use("/volumes", VolumeRouter);

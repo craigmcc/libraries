@@ -10,6 +10,7 @@ import {Op} from "sequelize";
 
 import Author from "../models/Author";
 import Library from"../models/Library";
+import Volume from "../models/Volume";
 import logger from "../util/server-logger";
 import {reloadTestData} from "../util/test-utils";
 
@@ -37,6 +38,7 @@ export class DevModeServices {
         const results = await Library.findAll({
             include: [
                 Author,
+                Volume,
             ],
             where: {
                 name: {[Op.ne]: "Personal Library"}

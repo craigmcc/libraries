@@ -9,12 +9,13 @@ import {FindOptions, Op} from "sequelize";
 // Internal Modules ----------------------------------------------------------
 
 import AbstractServices from "./AbstractServices";
+import Author from "../models/Author";
 import Database from "../models/Database";
 import Library from "../models/Library";
+import Volume from "../models/Volume";
 import * as SortOrder from "../models/SortOrder";
 import {NotFound} from "../util/http-errors";
 import {appendPagination} from "../util/query-parameters";
-import Author from "../models/Author";
 
 // Public Classes ------------------------------------------------------------
 
@@ -169,10 +170,10 @@ const appendQuery = (options: FindOptions, query?: any): FindOptions => {
         if ("" === query.withStories) {
             include.push(Story);
         }
-        if ("" === query.withVolumes) {
-            include.push(Volume);
-        }
     */
+    if ("" === query.withVolumes) {
+        include.push(Volume);
+    }
     if (include.length > 0) {
         options.include = include;
     }

@@ -6,8 +6,9 @@
 
 // Internal Modules ----------------------------------------------------------
 
-import Library from "../models/Library";
 import Author from "../models/Author";
+import Library from "../models/Library";
+import Volume from "../models/Volume";
 
 // Seed Data -----------------------------------------------------------------
 
@@ -138,3 +139,32 @@ export const oauthUsers = [
         username: "secondregular",
     },
 ]
+
+// ***** Volumes *****
+
+// For FIRST_LIBRARY (library_id to be interpolated)
+export const VOLUMES_FIRST_LIBRARY: Partial<Volume>[] = [
+    {
+        "name": "Fred Volume",
+    },
+    {
+        "name": "Wilma Volume",
+    },
+    {
+        "name": "Flintstone Volume",
+    }
+];
+
+// For SECOND_LIBRARY (library_id to be interpolated)
+export const VOLUMES_SECOND_LIBRARY: Partial<Volume>[] = [
+    {
+        "name": "Barney Volume",
+    },
+    {
+        "name": "Betty Volume",
+    },
+    {
+        "name": "Rubble Volume",
+    }
+];
+

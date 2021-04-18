@@ -1,17 +1,17 @@
-// Author --------------------------------------------------------------------
+// Volume --------------------------------------------------------------------
 
-// Contributor to one or more series, stories, and/or volumes.
+// Physical or electronic published unit, written by one or more Authors,
+// and containing one or more Stories.
 
 // External Modules ----------------------------------------------------------
 
-import {BelongsTo, Column, DataType, ForeignKey, HasMany, Table} from "sequelize-typescript";
+import {BelongsTo, Column, DataType, ForeignKey, HasMany, Index, Table} from "sequelize-typescript";
 
 // Internal Modules ----------------------------------------------------------
 
 import AbstractModel from "./AbstractModel";
 import Library from "./Library";
 import {
-    validateAuthorNameUnique,
     validateLibraryId
 } from "../util/async-validators";
 import {BadRequest} from "../util/http-errors";
@@ -19,24 +19,17 @@ import {BadRequest} from "../util/http-errors";
 // Public Objects ------------------------------------------------------------
 
 @Table({
-    tableName: "authors",
+    tableName: "volumes",
     validate: {
-        isLibraryIdValid: async function(this: Author): Promise<void> {
+        isLibraryIdValid: async function(this: Volume): Promise<void> {
             if (!(await validateLibraryId(this.library_id))) {
                 throw new BadRequest
-                    (`library_id: Invalid library_id ${this.library_id}`);
-            }
-        },
-        isAuthorNameUnique: async function(this: Author): Promise<void> {
-            if (!(await validateAuthorNameUnique(this))) {
-                throw new BadRequest
-                  (`name: Name '${this.first_name} ${this.last_name}' "
-                    + "is already in use within this Library`);
+                (`library_id: Invalid library_id ${this.library_id}`);
             }
         },
     },
 })
-export class Author extends AbstractModel<Author> {
+export class Volume extends AbstractModel<Volume> {
 
     @Column({
         allowNull: false,
@@ -51,15 +44,29 @@ export class Author extends AbstractModel<Author> {
     })
     active!: boolean;
 
+    @Column({
+        allowNull: true,
+        field: "copyright",
+        type: DataType.STRING
+    })
+    copyright?: string;
+
+    @Column({
+        allowNull: true,
+        field: "isbn",
+        type: DataType.STRING
+    })
+    isbn?: string;
+
     @BelongsTo(() => Library)
     library!: Library;
 
     @ForeignKey(() => Library)
+    @Index("ix_volumes_library_id_name")
     @Column({
         allowNull: false,
         field: "library_id",
         type: DataType.INTEGER,
-        unique: "uniqueNameWithinLibrary",
         validate: {
             notNull: {
                 msg: "library_id: Is required"
@@ -69,30 +76,31 @@ export class Author extends AbstractModel<Author> {
     library_id!: number;
 
     @Column({
-        allowNull: false,
-        field: "last_name",
-        type: DataType.STRING,
-        unique: "uniqueNameWithinLibrary",
-        validate: {
-            notNull: {
-                msg: "last_name: Is required"
-            },
-        }
+        allowNull: true,
+        field: "location",
+        type: DataType.STRING
     })
-    last_name!: string;
+    location?: string;
 
     @Column({
+        allowNull: true,
+        field: "media",
+        type: DataType.STRING
+    })
+    media?: string;
+
+    @Index("ix_volumes_library_id_name")
+    @Column({
         allowNull: false,
-        field: "first_name",
+        field: "name",
         type: DataType.STRING,
-        unique: "uniqueNameWithinLibrary",
         validate: {
             notNull: {
-                msg: "first_name: Is required"
+                msg: "name: Is required"
             },
         }
     })
-    first_name!: string;
+    name!: string;
 
     @Column({
         allowNull: true,
@@ -101,6 +109,19 @@ export class Author extends AbstractModel<Author> {
     })
     notes?: string;
 
+    @Column({
+        allowNull: false,
+        defaultValue: false,
+        field: "read",
+        type: DataType.BOOLEAN,
+        validate: {
+            notNull: {
+                msg: "read: Is required"
+            }
+        }
+    })
+    read!: boolean;
+
 }
 
-export default Author;
+export default Volume;

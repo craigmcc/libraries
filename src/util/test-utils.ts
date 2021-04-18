@@ -13,6 +13,7 @@ import * as SeedData from "./seed-data";
 import Author from "../models/Author";
 import Database from "../models/Database";
 import Library from "../models/Library";
+import Volume from "../models/Volume";
 
 // Public Objects ------------------------------------------------------------
 
@@ -37,6 +38,8 @@ export const reloadTestData = async (): Promise<void> => {
     const libraries: Library[] = await reloadLibraries(SeedData.LIBRARIES);
     const authorsFirst: Author[] = await reloadAuthors(libraries[0], SeedData.AUTHORS_FIRST_LIBRARY);
     const authorsSecond: Author[] = await reloadAuthors(libraries[1], SeedData.AUTHORS_SECOND_LIBRARY);
+    const volumesFirst: Volume[] = await reloadVolumes(libraries[0], SeedData.VOLUMES_FIRST_LIBRARY);
+    const volumesSecond: Volume[] = await reloadVolumes(libraries[1], SeedData.VOLUMES_SECOND_LIBRARY);
 
 }
 
@@ -72,6 +75,24 @@ const reloadLibraries
         throw error;
     }
 //    console.info("Reloading Libraries Results:", results);
+    return results;
+}
+
+const reloadVolumes
+    = async (library: Library, volumes: Partial<Volume>[]): Promise<Volume[]> =>
+{
+//    console.info(`Reloading Volumes for Library: ${JSON.stringify(library)}`);
+    volumes.forEach(volume => {
+        volume.library_id = library.id;
+    });
+    let results: Volume[] = [];
+    try {
+        results = await Volume.bulkCreate(volumes);
+    } catch (error) {
+        console.info("  Reloading Volumes ERROR", error);
+        throw error;
+    }
+//    console.info("Reloading Volumes Results:", results);
     return results;
 }
 

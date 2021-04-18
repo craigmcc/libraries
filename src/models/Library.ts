@@ -10,6 +10,7 @@ import { Column, DataType, HasMany, Table } from "sequelize-typescript";
 
 import AbstractModel from "./AbstractModel";
 import Author from "./Author";
+import Volume from "./Volume";
 import {
     validateLibraryNameUnique,
     validateLibraryScopeUnique
@@ -88,6 +89,12 @@ export class Library extends AbstractModel<Library> {
         }
     })
     scope!: string;
+
+    @HasMany(() => Volume, {
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+    })
+    volumes!: Volume[];
 
 }
 
