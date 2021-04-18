@@ -215,6 +215,34 @@ export class VolumeServices {
         return await library.$get("volumes", options);
     }
 
+    // ***** Child Table Lookups *****
+
+    public async authors(libraryId: number, volumeId: number, query?: any): Promise<Author[]> {
+        const library = await Library.findByPk(libraryId);
+        if (!library) {
+            throw new NotFound(
+                `libraryId: Missing Library ${libraryId}`,
+                "VolumeServices.authors"
+            );
+        }
+        const volume = await Volume.findOne({
+            where: {
+                id: volumeId,
+                library_id: libraryId,
+            }
+        })
+        if (!volume) {
+            throw new NotFound(
+                `volumeId: Missing Volume ${volumeId}`,
+                "VolumeServices.authors"
+            );
+        }
+        let options: FindOptions = appendQuery({
+            order: SortOrder.AUTHORS,
+        }, query);
+        return await volume.$get("authors", options);
+    }
+
 }
 
 export default new VolumeServices();

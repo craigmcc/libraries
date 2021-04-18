@@ -98,3 +98,15 @@ AuthorRouter.put("/:libraryId",
             req.body
         ));
     });
+
+// Child Lookup Routes -------------------------------------------------------
+
+// GET /:libraryId/:authorId/volumes - Find Volumes for this Author
+AuthorRouter.get("/:libraryId/:authorId/volumes",
+    async (req: Request, res: Response) => {
+        res.send(await AuthorServices.volumes(
+            parseInt(req.params.libraryId, 10),
+            parseInt(req.params.authorId, 10),
+            req.query
+        ));
+    });

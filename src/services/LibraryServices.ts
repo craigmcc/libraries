@@ -145,6 +145,36 @@ export class LibraryServices extends AbstractServices<Library> {
         return Library.findAll(options);
     }
 
+    // ***** Child Table Lookups *****
+
+    public async authors(libraryId: number, query?: any): Promise<Author[]> {
+        const library = await Library.findByPk(libraryId);
+        if (!library) {
+            throw new NotFound(
+                `libraryId: Missing Library ${libraryId}`,
+                "LibraryServices.authors"
+            );
+        }
+        let options: FindOptions = appendQuery({
+            order: SortOrder.AUTHORS,
+        }, query);
+        return await library.$get("authors", options);
+    }
+
+    public async volumes(libraryId: number, query?: any): Promise<Volume[]> {
+        const library = await Library.findByPk(libraryId);
+        if (!library) {
+            throw new NotFound(
+                `libraryId: Missing Library ${libraryId}`,
+                "LibraryServices.volumes"
+            );
+        }
+        let options: FindOptions = appendQuery({
+            order: SortOrder.VOLUMES,
+        }, query);
+        return await library.$get("volumes", options);
+    }
+
 }
 
 export default new LibraryServices();

@@ -41,6 +41,13 @@ export const reloadTestData = async (): Promise<void> => {
     const volumesFirst: Volume[] = await reloadVolumes(libraries[0], SeedData.VOLUMES_FIRST_LIBRARY);
     const volumesSecond: Volume[] = await reloadVolumes(libraries[1], SeedData.VOLUMES_SECOND_LIBRARY);
 
+    // Establish many-many relationships (requires knowledge of seed data content)
+
+    reloadAuthorVolumes(authorsFirst[0], [volumesFirst[0], volumesFirst[2]]);
+    reloadAuthorVolumes(authorsFirst[1], [volumesFirst[1], volumesFirst[2]]);
+    reloadAuthorVolumes(authorsSecond[0], [volumesSecond[0], volumesSecond[2]]);
+    reloadAuthorVolumes(authorsSecond[1], [volumesSecond[1], volumesSecond[2]]);
+
 }
 
 // Private Objects -----------------------------------------------------------
@@ -61,6 +68,12 @@ const reloadAuthors
     }
 //    console.info("Reloading Authors Results:", results);
     return results;
+}
+
+const reloadAuthorVolumes
+    = async (author: Author, volumes: Volume[]): Promise<void> =>
+{
+    await author.$add("volumes", volumes);
 }
 
 const reloadLibraries

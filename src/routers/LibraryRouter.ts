@@ -91,3 +91,24 @@ LibraryRouter.put("/:libraryId",
             req.body
         ));
     });
+
+// Child Lookup Routes -------------------------------------------------------
+
+// GET /:libraryId/authors - Find Authors for this Library
+LibraryRouter.get("/:libraryId/authors",
+    async (req: Request, res: Response) => {
+        res.send(await LibraryServices.authors(
+            parseInt(req.params.libraryId, 10),
+            req.query
+        ));
+    });
+
+// GET /:libraryId/volumes - Find Volumes for this Library
+LibraryRouter.get("/:libraryId/volumes",
+    async (req: Request, res: Response) => {
+        res.send(await LibraryServices.volumes(
+            parseInt(req.params.libraryId, 10),
+            req.query
+        ));
+    });
+

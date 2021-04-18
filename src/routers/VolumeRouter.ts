@@ -9,6 +9,8 @@ import {Request, Response, Router} from "express";
 // Internal Modules ----------------------------------------------------------
 
 import VolumeServices from "../services/VolumeServices";
+import AuthorServices from "../services/AuthorServices";
+import AuthorRouter from "./AuthorRouter";
 
 // Public Objects ------------------------------------------------------------
 
@@ -95,5 +97,17 @@ VolumeRouter.put("/:libraryId",
             parseInt(req.params.libraryId, 10),
             parseInt(req.params.volumeId, 10),
             req.body
+        ));
+    });
+
+// Child Lookup Routes -------------------------------------------------------
+
+// GET /:libraryId/:volumeId/authors - Find Authors for this Volume
+VolumeRouter.get("/:libraryId/:volumeId/authors",
+    async (req: Request, res: Response) => {
+        res.send(await VolumeServices.authors(
+            parseInt(req.params.libraryId, 10),
+            parseInt(req.params.volumeId, 10),
+            req.query
         ));
     });
