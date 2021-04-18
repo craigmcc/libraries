@@ -5,13 +5,14 @@
 // External Modules ----------------------------------------------------------
 
 require("custom-env").env(true);
-import { Sequelize } from "sequelize-typescript";
+import {Sequelize} from "sequelize-typescript";
 
 // Internal Modules ----------------------------------------------------------
 
 import Author from "./Author";
 import AuthorVolume from "./AuthorVolume";
 import Library from "./Library";
+import Story from "./Story";
 import Volume from "./Volume";
 
 // Configure Database Instance -----------------------------------------------
@@ -42,6 +43,7 @@ Database.addModels([
     Author,
     AuthorVolume,
     Library,
+    Story,
     Volume,
 ]);
 

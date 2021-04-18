@@ -140,6 +140,34 @@ export const oauthUsers = [
     },
 ]
 
+// ***** Stories *****
+
+// For FIRST_LIBRARY (library_id to be interpolated)
+export const STORIES_FIRST_LIBRARY: Partial<Volume>[] = [
+    {
+        "name": "Fred Story",
+    },
+    {
+        "name": "Wilma Story",
+    },
+    {
+        "name": "Flintstone Story",
+    }
+];
+
+// For SECOND_LIBRARY (library_id to be interpolated)
+export const STORIES_SECOND_LIBRARY: Partial<Volume>[] = [
+    {
+        "name": "Barney Story",
+    },
+    {
+        "name": "Betty Story",
+    },
+    {
+        "name": "Rubble Story",
+    }
+];
+
 // ***** Volumes *****
 
 // For FIRST_LIBRARY (library_id to be interpolated)

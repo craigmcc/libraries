@@ -14,6 +14,7 @@ import Author from "../models/Author";
 import Database from "../models/Database";
 import Library from "../models/Library";
 import Volume from "../models/Volume";
+import Story from "../models/Story";
 
 // Public Objects ------------------------------------------------------------
 
@@ -34,10 +35,13 @@ export const reloadTestData = async (): Promise<void> => {
     await Database.sync();
 
     // Reload test data in top-down order
+
     await removeLibraries(SeedData.LIBRARIES);
     const libraries: Library[] = await reloadLibraries(SeedData.LIBRARIES);
     const authorsFirst: Author[] = await reloadAuthors(libraries[0], SeedData.AUTHORS_FIRST_LIBRARY);
     const authorsSecond: Author[] = await reloadAuthors(libraries[1], SeedData.AUTHORS_SECOND_LIBRARY);
+    const storiesFirst: Story[] = await reloadStories(libraries[0], SeedData.STORIES_FIRST_LIBRARY);
+    const storiesSecond: Story[] = await reloadStories(libraries[1], SeedData.STORIES_SECOND_LIBRARY);
     const volumesFirst: Volume[] = await reloadVolumes(libraries[0], SeedData.VOLUMES_FIRST_LIBRARY);
     const volumesSecond: Volume[] = await reloadVolumes(libraries[1], SeedData.VOLUMES_SECOND_LIBRARY);
 
@@ -91,6 +95,24 @@ const reloadLibraries
     return results;
 }
 
+const reloadStories
+    = async (library: Library, stories: Partial<Story>[]): Promise<Story[]> =>
+{
+//    console.info(`Reloading Stories for Library: ${JSON.stringify(library)}`);
+    stories.forEach(story => {
+        story.library_id = library.id;
+    });
+    let results: Story[] = [];
+    try {
+        results = await Story.bulkCreate(stories);
+    } catch (error) {
+        console.info("  Reloading Stories ERROR", error);
+        throw error;
+    }
+//    console.info("Reloading Stories Results:", results);
+    return results;
+}
+
 const reloadVolumes
     = async (library: Library, volumes: Partial<Volume>[]): Promise<Volume[]> =>
 {
@@ -126,3 +148,4 @@ const removeLibraries = async (libraries: Partial<Library>[]): Promise<void> => 
     }
 //    console.info("Removing Libraries Complete");
 }
+

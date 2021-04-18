@@ -16,6 +16,7 @@ import Volume from "../models/Volume";
 import * as SortOrder from "../models/SortOrder";
 import {NotFound} from "../util/http-errors";
 import {appendPagination} from "../util/query-parameters";
+import Story from "../models/Story";
 
 // Public Classes ------------------------------------------------------------
 
@@ -159,6 +160,20 @@ export class LibraryServices extends AbstractServices<Library> {
             order: SortOrder.AUTHORS,
         }, query);
         return await library.$get("authors", options);
+    }
+
+    public async stories(libraryId: number, query?: any): Promise<Story[]> {
+        const library = await Library.findByPk(libraryId);
+        if (!library) {
+            throw new NotFound(
+                `libraryId: Missing Library ${libraryId}`,
+                "LibraryServices.volumes"
+            );
+        }
+        let options: FindOptions = appendQuery({
+            order: SortOrder.STORIES,
+        }, query);
+        return await library.$get("stories", options);
     }
 
     public async volumes(libraryId: number, query?: any): Promise<Volume[]> {

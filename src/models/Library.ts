@@ -4,12 +4,13 @@
 
 // External Modules ----------------------------------------------------------
 
-import { Column, DataType, HasMany, Table } from "sequelize-typescript";
+import {Column, DataType, HasMany, Table} from "sequelize-typescript";
 
 // Internal Modules ----------------------------------------------------------
 
 import AbstractModel from "./AbstractModel";
 import Author from "./Author";
+import Story from "./Story";
 import Volume from "./Volume";
 import {
     validateLibraryNameUnique,
@@ -89,6 +90,12 @@ export class Library extends AbstractModel<Library> {
         }
     })
     scope!: string;
+
+    @HasMany(() => Story, {
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+    })
+    stories!: Story[];
 
     @HasMany(() => Volume, {
         onDelete: "CASCADE",

@@ -62,7 +62,7 @@ VolumeRouter.get("/:libraryId",
         ));
     });
 
-// POST /:libraryId/ - Insert a new Library
+// POST /:libraryId/ - Insert a new Volume
 VolumeRouter.post("/:libraryId",
     async (req: Request, res: Response) => {
         res.send(await VolumeServices.insert(
