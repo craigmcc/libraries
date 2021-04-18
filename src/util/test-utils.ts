@@ -47,6 +47,11 @@ export const reloadTestData = async (): Promise<void> => {
 
     // Establish many-many relationships (requires knowledge of seed data content)
 
+    reloadAuthorStories(authorsFirst[0], [storiesFirst[0], storiesFirst[2]]);
+    reloadAuthorStories(authorsFirst[1], [storiesFirst[1], storiesFirst[2]]);
+    reloadAuthorStories(authorsSecond[0], [storiesSecond[0], storiesSecond[2]]);
+    reloadAuthorStories(authorsSecond[1], [storiesSecond[1], storiesSecond[2]]);
+
     reloadAuthorVolumes(authorsFirst[0], [volumesFirst[0], volumesFirst[2]]);
     reloadAuthorVolumes(authorsFirst[1], [volumesFirst[1], volumesFirst[2]]);
     reloadAuthorVolumes(authorsSecond[0], [volumesSecond[0], volumesSecond[2]]);
@@ -72,6 +77,12 @@ const reloadAuthors
     }
 //    console.info("Reloading Authors Results:", results);
     return results;
+}
+
+const reloadAuthorStories
+    = async (author: Author, stories: Story[]): Promise<void> =>
+{
+    await author.$add("stories", stories);
 }
 
 const reloadAuthorVolumes

@@ -101,6 +101,16 @@ AuthorRouter.put("/:libraryId",
 
 // Child Lookup Routes -------------------------------------------------------
 
+// GET /:libraryId/:authorId/stories - Find Stories for this Author
+AuthorRouter.get("/:libraryId/:authorId/stories",
+    async (req: Request, res: Response) => {
+        res.send(await AuthorServices.stories(
+            parseInt(req.params.libraryId, 10),
+            parseInt(req.params.authorId, 10),
+            req.query
+        ));
+    });
+
 // GET /:libraryId/:authorId/volumes - Find Volumes for this Author
 AuthorRouter.get("/:libraryId/:authorId/volumes",
     async (req: Request, res: Response) => {
@@ -110,3 +120,4 @@ AuthorRouter.get("/:libraryId/:authorId/volumes",
             req.query
         ));
     });
+

@@ -100,7 +100,6 @@ StoryRouter.put("/:libraryId",
 
 // Child Lookup Routes -------------------------------------------------------
 
-/*
 // GET /:libraryId/:storyId/authors - Find Authors for this Story
 StoryRouter.get("/:libraryId/:storyId/authors",
     async (req: Request, res: Response) => {
@@ -110,4 +109,3 @@ StoryRouter.get("/:libraryId/:storyId/authors",
             req.query
         ));
     });
-*/

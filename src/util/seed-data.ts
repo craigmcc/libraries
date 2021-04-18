@@ -1,4 +1,4 @@
-// Seed ----------------------------------------------------------------------
+// seed-data -----------------------------------------------------------------
 
 // Seed data for tests.
 
@@ -8,6 +8,7 @@
 
 import Author from "../models/Author";
 import Library from "../models/Library";
+import Story from "../models/Story";
 import Volume from "../models/Volume";
 
 // Seed Data -----------------------------------------------------------------
@@ -55,54 +56,8 @@ export const AUTHORS_SECOND_LIBRARY: Partial<Author>[] = [
     },
 ];
 
-// ***** Libraries *****
-
-export const librariesData = [
-    {
-        "name": "First Seed Library",
-        "scope": "first",
-    },
-    {
-        "name": "Second Seed Library",
-        "scope": "second",
-    },
-];
-
-// ***** Stories *****
-
-// For "First Seed" Library and Author (ids to be interpolated)
-export const storiesFirst = [
-    {
-        "name": "My Story",
-        "notes": "By Fred Flintstone",
-    },
-    {
-        "name": "My Story", // Deliberate duplication
-        "notes": "By Wilma Flintstone",
-    },
-    {
-        "name": "Our Story",
-        "notes": "By Fred Flintstone and Wilma Flintstone",
-    },
-];
-
-// For "Second Seed" Library and Author (ids to be interpolated)
-export const storiesSecond = [
-    {
-        "name": "My Story",
-        "notes": "By Barney Rubble",
-    },
-    {
-        "name": "My Story", // Deliberate duplication
-        "notes": "By Betty Rubble",
-    },
-    {
-        "name": "Our Story",
-        "notes": "By Barney Rubble and Betty Rubble",
-    },
-];
-
-export const oauthUsers = [
+// OAuth Users (TODO - encrypt passwords)
+export const OAUTH_USERS = [
     {
         active: true,
         name: "Superuser User",
@@ -113,37 +68,37 @@ export const oauthUsers = [
     {
         active: true,
         name: "First Library Admin",
-        password: "firstadmin",
-        scope: "first admin regular",
-        username: "firstadmin",
+        password: "testadmin",
+        scope: "test admin regular",
+        username: "testadmin",
     },
     {
         active: true,
         name: "First Library Regular",
-        password: "firstregular",
-        scope: "first regular",
-        username: "firstregular",
+        password: "testregular",
+        scope: "test regular",
+        username: "testregular",
     },
     {
         active: true,
         name: "Second Library Admin",
-        password: "secondadmin",
-        scope: "second admin regular",
-        username: "secondadmin",
+        password: "extraadmin",
+        scope: "extra admin regular",
+        username: "extraadmin",
     },
     {
         active: true,
         name: "Second Library Regular",
-        password: "secondregular",
-        scope: "second regular",
-        username: "secondregular",
+        password: "extraregular",
+        scope: "extra regular",
+        username: "extraregular",
     },
 ]
 
 // ***** Stories *****
 
 // For FIRST_LIBRARY (library_id to be interpolated)
-export const STORIES_FIRST_LIBRARY: Partial<Volume>[] = [
+export const STORIES_FIRST_LIBRARY: Partial<Story>[] = [
     {
         "name": "Fred Story",
     },
@@ -156,7 +111,7 @@ export const STORIES_FIRST_LIBRARY: Partial<Volume>[] = [
 ];
 
 // For SECOND_LIBRARY (library_id to be interpolated)
-export const STORIES_SECOND_LIBRARY: Partial<Volume>[] = [
+export const STORIES_SECOND_LIBRARY: Partial<Story>[] = [
     {
         "name": "Barney Story",
     },

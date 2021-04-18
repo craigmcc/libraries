@@ -16,6 +16,7 @@ import {
 // Internal Modules ----------------------------------------------------------
 
 import AbstractModel from "./AbstractModel";
+import AuthorStory from "./AuthorStory";
 import AuthorVolume from "./AuthorVolume";
 import Library from "./Library";
 import Volume from "./Volume";
@@ -24,6 +25,7 @@ import {
     validateLibraryId
 } from "../util/async-validators";
 import {BadRequest} from "../util/http-errors";
+import Story from "./Story";
 
 // Public Objects ------------------------------------------------------------
 
@@ -109,6 +111,9 @@ export class Author extends AbstractModel<Author> {
         type: DataType.STRING
     })
     notes?: string;
+
+    @BelongsToMany(() => Story, () => AuthorStory)
+    stories!: Array<Story & {AuthorStory: AuthorStory}>;
 
     @BelongsToMany(() => Volume, () => AuthorVolume)
     volumes!: Array<Volume & {AuthorVolume: AuthorVolume}>;

@@ -11,8 +11,8 @@ import {FindOptions, Op} from "sequelize";
 import Author from "../models/Author";
 import Database from "../models/Database";
 import Library from "../models/Library";
-import Story from "../models/Story";
 import * as SortOrder from "../models/SortOrder";
+import Story from "../models/Story";
 import Volume from "../models/Volume";
 import {NotFound} from "../util/http-errors";
 import {appendPagination} from "../util/query-parameters";
@@ -218,7 +218,6 @@ export class StoryServices {
 
     // ***** Child Table Lookups *****
 
-/*
     public async authors(libraryId: number, storyId: number, query?: any): Promise<Author[]> {
         const library = await Library.findByPk(libraryId);
         if (!library) {
@@ -244,7 +243,6 @@ export class StoryServices {
         }, query);
         return await story.$get("authors", options);
     }
-*/
 
 }
 

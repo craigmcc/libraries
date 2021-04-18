@@ -12,6 +12,7 @@ import Author from "../models/Author";
 import Database from "../models/Database";
 import Library from "../models/Library";
 import * as SortOrder from "../models/SortOrder";
+import Story from "../models/Story";
 import Volume from "../models/Volume";
 import {NotFound} from "../util/http-errors";
 import {appendPagination} from "../util/query-parameters";
@@ -233,6 +234,32 @@ export class AuthorServices {
 
     // ***** Child Table Lookups *****
 
+    public async stories(libraryId: number, authorId: number, query?: any): Promise<Story[]> {
+        const library = await Library.findByPk(libraryId);
+        if (!library) {
+            throw new NotFound(
+                `libraryId: Missing Library ${libraryId}`,
+                "AuthorServices.stories"
+            );
+        }
+        const author = await Author.findOne({
+            where: {
+                id: authorId,
+                library_id: libraryId
+            }
+        })
+        if (!author) {
+            throw new NotFound(
+                `authorId: Missing Author ${authorId}`,
+                "AuthorServices.stories"
+            );
+        }
+        let options: FindOptions = appendQuery({
+            order: SortOrder.STORIES,
+        }, query);
+        return await author.$get("stories", options);
+    }
+
     public async volumes(libraryId: number, authorId: number, query?: any): Promise<Volume[]> {
         const library = await Library.findByPk(libraryId);
         if (!library) {
@@ -281,10 +308,10 @@ const appendQuery = (options: FindOptions, query?: any): FindOptions => {
         if ("" === query.withSeries) {
             include.push(Series);
         }
-        if ("" === query.withStories) {
-            include.push(Story);
-        }
     */
+    if ("" === query.withStories) {
+        include.push(Story);
+    }
     if ("" === query.withVolumes) {
         include.push(Volume);
     }

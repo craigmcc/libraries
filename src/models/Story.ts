@@ -18,6 +18,8 @@ import {
 // Internal Modules ----------------------------------------------------------
 
 import AbstractModel from "./AbstractModel";
+import Author from "./Author";
+import AuthorStory from "./AuthorStory";
 import Library from "./Library";
 import {
     validateLibraryId
@@ -52,10 +54,8 @@ export class Story extends AbstractModel<Story> {
     })
     active!: boolean;
 
-/*
     @BelongsToMany(() => Author, () => AuthorStory)
     authors!: Array<Author & {AuthorStory: AuthorStory}>;
-*/
 
     @Column({
         allowNull: true,

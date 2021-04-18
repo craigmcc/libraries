@@ -1,6 +1,6 @@
-// AuthorVolume --------------------------------------------------------------
+// AuthorStory ---------------------------------------------------------------
 
-// Join table for Authors of Volumes.
+// Join table for Authors of Stories.
 
 // External Modules ----------------------------------------------------------
 
@@ -10,14 +10,14 @@ import {BelongsTo, Column, DataType, ForeignKey, Table} from "sequelize-typescri
 
 import AbstractModel from "./AbstractModel";
 import Author from "./Author";
-import Volume from "./Volume";
+import Story from "./Story";
 
 // Public Objects -----------------------------------------------------------
 
 @Table({
-    tableName: "authors_volumes"
+    tableName: "authors_stories"
 })
-export class AuthorVolume extends AbstractModel<AuthorVolume> {
+export class AuthorStory extends AbstractModel<AuthorStory> {
 
     @BelongsTo(() => Author)
     author!: Author;
@@ -38,17 +38,17 @@ export class AuthorVolume extends AbstractModel<AuthorVolume> {
     })
     principal!: boolean;
 
-    @BelongsTo(() => Volume)
-    volume!: Volume;
+    @BelongsTo(() => Story)
+    volume!: Story;
 
     @Column({
         allowNull: false,
-        field: "volume_id",
+        field: "story_id",
         type: DataType.INTEGER,
     })
-    @ForeignKey(() => Volume)
-    volume_id!: number;
+    @ForeignKey(() => Story)
+    story_id!: number;
 
 }
 
-export default AuthorVolume;
+export default AuthorStory;
