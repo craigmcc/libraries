@@ -25,6 +25,8 @@ import {
     validateLibraryId
 } from "../util/async-validators";
 import {BadRequest} from "../util/http-errors";
+import VolumeStory from "./VolumeStory";
+import Volume from "./Volume";
 
 // Public Objects ------------------------------------------------------------
 
@@ -100,6 +102,9 @@ export class Story extends AbstractModel<Story> {
         type: DataType.STRING
     })
     notes?: string;
+
+    @BelongsToMany(() => Volume, () => VolumeStory)
+    volumes!: Array<Volume & {VolumeStory: VolumeStory}>;
 
 }
 

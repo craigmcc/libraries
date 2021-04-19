@@ -17,6 +17,8 @@ import {
     validateLibraryId
 } from "../util/async-validators";
 import {BadRequest} from "../util/http-errors";
+import Story from "./Story";
+import VolumeStory from "./VolumeStory";
 
 // Public Objects ------------------------------------------------------------
 
@@ -126,6 +128,9 @@ export class Volume extends AbstractModel<Volume> {
         }
     })
     read!: boolean;
+
+    @BelongsToMany(() => Story, () => VolumeStory)
+    stories!: Array<Story & {VolumeStory: VolumeStory}>;
 
 }
 

@@ -9,8 +9,6 @@ import {Request, Response, Router} from "express";
 // Internal Modules ----------------------------------------------------------
 
 import VolumeServices from "../services/VolumeServices";
-import AuthorServices from "../services/AuthorServices";
-import AuthorRouter from "./AuthorRouter";
 
 // Public Objects ------------------------------------------------------------
 
@@ -111,3 +109,14 @@ VolumeRouter.get("/:libraryId/:volumeId/authors",
             req.query
         ));
     });
+
+// GET /:libraryId/:volumeId/stories - Find Stories for this Volume
+VolumeRouter.get("/:libraryId/:volumeId/stories",
+    async (req: Request, res: Response) => {
+        res.send(await VolumeServices.stories(
+            parseInt(req.params.libraryId, 10),
+            parseInt(req.params.volumeId, 10),
+            req.query
+        ));
+    });
+

@@ -109,3 +109,14 @@ StoryRouter.get("/:libraryId/:storyId/authors",
             req.query
         ));
     });
+
+// GET /:libraryId/:storyId/volumes - Find Volumes for this Story
+StoryRouter.get("/:libraryId/:storyId/volumes",
+    async (req: Request, res: Response) => {
+        res.send(await StoryServices.volumes(
+            parseInt(req.params.libraryId, 10),
+            parseInt(req.params.storyId, 10),
+            req.query
+        ));
+    });
+

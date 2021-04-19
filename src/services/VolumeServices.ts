@@ -11,6 +11,7 @@ import {FindOptions, Op} from "sequelize";
 import Author from "../models/Author";
 import Database from "../models/Database";
 import Library from "../models/Library";
+import Story from "../models/Story";
 import Volume from "../models/Volume";
 import * as SortOrder from "../models/SortOrder";
 import {NotFound} from "../util/http-errors";
@@ -243,6 +244,32 @@ export class VolumeServices {
         return await volume.$get("authors", options);
     }
 
+    public async stories(libraryId: number, volumeId: number, query?: any): Promise<Story[]> {
+        const library = await Library.findByPk(libraryId);
+        if (!library) {
+            throw new NotFound(
+                `libraryId: Missing Library ${libraryId}`,
+                "VolumeServices.stories"
+            );
+        }
+        const volume = await Volume.findOne({
+            where: {
+                id: volumeId,
+                library_id: libraryId,
+            }
+        })
+        if (!volume) {
+            throw new NotFound(
+                `volumeId: Missing Volume ${volumeId}`,
+                "VolumeServices.stories"
+            );
+        }
+        let options: FindOptions = appendQuery({
+            order: SortOrder.STORIES,
+        }, query);
+        return await volume.$get("stories", options);
+    }
+
 }
 
 export default new VolumeServices();
@@ -264,11 +291,9 @@ const appendQuery = (options: FindOptions, query?: any): FindOptions => {
     if ("" === query.withLibrary) {
         include.push(Library);
     }
-    /*
-        if ("" === query.withStories) {
-            include.push(Story);
-        }
-    */
+    if ("" === query.withStories) {
+        include.push(Story);
+    }
     if (include.length > 0) {
         options.include = include;
     }

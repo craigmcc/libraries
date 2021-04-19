@@ -212,10 +212,10 @@ const appendQuery = (options: FindOptions, query?: any): FindOptions => {
         if ("" === query.withSeries) {
             include.push(Series);
         }
-        if ("" === query.withStories) {
-            include.push(Story);
-        }
     */
+    if ("" === query.withStories) {
+        include.push(Story);
+    }
     if ("" === query.withVolumes) {
         include.push(Volume);
     }

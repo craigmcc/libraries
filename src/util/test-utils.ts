@@ -57,6 +57,13 @@ export const reloadTestData = async (): Promise<void> => {
     reloadAuthorVolumes(authorsSecond[0], [volumesSecond[0], volumesSecond[2]]);
     reloadAuthorVolumes(authorsSecond[1], [volumesSecond[1], volumesSecond[2]]);
 
+    reloadVolumeStories(volumesFirst[0], [storiesFirst[0]]);
+    reloadVolumeStories(volumesFirst[1], [storiesFirst[1]]);
+    reloadVolumeStories(volumesFirst[2], [storiesFirst[0], storiesFirst[1], storiesFirst[2]]);
+    reloadVolumeStories(volumesSecond[0], [storiesSecond[0]]);
+    reloadVolumeStories(volumesSecond[1], [storiesSecond[1]]);
+    reloadVolumeStories(volumesSecond[2], [storiesSecond[0], storiesSecond[1], storiesSecond[2]]);
+
 }
 
 // Private Objects -----------------------------------------------------------
@@ -140,6 +147,12 @@ const reloadVolumes
     }
 //    console.info("Reloading Volumes Results:", results);
     return results;
+}
+
+const reloadVolumeStories
+    = async (volume: Volume, stories: Story[]): Promise<void> =>
+{
+    await volume.$add("stories", stories);
 }
 
 const removeLibraries = async (libraries: Partial<Library>[]): Promise<void> => {

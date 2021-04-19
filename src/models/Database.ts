@@ -15,6 +15,7 @@ import AuthorVolume from "./AuthorVolume";
 import Library from "./Library";
 import Story from "./Story";
 import Volume from "./Volume";
+import VolumeStory from "./VolumeStory";
 
 // Configure Database Instance -----------------------------------------------
 
@@ -47,6 +48,7 @@ Database.addModels([
     Library,
     Story,
     Volume,
+    VolumeStory,
 ]);
 
 export default Database;

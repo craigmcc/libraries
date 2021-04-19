@@ -244,6 +244,32 @@ export class StoryServices {
         return await story.$get("authors", options);
     }
 
+    public async volumes(libraryId: number, storyId: number, query?: any): Promise<Volume[]> {
+        const library = await Library.findByPk(libraryId);
+        if (!library) {
+            throw new NotFound(
+                `libraryId: Missing Library ${libraryId}`,
+                "StoryServices.volumes"
+            );
+        }
+        const story = await Story.findOne({
+            where: {
+                id: storyId,
+                library_id: libraryId,
+            }
+        })
+        if (!story) {
+            throw new NotFound(
+                `storyId: Missing Story ${storyId}`,
+                "StoryServices.volumes"
+            );
+        }
+        let options: FindOptions = appendQuery({
+            order: SortOrder.VOLUMES,
+        }, query);
+        return await story.$get("volumes", options);
+    }
+
 }
 
 export default new StoryServices();
