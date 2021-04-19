@@ -12,11 +12,12 @@ import AbstractServices from "./AbstractServices";
 import Author from "../models/Author";
 import Database from "../models/Database";
 import Library from "../models/Library";
-import Volume from "../models/Volume";
+import Series from "../models/Series";
 import * as SortOrder from "../models/SortOrder";
+import Story from "../models/Story";
+import Volume from "../models/Volume";
 import {NotFound} from "../util/http-errors";
 import {appendPagination} from "../util/query-parameters";
-import Story from "../models/Story";
 
 // Public Classes ------------------------------------------------------------
 
@@ -162,12 +163,26 @@ export class LibraryServices extends AbstractServices<Library> {
         return await library.$get("authors", options);
     }
 
+    public async series(libraryId: number, query?: any): Promise<Series[]> {
+        const library = await Library.findByPk(libraryId);
+        if (!library) {
+            throw new NotFound(
+                `libraryId: Missing Library ${libraryId}`,
+                "LibraryServices.series"
+            );
+        }
+        let options: FindOptions = appendQuery({
+            order: SortOrder.SERIES,
+        }, query);
+        return await library.$get("series", options);
+    }
+
     public async stories(libraryId: number, query?: any): Promise<Story[]> {
         const library = await Library.findByPk(libraryId);
         if (!library) {
             throw new NotFound(
                 `libraryId: Missing Library ${libraryId}`,
-                "LibraryServices.volumes"
+                "LibraryServices.stories"
             );
         }
         let options: FindOptions = appendQuery({
@@ -208,11 +223,9 @@ const appendQuery = (options: FindOptions, query?: any): FindOptions => {
     if ("" === query.withAuthors) {
         include.push(Author);
     }
-    /*
-        if ("" === query.withSeries) {
-            include.push(Series);
-        }
-    */
+    if ("" === query.withSeries) {
+        include.push(Series);
+    }
     if ("" === query.withStories) {
         include.push(Story);
     }

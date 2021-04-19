@@ -13,8 +13,9 @@ import * as SeedData from "./seed-data";
 import Author from "../models/Author";
 import Database from "../models/Database";
 import Library from "../models/Library";
-import Volume from "../models/Volume";
+import Series from "../models/Series";
 import Story from "../models/Story";
+import Volume from "../models/Volume";
 
 // Public Objects ------------------------------------------------------------
 
@@ -38,31 +39,33 @@ export const reloadTestData = async (): Promise<void> => {
 
     await removeLibraries(SeedData.LIBRARIES);
     const libraries: Library[] = await reloadLibraries(SeedData.LIBRARIES);
-    const authorsFirst: Author[] = await reloadAuthors(libraries[0], SeedData.AUTHORS_FIRST_LIBRARY);
-    const authorsSecond: Author[] = await reloadAuthors(libraries[1], SeedData.AUTHORS_SECOND_LIBRARY);
-    const storiesFirst: Story[] = await reloadStories(libraries[0], SeedData.STORIES_FIRST_LIBRARY);
-    const storiesSecond: Story[] = await reloadStories(libraries[1], SeedData.STORIES_SECOND_LIBRARY);
-    const volumesFirst: Volume[] = await reloadVolumes(libraries[0], SeedData.VOLUMES_FIRST_LIBRARY);
-    const volumesSecond: Volume[] = await reloadVolumes(libraries[1], SeedData.VOLUMES_SECOND_LIBRARY);
+    const authors0: Author[] = await reloadAuthors(libraries[0], SeedData.AUTHORS_LIBRARY0);
+    const authors1: Author[] = await reloadAuthors(libraries[1], SeedData.AUTHORS_LIBRARY1);
+    const series0: Series[] = await reloadSeries(libraries[0], SeedData.SERIES_LIBRARY0);
+    const series1: Series[] = await reloadSeries(libraries[1], SeedData.SERIES_LIBRARY1);
+    const stories0: Story[] = await reloadStories(libraries[0], SeedData.STORIES_LIBRARY0);
+    const stories1: Story[] = await reloadStories(libraries[1], SeedData.STORIES_LIBRARY1);
+    const volumes0: Volume[] = await reloadVolumes(libraries[0], SeedData.VOLUMES_LIBRARY0);
+    const volumes1: Volume[] = await reloadVolumes(libraries[1], SeedData.VOLUMES_LIBRARY1);
 
     // Establish many-many relationships (requires knowledge of seed data content)
 
-    reloadAuthorStories(authorsFirst[0], [storiesFirst[0], storiesFirst[2]]);
-    reloadAuthorStories(authorsFirst[1], [storiesFirst[1], storiesFirst[2]]);
-    reloadAuthorStories(authorsSecond[0], [storiesSecond[0], storiesSecond[2]]);
-    reloadAuthorStories(authorsSecond[1], [storiesSecond[1], storiesSecond[2]]);
+    reloadAuthorStories(authors0[0], [stories0[0], stories0[2]]);
+    reloadAuthorStories(authors0[1], [stories0[1], stories0[2]]);
+    reloadAuthorStories(authors1[0], [stories1[0], stories1[2]]);
+    reloadAuthorStories(authors1[1], [stories1[1], stories1[2]]);
 
-    reloadAuthorVolumes(authorsFirst[0], [volumesFirst[0], volumesFirst[2]]);
-    reloadAuthorVolumes(authorsFirst[1], [volumesFirst[1], volumesFirst[2]]);
-    reloadAuthorVolumes(authorsSecond[0], [volumesSecond[0], volumesSecond[2]]);
-    reloadAuthorVolumes(authorsSecond[1], [volumesSecond[1], volumesSecond[2]]);
+    reloadAuthorVolumes(authors0[0], [volumes0[0], volumes0[2]]);
+    reloadAuthorVolumes(authors0[1], [volumes0[1], volumes0[2]]);
+    reloadAuthorVolumes(authors1[0], [volumes1[0], volumes1[2]]);
+    reloadAuthorVolumes(authors1[1], [volumes1[1], volumes1[2]]);
 
-    reloadVolumeStories(volumesFirst[0], [storiesFirst[0]]);
-    reloadVolumeStories(volumesFirst[1], [storiesFirst[1]]);
-    reloadVolumeStories(volumesFirst[2], [storiesFirst[0], storiesFirst[1], storiesFirst[2]]);
-    reloadVolumeStories(volumesSecond[0], [storiesSecond[0]]);
-    reloadVolumeStories(volumesSecond[1], [storiesSecond[1]]);
-    reloadVolumeStories(volumesSecond[2], [storiesSecond[0], storiesSecond[1], storiesSecond[2]]);
+    reloadVolumeStories(volumes0[0], [stories0[0]]);
+    reloadVolumeStories(volumes0[1], [stories0[1]]);
+    reloadVolumeStories(volumes0[2], [stories0[0], stories0[1], stories0[2]]);
+    reloadVolumeStories(volumes1[0], [stories1[0]]);
+    reloadVolumeStories(volumes1[1], [stories1[1]]);
+    reloadVolumeStories(volumes1[2], [stories1[0], stories1[1], stories1[2]]);
 
 }
 
@@ -110,6 +113,24 @@ const reloadLibraries
         throw error;
     }
 //    console.info("Reloading Libraries Results:", results);
+    return results;
+}
+
+const reloadSeries
+    = async (library: Library, series: Partial<Series>[]): Promise<Series[]> =>
+{
+//    console.info(`Reloading Series for Library: ${JSON.stringify(library)}`);
+    series.forEach(aSeries => {
+        aSeries.library_id = library.id;
+    });
+    let results: Series[] = [];
+    try {
+        results = await Series.bulkCreate(series);
+    } catch (error) {
+        console.info("  Reloading Series ERROR", error);
+        throw error;
+    }
+//    console.info("Reloading Series Results:", results);
     return results;
 }
 
@@ -172,4 +193,3 @@ const removeLibraries = async (libraries: Partial<Library>[]): Promise<void> => 
     }
 //    console.info("Removing Libraries Complete");
 }
-

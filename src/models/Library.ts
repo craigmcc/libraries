@@ -10,6 +10,7 @@ import {Column, DataType, HasMany, Table} from "sequelize-typescript";
 
 import AbstractModel from "./AbstractModel";
 import Author from "./Author";
+import Series from "./Series";
 import Story from "./Story";
 import Volume from "./Volume";
 import {
@@ -90,6 +91,12 @@ export class Library extends AbstractModel<Library> {
         }
     })
     scope!: string;
+
+    @HasMany(() => Series, {
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+    })
+    series!: Series[];
 
     @HasMany(() => Story, {
         onDelete: "CASCADE",

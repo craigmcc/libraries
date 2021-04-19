@@ -8,6 +8,7 @@
 
 import Author from "../models/Author";
 import Library from "../models/Library";
+import Series from "../models/Series";
 import Story from "../models/Story";
 import Volume from "../models/Volume";
 
@@ -33,7 +34,7 @@ export const LIBRARIES: Partial<Library>[] = [
 // ***** Authors *****
 
 // For FIRST_LIBRARY (library_id to be interpolated)
-export const AUTHORS_FIRST_LIBRARY: Partial<Author>[] = [
+export const AUTHORS_LIBRARY0: Partial<Author>[] = [
     {
         "first_name": "Fred",
         "last_name": "Flintstone",
@@ -45,7 +46,7 @@ export const AUTHORS_FIRST_LIBRARY: Partial<Author>[] = [
 ];
 
 // For SECOND_LIBRARY (library_id to be interpolated)
-export const AUTHORS_SECOND_LIBRARY: Partial<Author>[] = [
+export const AUTHORS_LIBRARY1: Partial<Author>[] = [
     {
         "first_name": "Barney",
         "last_name": "Rubble",
@@ -95,10 +96,24 @@ export const OAUTH_USERS = [
     },
 ]
 
+// ***** Series *****
+
+export const SERIES_LIBRARY0: Partial<Series>[] = [
+    {
+        name: "Flintstone Series",
+    },
+]
+
+export const SERIES_LIBRARY1: Partial<Series>[] = [
+    {
+        name: "Rubble Series",
+    },
+]
+
 // ***** Stories *****
 
 // For FIRST_LIBRARY (library_id to be interpolated)
-export const STORIES_FIRST_LIBRARY: Partial<Story>[] = [
+export const STORIES_LIBRARY0: Partial<Story>[] = [
     {
         "name": "Fred Story",
     },
@@ -111,7 +126,7 @@ export const STORIES_FIRST_LIBRARY: Partial<Story>[] = [
 ];
 
 // For SECOND_LIBRARY (library_id to be interpolated)
-export const STORIES_SECOND_LIBRARY: Partial<Story>[] = [
+export const STORIES_LIBRARY1: Partial<Story>[] = [
     {
         "name": "Barney Story",
     },
@@ -126,7 +141,7 @@ export const STORIES_SECOND_LIBRARY: Partial<Story>[] = [
 // ***** Volumes *****
 
 // For FIRST_LIBRARY (library_id to be interpolated)
-export const VOLUMES_FIRST_LIBRARY: Partial<Volume>[] = [
+export const VOLUMES_LIBRARY0: Partial<Volume>[] = [
     {
         "name": "Fred Volume",
     },
@@ -139,7 +154,7 @@ export const VOLUMES_FIRST_LIBRARY: Partial<Volume>[] = [
 ];
 
 // For SECOND_LIBRARY (library_id to be interpolated)
-export const VOLUMES_SECOND_LIBRARY: Partial<Volume>[] = [
+export const VOLUMES_LIBRARY1: Partial<Volume>[] = [
     {
         "name": "Barney Volume",
     },

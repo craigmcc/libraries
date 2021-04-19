@@ -13,6 +13,7 @@ import Author from "./Author";
 import AuthorStory from "./AuthorStory";
 import AuthorVolume from "./AuthorVolume";
 import Library from "./Library";
+import Series from "./Series";
 import Story from "./Story";
 import Volume from "./Volume";
 import VolumeStory from "./VolumeStory";
@@ -46,6 +47,7 @@ Database.addModels([
     AuthorStory,
     AuthorVolume,
     Library,
+    Series,
     Story,
     Volume,
     VolumeStory,

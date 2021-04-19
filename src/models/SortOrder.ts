@@ -18,6 +18,11 @@ export const LIBRARIES: Order = [
     [ "name", "ASC" ],
 ];
 
+export const SERIES: Order = [
+    [ "library_id", "ASC" ],
+    [ "name", "ASC" ],
+];
+
 export const STORIES: Order = [
     [ "library_id", "ASC" ],
     [ "name", "ASC" ],

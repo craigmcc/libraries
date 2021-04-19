@@ -10,6 +10,7 @@ import {Op} from "sequelize";
 
 import Author from "../models/Author";
 import Library from"../models/Library";
+import Series from "../models/Series";
 import Story from "../models/Story";
 import Volume from "../models/Volume";
 import logger from "../util/server-logger";
@@ -39,6 +40,7 @@ export class DevModeServices {
         const results = await Library.findAll({
             include: [
                 Author,
+                Series,
                 Story,
                 Volume,
             ],

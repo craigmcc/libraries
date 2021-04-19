@@ -11,6 +11,7 @@ import {Router} from "express";
 import AuthorRouter from "./AuthorRouter";
 import DevModeRouter from "./DevModeRouter";
 import LibraryRouter from "./LibraryRouter";
+import SeriesRouter from "./SeriesRouter";
 import StoryRouter from "./StoryRouter";
 import VolumeRouter from "./VolumeRouter";
 
@@ -27,5 +28,6 @@ export default ApiRouter;
 ApiRouter.use("/authors", AuthorRouter);
 ApiRouter.use("/devmode", DevModeRouter);
 ApiRouter.use("/libraries", LibraryRouter);
+ApiRouter.use("/series", SeriesRouter);
 ApiRouter.use("/stories", StoryRouter);
 ApiRouter.use("/volumes", VolumeRouter);

@@ -103,6 +103,15 @@ LibraryRouter.get("/:libraryId/authors",
         ));
     });
 
+// GET /:libraryId/series - Find Series for this Library
+LibraryRouter.get("/:libraryId/series",
+    async (req: Request, res: Response) => {
+        res.send(await LibraryServices.series(
+            parseInt(req.params.libraryId, 10),
+            req.query
+        ));
+    });
+
 // GET /:libraryId/stories - Find Stories for this Library
 LibraryRouter.get("/:libraryId/stories",
     async (req: Request, res: Response) => {
