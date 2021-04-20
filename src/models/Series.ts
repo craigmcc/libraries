@@ -22,6 +22,10 @@ import {
     validateLibraryId
 } from "../util/async-validators";
 import {BadRequest} from "../util/http-errors";
+import Author from "./Author";
+import AuthorSeries from "./AuthorSeries";
+import SeriesStory from "./SeriesStory";
+import Story from "./Story";
 
 // Public Objects ------------------------------------------------------------
 
@@ -51,10 +55,8 @@ export class Series extends AbstractModel<Series> {
     })
     active!: boolean;
 
-/*
     @BelongsToMany(() => Author, () => AuthorSeries)
     authors!: Array<Author & {AuthorSeries: AuthorSeries}>;
-*/
 
     @Column({
         allowNull: true,
@@ -99,6 +101,9 @@ export class Series extends AbstractModel<Series> {
         type: DataType.STRING
     })
     notes?: string;
+
+    @BelongsToMany(() => Story, () => SeriesStory)
+    stories!: Array<Story & {SeriesStory: SeriesStory}>;
 
 }
 

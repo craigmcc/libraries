@@ -16,6 +16,7 @@ import Story from "../models/Story";
 import Volume from "../models/Volume";
 import {NotFound} from "../util/http-errors";
 import {appendPagination} from "../util/query-parameters";
+import Series from "../models/Series";
 
 // Public Objects ------------------------------------------------------------
 
@@ -244,6 +245,32 @@ export class StoryServices {
         return await story.$get("authors", options);
     }
 
+    public async series(libraryId: number, storyId: number, query?: any): Promise<Series[]> {
+        const library = await Library.findByPk(libraryId);
+        if (!library) {
+            throw new NotFound(
+                `libraryId: Missing Library ${libraryId}`,
+                "StoryServices.series"
+            );
+        }
+        const story = await Story.findOne({
+            where: {
+                id: storyId,
+                library_id: libraryId,
+            }
+        })
+        if (!story) {
+            throw new NotFound(
+                `storyId: Missing Story ${storyId}`,
+                "StoryServices.series"
+            );
+        }
+        let options: FindOptions = appendQuery({
+            order: SortOrder.SERIES,
+        }, query);
+        return await story.$get("series", options);
+    }
+
     public async volumes(libraryId: number, storyId: number, query?: any): Promise<Volume[]> {
         const library = await Library.findByPk(libraryId);
         if (!library) {
@@ -291,11 +318,9 @@ const appendQuery = (options: FindOptions, query?: any): FindOptions => {
     if ("" === query.withLibrary) {
         include.push(Library);
     }
-/*
     if ("" === query.withSeries) {
         include.push(Series);
     }
-*/
     if ("" === query.withVolumes) {
         include.push(Volume);
     }

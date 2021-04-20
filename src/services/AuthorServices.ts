@@ -11,6 +11,7 @@ import {FindOptions, Op} from "sequelize";
 import Author from "../models/Author";
 import Database from "../models/Database";
 import Library from "../models/Library";
+import Series from "../models/Series";
 import * as SortOrder from "../models/SortOrder";
 import Story from "../models/Story";
 import Volume from "../models/Volume";
@@ -234,6 +235,32 @@ export class AuthorServices {
 
     // ***** Child Table Lookups *****
 
+    public async series(libraryId: number, authorId: number, query?: any): Promise<Series[]> {
+        const library = await Library.findByPk(libraryId);
+        if (!library) {
+            throw new NotFound(
+                `libraryId: Missing Library ${libraryId}`,
+                "AuthorServices.series"
+            );
+        }
+        const author = await Author.findOne({
+            where: {
+                id: authorId,
+                library_id: libraryId
+            }
+        })
+        if (!author) {
+            throw new NotFound(
+                `authorId: Missing Author ${authorId}`,
+                "AuthorServices.series"
+            );
+        }
+        let options: FindOptions = appendQuery({
+            order: SortOrder.STORIES,
+        }, query);
+        return await author.$get("series", options);
+    }
+
     public async stories(libraryId: number, authorId: number, query?: any): Promise<Story[]> {
         const library = await Library.findByPk(libraryId);
         if (!library) {
@@ -304,11 +331,9 @@ const appendQuery = (options: FindOptions, query?: any): FindOptions => {
     if ("" === query.withLibrary) {
         include.push(Library);
     }
-    /*
-        if ("" === query.withSeries) {
-            include.push(Series);
-        }
-    */
+    if ("" === query.withSeries) {
+        include.push(Series);
+    }
     if ("" === query.withStories) {
         include.push(Story);
     }

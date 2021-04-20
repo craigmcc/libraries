@@ -26,6 +26,8 @@ import {
 } from "../util/async-validators";
 import {BadRequest} from "../util/http-errors";
 import Story from "./Story";
+import Series from "./Series";
+import AuthorSeries from "./AuthorSeries";
 
 // Public Objects ------------------------------------------------------------
 
@@ -111,6 +113,9 @@ export class Author extends AbstractModel<Author> {
         type: DataType.STRING
     })
     notes?: string;
+
+    @BelongsToMany(() => Series, () => AuthorSeries)
+    series!: Array<Series & {AuthorSeries: AuthorSeries}>;
 
     @BelongsToMany(() => Story, () => AuthorStory)
     stories!: Array<Story & {AuthorStory: AuthorStory}>;

@@ -16,6 +16,7 @@ import Library from "../models/Library";
 import Series from "../models/Series";
 import Story from "../models/Story";
 import Volume from "../models/Volume";
+import SeriesStory from "../models/SeriesStory";
 
 // Public Objects ------------------------------------------------------------
 
@@ -50,6 +51,11 @@ export const reloadTestData = async (): Promise<void> => {
 
     // Establish many-many relationships (requires knowledge of seed data content)
 
+    reloadAuthorSeries(authors0[0], [series0[0]]);
+    reloadAuthorSeries(authors0[1], [series0[0]]);
+    reloadAuthorSeries(authors1[0], [series1[0]]);
+    reloadAuthorSeries(authors1[1], [series1[0]]);
+
     reloadAuthorStories(authors0[0], [stories0[0], stories0[2]]);
     reloadAuthorStories(authors0[1], [stories0[1], stories0[2]]);
     reloadAuthorStories(authors1[0], [stories1[0], stories1[2]]);
@@ -59,6 +65,13 @@ export const reloadTestData = async (): Promise<void> => {
     reloadAuthorVolumes(authors0[1], [volumes0[1], volumes0[2]]);
     reloadAuthorVolumes(authors1[0], [volumes1[0], volumes1[2]]);
     reloadAuthorVolumes(authors1[1], [volumes1[1], volumes1[2]]);
+
+    reloadSeriesStory(series0[0], stories0[0], 1);
+    reloadSeriesStory(series0[0], stories0[1], 2);
+    reloadSeriesStory(series0[0], stories0[2], 3);
+    reloadSeriesStory(series1[0], stories1[0], 3);
+    reloadSeriesStory(series1[0], stories1[1], 2);
+    reloadSeriesStory(series1[0], stories1[2], 1);
 
     reloadVolumeStories(volumes0[0], [stories0[0]]);
     reloadVolumeStories(volumes0[1], [stories0[1]]);
@@ -87,6 +100,12 @@ const reloadAuthors
     }
 //    console.info("Reloading Authors Results:", results);
     return results;
+}
+
+const reloadAuthorSeries
+    = async (author: Author, series: Series[]): Promise<void> =>
+{
+    await author.$add("series", series);
 }
 
 const reloadAuthorStories
@@ -132,6 +151,16 @@ const reloadSeries
     }
 //    console.info("Reloading Series Results:", results);
     return results;
+}
+
+const reloadSeriesStory
+    = async (series: Series, story: Story, ordinal: number): Promise<void> =>
+{
+    await SeriesStory.create({
+        series_id: series.id,
+        story_id: story.id,
+        ordinal: ordinal,
+    });
 }
 
 const reloadStories

@@ -10,10 +10,12 @@ import {Sequelize} from "sequelize-typescript";
 // Internal Modules ----------------------------------------------------------
 
 import Author from "./Author";
+import AuthorSeries from "./AuthorSeries";
 import AuthorStory from "./AuthorStory";
 import AuthorVolume from "./AuthorVolume";
 import Library from "./Library";
 import Series from "./Series";
+import SeriesStory from "./SeriesStory";
 import Story from "./Story";
 import Volume from "./Volume";
 import VolumeStory from "./VolumeStory";
@@ -44,10 +46,12 @@ export const Database = ((NODE_ENV != "test")
 
 Database.addModels([
     Author,
+    AuthorSeries,
     AuthorStory,
     AuthorVolume,
     Library,
     Series,
+    SeriesStory,
     Story,
     Volume,
     VolumeStory,

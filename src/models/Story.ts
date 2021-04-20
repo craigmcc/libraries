@@ -27,6 +27,8 @@ import {
 import {BadRequest} from "../util/http-errors";
 import VolumeStory from "./VolumeStory";
 import Volume from "./Volume";
+import Series from "./Series";
+import SeriesStory from "./SeriesStory";
 
 // Public Objects ------------------------------------------------------------
 
@@ -102,6 +104,9 @@ export class Story extends AbstractModel<Story> {
         type: DataType.STRING
     })
     notes?: string;
+
+    @BelongsToMany(() => Series, () => SeriesStory)
+    series!: Array<Series & {SeriesStory: SeriesStory}>;
 
     @BelongsToMany(() => Volume, () => VolumeStory)
     volumes!: Array<Volume & {VolumeStory: VolumeStory}>;
