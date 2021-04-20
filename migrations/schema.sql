@@ -621,7 +621,8 @@ CREATE TABLE public.volumes (
     media text,
     name text NOT NULL,
     notes text,
-    read boolean DEFAULT false NOT NULL
+    read boolean DEFAULT false NOT NULL,
+    google_id text
 );
 
 

@@ -24,7 +24,7 @@ export class SeriesStory extends AbstractModel<SeriesStory> {
         field: "ordinal",
         type: DataType.SMALLINT
     })
-    ordinal!: number;
+    ordinal?: number;
 
     @BelongsTo(() => Series)
     series!: Series;

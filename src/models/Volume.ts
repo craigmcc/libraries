@@ -13,12 +13,11 @@ import AbstractModel from "./AbstractModel";
 import Author from "./Author";
 import AuthorVolume from "./AuthorVolume";
 import Library from "./Library";
-import {
-    validateLibraryId
-} from "../util/async-validators";
-import {BadRequest} from "../util/http-errors";
 import Story from "./Story";
 import VolumeStory from "./VolumeStory";
+import {validateLocation} from "../util/application-validators";
+import {validateLibraryId} from "../util/async-validators";
+import {BadRequest} from "../util/http-errors";
 
 // Public Objects ------------------------------------------------------------
 
@@ -60,6 +59,13 @@ export class Volume extends AbstractModel<Volume> {
 
     @Column({
         allowNull: true,
+        field: "google_id",
+        type: DataType.STRING,
+    })
+    google_id?: string;
+
+    @Column({
+        allowNull: true,
         field: "isbn",
         type: DataType.STRING
     })
@@ -85,7 +91,14 @@ export class Volume extends AbstractModel<Volume> {
     @Column({
         allowNull: true,
         field: "location",
-        type: DataType.STRING
+        type: DataType.STRING,
+        validate: {
+            isValidLocation: function(value: string): void {
+                if (!validateLocation(value)) {
+                    throw new BadRequest(`location: Invalid location '${value}'`);
+                }
+            }
+        }
     })
     location?: string;
 
