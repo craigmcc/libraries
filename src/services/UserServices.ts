@@ -29,7 +29,7 @@ export class UserServices extends AbstractServices<User> {
         const results: User[] = await User.findAll(options);
         results.forEach(result => {
             // @ts-ignore
-            delete result.password;
+            result.password = "";
         })
         return results;
     }
@@ -41,7 +41,7 @@ export class UserServices extends AbstractServices<User> {
         let results = await User.findAll(options);
         if (results.length === 1) {
             // @ts-ignore
-            delete results[0].password;
+            results[0].password = "";
             return results[0];
         } else {
             throw new NotFound(
@@ -98,7 +98,7 @@ export class UserServices extends AbstractServices<User> {
         if (user.password && (user.password.length > 0)) {
             updatedUser.password = await hashPassword(user.password);
         } else {
-            delete updatedUser.password;
+            updatedUser.password = user.password;
         }
         let transaction;
         try {
@@ -141,7 +141,7 @@ export class UserServices extends AbstractServices<User> {
         const results = await User.findAll(options);
         results.forEach(result => {
             // @ts-ignore
-            delete result.password;
+            result.password = "";
         });
         return results;
     }
@@ -159,7 +159,7 @@ export class UserServices extends AbstractServices<User> {
                 "UserServices.exact()");
         }
         // @ts-ignore
-        delete results[0].password;
+        results[0].password = "";
         return results[0];
     }
 
@@ -173,7 +173,7 @@ export class UserServices extends AbstractServices<User> {
         const results = await User.findAll(options);
         results.forEach(result => {
             // @ts-ignore
-            delete result.password;
+            result.password = "";
         })
         return results;
     }

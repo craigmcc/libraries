@@ -8,6 +8,13 @@ import {Request, Response, Router} from "express";
 
 // Internal Modules ----------------------------------------------------------
 
+import {
+    requireAdmin,
+    requireAny,
+    requireNone,
+    requireRegular,
+    requireSuperuser,
+} from "../oauth/oauth-middleware";
 import LibraryServices from "../services/LibraryServices";
 
 // Public Objects ------------------------------------------------------------
@@ -22,6 +29,7 @@ export default LibraryRouter;
 
 // GET /active - Find active Libraries
 LibraryRouter.get("/active",
+    requireNone,    // Avoid catch-22 on initial population of LibraryContext
     async (req: Request, res: Response) => {
         res.send(await LibraryServices.active(
             req.query
@@ -30,6 +38,7 @@ LibraryRouter.get("/active",
 
 // GET /exact/:name - Find Library by exact name
 LibraryRouter.get("/exact/:name",
+    requireAny,
     async (req: Request, res: Response) => {
         res.send(await LibraryServices.exact(
             req.params.name,
@@ -39,6 +48,7 @@ LibraryRouter.get("/exact/:name",
 
 // GET /name/:name - Find Libraries by name match
 LibraryRouter.get("/name/:name",
+    requireSuperuser,
     async (req: Request, res: Response) => {
         res.send(await LibraryServices.name(
             req.params.name,
@@ -50,6 +60,7 @@ LibraryRouter.get("/name/:name",
 
 // GET / - Find all Libraries
 LibraryRouter.get("/",
+    requireSuperuser,
     async (req: Request, res: Response) => {
         res.send(await LibraryServices.all(
             req.query
@@ -58,6 +69,7 @@ LibraryRouter.get("/",
 
 // POST / - Insert a new Library
 LibraryRouter.post("/",
+    requireSuperuser,
     async (req: Request, res: Response) => {
         res.send(await LibraryServices.insert(
             req.body
@@ -66,6 +78,7 @@ LibraryRouter.post("/",
 
 // DELETE /:libraryId - Remove Library by ID
 LibraryRouter.delete("/:libraryId",
+    requireSuperuser,
     async (req: Request, res: Response) => {
         res.send(await LibraryServices.remove(
             parseInt(req.params.libraryId, 10)
@@ -74,6 +87,7 @@ LibraryRouter.delete("/:libraryId",
 
 // GET /:libraryId - Find Library by ID
 LibraryRouter.get("/:libraryId",
+    requireRegular,
     async (req: Request, res: Response) => {
         console.info("Begin LibraryServices.find(" + req.params.libraryId + ")");
         res.send(await LibraryServices.find(
@@ -85,6 +99,7 @@ LibraryRouter.get("/:libraryId",
 
 // PUT /:libraryId - Update Library by ID
 LibraryRouter.put("/:libraryId",
+    requireAdmin,
     async (req: Request, res: Response) => {
         res.send(await LibraryServices.update(
             parseInt(req.params.libraryId, 10),
@@ -96,6 +111,7 @@ LibraryRouter.put("/:libraryId",
 
 // GET /:libraryId/authors - Find Authors for this Library
 LibraryRouter.get("/:libraryId/authors",
+    requireRegular,
     async (req: Request, res: Response) => {
         res.send(await LibraryServices.authors(
             parseInt(req.params.libraryId, 10),
@@ -105,6 +121,7 @@ LibraryRouter.get("/:libraryId/authors",
 
 // GET /:libraryId/series - Find Series for this Library
 LibraryRouter.get("/:libraryId/series",
+    requireRegular,
     async (req: Request, res: Response) => {
         res.send(await LibraryServices.series(
             parseInt(req.params.libraryId, 10),
@@ -114,6 +131,7 @@ LibraryRouter.get("/:libraryId/series",
 
 // GET /:libraryId/stories - Find Stories for this Library
 LibraryRouter.get("/:libraryId/stories",
+    requireRegular,
     async (req: Request, res: Response) => {
         res.send(await LibraryServices.stories(
             parseInt(req.params.libraryId, 10),
@@ -123,10 +141,10 @@ LibraryRouter.get("/:libraryId/stories",
 
 // GET /:libraryId/volumes - Find Volumes for this Library
 LibraryRouter.get("/:libraryId/volumes",
+    requireRegular,
     async (req: Request, res: Response) => {
         res.send(await LibraryServices.volumes(
             parseInt(req.params.libraryId, 10),
             req.query
         ));
     });
-

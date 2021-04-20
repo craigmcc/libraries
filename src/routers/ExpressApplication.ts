@@ -13,6 +13,8 @@ import path from "path";
 // Internal Modules ----------------------------------------------------------
 
 import ApiRouter from "./ApiRouter";
+import {handleOAuthError} from "../oauth/oauth-middleware";
+import OAuthRouter from "../oauth/OAuthRouter";
 import {
     handleHttpError,
     handleServerError,
@@ -52,10 +54,12 @@ app.use(express.static(CLIENT_BASE));
 
 // Configure application-specific routing
 app.use("/api", ApiRouter);
+app.use("/oauth", OAuthRouter);
 
 // Configure error handling (must be last)
 app.use(handleHttpError);
 app.use(handleValidationError);
+app.use(handleOAuthError);
 app.use(handleServerError); // The last of the last :-)
 
 // Configure unknown mappings back to client

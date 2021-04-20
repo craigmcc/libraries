@@ -8,6 +8,10 @@ import {Request, Response, Router} from "express";
 
 // Internal Modules ----------------------------------------------------------
 
+import {
+    requireAdmin,
+    requireRegular,
+} from "../oauth/oauth-middleware";
 import StoryServices from "../services/StoryServices";
 
 // Public Objects ------------------------------------------------------------
@@ -22,6 +26,7 @@ export default StoryRouter;
 
 // GET /:libraryId/active - Find active Stories
 StoryRouter.get("/:libraryId/active",
+    requireRegular,
     async (req: Request, res: Response) => {
         res.send(await StoryServices.active(
             parseInt(req.params.libraryId, 10),
@@ -31,6 +36,7 @@ StoryRouter.get("/:libraryId/active",
 
 // GET /:libraryId/exact/:name - Find Story by exact name
 StoryRouter.get("/:libraryId/exact/:name",
+    requireRegular,
     async (req: Request, res: Response) => {
         res.send(await StoryServices.exact(
             parseInt(req.params.libraryId, 10),
@@ -41,6 +47,7 @@ StoryRouter.get("/:libraryId/exact/:name",
 
 // GET /:libraryId/name/:name - Find Stories by name match
 StoryRouter.get("/:libraryId/name/:name",
+    requireRegular,
     async (req: Request, res: Response) => {
         res.send(await StoryServices.name(
             parseInt(req.params.libraryId, 10),
@@ -53,6 +60,7 @@ StoryRouter.get("/:libraryId/name/:name",
 
 // GET /:libraryId - Find all Stories
 StoryRouter.get("/:libraryId",
+    requireRegular,
     async (req: Request, res: Response) => {
         res.send(await StoryServices.all(
             parseInt(req.params.libraryId, 10),
@@ -62,6 +70,7 @@ StoryRouter.get("/:libraryId",
 
 // POST /:libraryId/ - Insert a new Story
 StoryRouter.post("/:libraryId",
+    requireRegular,
     async (req: Request, res: Response) => {
         res.send(await StoryServices.insert(
             parseInt(req.params.libraryId, 10),
@@ -71,6 +80,7 @@ StoryRouter.post("/:libraryId",
 
 // DELETE /:libraryId/:storyId - Remove Story by ID
 StoryRouter.delete("/:libraryId/:storyId",
+    requireAdmin,
     async (req: Request, res: Response) => {
         res.send(await StoryServices.remove(
             parseInt(req.params.libraryId, 10),
@@ -80,6 +90,7 @@ StoryRouter.delete("/:libraryId/:storyId",
 
 // GET /:libraryId/:storyId - Find Story by ID
 StoryRouter.get("/:libraryId/:storyId",
+    requireRegular,
     async (req: Request, res: Response) => {
         res.send(await StoryServices.find(
             parseInt(req.params.libraryId, 10),
@@ -90,6 +101,7 @@ StoryRouter.get("/:libraryId/:storyId",
 
 // PUT /:libraryId/:storyId - Update Story by ID
 StoryRouter.put("/:libraryId",
+    requireRegular,
     async (req: Request, res: Response) => {
         res.send(await StoryServices.update(
             parseInt(req.params.libraryId, 10),
@@ -102,6 +114,7 @@ StoryRouter.put("/:libraryId",
 
 // GET /:libraryId/:storyId/authors - Find Authors for this Story
 StoryRouter.get("/:libraryId/:storyId/authors",
+    requireRegular,
     async (req: Request, res: Response) => {
         res.send(await StoryServices.authors(
             parseInt(req.params.libraryId, 10),
@@ -112,6 +125,7 @@ StoryRouter.get("/:libraryId/:storyId/authors",
 
 // GET /:libraryId/:storyId/volumes - Find Volumes for this Story
 StoryRouter.get("/:libraryId/:storyId/volumes",
+    requireRegular,
     async (req: Request, res: Response) => {
         res.send(await StoryServices.volumes(
             parseInt(req.params.libraryId, 10),

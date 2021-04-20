@@ -8,6 +8,7 @@ import {Request, Response, Router} from "express";
 
 // Internal Modules ----------------------------------------------------------
 
+import {requireSuperuser} from "../oauth/oauth-middleware";
 import UserServices from "../services/UserServices";
 
 // Public Objects ------------------------------------------------------------
@@ -22,6 +23,7 @@ export default UserRouter;
 
 // GET /active - Find active Users
 UserRouter.get("/active",
+    requireSuperuser,
     async (req: Request, res: Response) => {
         res.send(await UserServices.active(
             req.query
@@ -30,6 +32,7 @@ UserRouter.get("/active",
 
 // GET /exact/:name - Find User by exact name
 UserRouter.get("/exact/:name",
+    requireSuperuser,
     async (req: Request, res: Response) => {
         res.send(await UserServices.exact(
             req.params.name,
@@ -39,6 +42,7 @@ UserRouter.get("/exact/:name",
 
 // GET /name/:name - Find Users by name match
 UserRouter.get("/name/:name",
+    requireSuperuser,
     async (req: Request, res: Response) => {
         res.send(await UserServices.name(
             req.params.name,
@@ -50,6 +54,7 @@ UserRouter.get("/name/:name",
 
 // GET / - Find all Users
 UserRouter.get("/",
+    requireSuperuser,
     async (req: Request, res: Response) => {
         res.send(await UserServices.all(
             req.query
@@ -58,6 +63,7 @@ UserRouter.get("/",
 
 // POST / - Insert a new User
 UserRouter.post("/",
+    requireSuperuser,
     async (req: Request, res: Response) => {
         res.send(await UserServices.insert(
             req.body
@@ -66,6 +72,7 @@ UserRouter.post("/",
 
 // DELETE /:userId - Remove User by ID
 UserRouter.delete("/:userId",
+    requireSuperuser,
     async (req: Request, res: Response) => {
         res.send(await UserServices.remove(
             parseInt(req.params.userId, 10)
@@ -74,6 +81,7 @@ UserRouter.delete("/:userId",
 
 // GET /:userId - Find User by ID
 UserRouter.get("/:userId",
+    requireSuperuser,
     async (req: Request, res: Response) => {
         console.info("Begin UserServices.find(" + req.params.userId + ")");
         res.send(await UserServices.find(
@@ -85,6 +93,7 @@ UserRouter.get("/:userId",
 
 // PUT /:userId - Update User by ID
 UserRouter.put("/:userId",
+    requireSuperuser,
     async (req: Request, res: Response) => {
         res.send(await UserServices.update(
             parseInt(req.params.userId, 10),

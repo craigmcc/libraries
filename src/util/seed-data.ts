@@ -27,7 +27,7 @@ export const LIBRARIES: Partial<Library>[] = [
     },
     {
         name: SECOND_LIBRARY,
-        scope: "extra",
+        scope: "test",
     },
 ];
 
