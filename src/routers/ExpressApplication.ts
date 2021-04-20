@@ -28,7 +28,7 @@ const app = express();
 app.use(cors({
     origin: "*"
 }));
-app.use(morgan(process.env.NODE_ENV === "development" ? "dev" : "combined"));
+app.use(morgan("combined"));
 
 // Configure body handling middleware
 app.use(bodyParser.json({
