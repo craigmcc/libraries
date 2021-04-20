@@ -17,6 +17,8 @@ import Series from "../models/Series";
 import Story from "../models/Story";
 import Volume from "../models/Volume";
 import SeriesStory from "../models/SeriesStory";
+import {hashPassword} from "../oauth/oauth-utils";
+import User from "../models/User";
 
 // Public Objects ------------------------------------------------------------
 
@@ -48,6 +50,7 @@ export const reloadTestData = async (): Promise<void> => {
     const stories1: Story[] = await reloadStories(libraries[1], SeedData.STORIES_LIBRARY1);
     const volumes0: Volume[] = await reloadVolumes(libraries[0], SeedData.VOLUMES_LIBRARY0);
     const volumes1: Volume[] = await reloadVolumes(libraries[1], SeedData.VOLUMES_LIBRARY1);
+    const user: User = await reloadUser();
 
     // Establish many-many relationships (requires knowledge of seed data content)
 
@@ -179,6 +182,25 @@ const reloadStories
     }
 //    console.info("Reloading Stories Results:", results);
     return results;
+}
+
+const reloadUser = async (): Promise<User> => {
+    const found = await User.findOne({
+        where: { username: "superuser" }
+    });
+    if (found) {
+        return found;
+    }
+    const SUPERUSER_PASSWORD = process.env.SUPERUSER_PASSWORD
+        ? process.env.SUPERUSER_PASSWORD
+        : "superuser";
+    const user: Partial<User> = {
+        active: true,
+        password: await hashPassword(SUPERUSER_PASSWORD),
+        scope: "superuser",
+        username: "superuser",
+    }
+    return await User.create(user);
 }
 
 const reloadVolumes

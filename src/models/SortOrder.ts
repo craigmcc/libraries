@@ -28,6 +28,10 @@ export const STORIES: Order = [
     [ "name", "ASC" ],
 ];
 
+export const USERS: Order = [
+    [ "username", "ASC" ],
+];
+
 export const VOLUMES: Order = [
     [ "library_id", "ASC" ],
     [ "name", "ASC" ],

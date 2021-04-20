@@ -559,10 +559,8 @@ ALTER SEQUENCE public.stories_library_id_seq OWNED BY public.stories.library_id;
 CREATE TABLE public.users (
     id integer NOT NULL,
     active boolean DEFAULT true NOT NULL,
-    level text DEFAULT 'info'::text NOT NULL,
-    library_id integer NOT NULL,
-    notes text,
     password text NOT NULL,
+    scope text NOT NULL,
     username text NOT NULL
 );
 
@@ -585,26 +583,6 @@ CREATE SEQUENCE public.users_id_seq
 --
 
 ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
-
-
---
--- Name: users_library_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.users_library_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: users_library_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.users_library_id_seq OWNED BY public.users.library_id;
 
 
 --
@@ -875,13 +853,6 @@ ALTER TABLE ONLY public.stories ALTER COLUMN library_id SET DEFAULT nextval('pub
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
-
-
---
--- Name: users library_id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.users ALTER COLUMN library_id SET DEFAULT nextval('public.users_library_id_seq'::regclass);
 
 
 --
@@ -1205,14 +1176,6 @@ ALTER TABLE ONLY public.series_stories
 
 ALTER TABLE ONLY public.stories
     ADD CONSTRAINT fk_stories_library_id FOREIGN KEY (library_id) REFERENCES public.libraries(id) ON UPDATE CASCADE ON DELETE CASCADE;
-
-
---
--- Name: users fk_users_library_id; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.users
-    ADD CONSTRAINT fk_users_library_id FOREIGN KEY (library_id) REFERENCES public.libraries(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --

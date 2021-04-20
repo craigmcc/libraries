@@ -17,6 +17,7 @@ import Library from "./Library";
 import Series from "./Series";
 import SeriesStory from "./SeriesStory";
 import Story from "./Story";
+import User from "./User";
 import Volume from "./Volume";
 import VolumeStory from "./VolumeStory";
 
@@ -53,6 +54,7 @@ Database.addModels([
     Series,
     SeriesStory,
     Story,
+    User,
     Volume,
     VolumeStory,
 ]);

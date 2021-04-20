@@ -13,6 +13,7 @@ import {Op} from "sequelize";
 
 import Author from "../models/Author";
 import Library from "../models/Library";
+import User from "../models/User";
 
 // Public Objects ------------------------------------------------------------
 
@@ -107,6 +108,32 @@ export const validateLibraryScopeUnique
             }
         }
         let results = await Library.findAll(options);
+        return (results.length === 0);
+    } else {
+        return true;
+    }
+}
+
+export const validateUserUsernameUnique
+    = async (user: User): Promise<boolean> =>
+{
+    if (user) {
+        let options = {};
+        if (user.id && (user.id > 0)) {
+            options = {
+                where: {
+                    id: {[Op.ne]: user.id},
+                    username: user.username
+                }
+            }
+        } else {
+            options = {
+                where: {
+                    username: user.username
+                }
+            }
+        }
+        let results = await User.findAll(options);
         return (results.length === 0);
     } else {
         return true;
