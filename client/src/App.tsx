@@ -15,6 +15,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 // Internal Modules ----------------------------------------------------------
 
+import LoggedInUser from "./components/LoggedInUser";
 import {LoginContextProvider} from "./contexts/LoginContext";
 import HomeView from "./views/HomeView";
 //import UsersView from "./views/Users";
@@ -67,13 +68,12 @@ function App() {
                         </Nav>
                     </Navbar.Collapse>
 
-{/*
                     <LoggedInUser/>
                     <span className="mr-4"/>
+                    <strong>LibrarySelector</strong>
+                    {/*
                     <LibrarySelector/>
 */}
-
-                    <strong>LoggedInUser and LibrarySelector</strong>
 
                 </Navbar>
 
