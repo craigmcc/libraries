@@ -9,7 +9,7 @@ import axios, { AxiosInstance } from "axios";
 
 // Internal Modules ----------------------------------------------------------
 
-import {CURRENT_ACCESS_TOKEN, CURRENT_USERNAME} from "../contexts/LoginContext";
+import {CURRENT_TOKEN, CURRENT_USER} from "../contexts/LoginContext";
 
 // Private Objects -----------------------------------------------------------
 
@@ -23,11 +23,11 @@ const ApiBase: AxiosInstance = axios.create({
 });
 
 ApiBase.interceptors.request.use(function (config) {
-    if (CURRENT_ACCESS_TOKEN) {
-        config.headers["Authorization"] = `Bearer ${CURRENT_ACCESS_TOKEN}`;
+    if (CURRENT_TOKEN && CURRENT_TOKEN.access_token) {
+        config.headers["Authorization"] = `Bearer ${CURRENT_TOKEN.access_token}`;
     }
-    if (CURRENT_USERNAME) {
-        config.headers["X-LIB-Username"] = CURRENT_USERNAME;
+    if (CURRENT_USER) {
+        config.headers["X-LIB-Username"] = CURRENT_USER.username;
     }
     return config;
 })

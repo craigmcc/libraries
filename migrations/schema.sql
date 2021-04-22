@@ -561,7 +561,8 @@ CREATE TABLE public.users (
     active boolean DEFAULT true NOT NULL,
     password text NOT NULL,
     scope text NOT NULL,
-    username text NOT NULL
+    username text NOT NULL,
+    level text DEFAULT 'info'::text NOT NULL
 );
 
 

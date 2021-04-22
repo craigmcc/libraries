@@ -49,11 +49,11 @@ export default LoginContext;
 // Context Provider ----------------------------------------------------------
 
 // For use by HTTP clients to include in their requests
-export let CURRENT_ACCESS_TOKEN: string | null = null;
-export let CURRENT_REFRESH_TOKEN: string | null = null;
-export let CURRENT_SCOPE: string | null = null;
+export let CURRENT_TOKEN: TokenResponse | null = null;
 export let CURRENT_USER: User | null = null;
-export let CURRENT_USERNAME: string | null = null;
+
+// For validateScope checks against allowed scopes for this access token
+let CURRENT_ALLOWED: string[] = [];
 
 export const LoginContextProvider = (props: any) => {
 
@@ -84,12 +84,9 @@ export const LoginContextProvider = (props: any) => {
             username: newUsername,
         });
 
-        CURRENT_ACCESS_TOKEN = tokenResponse.access_token;
-        CURRENT_REFRESH_TOKEN =
-            tokenResponse.refresh_token ? tokenResponse.refresh_token : null;
-        CURRENT_SCOPE = tokenResponse.scope;
-        CURRENT_USERNAME = newUsername;
-
+        CURRENT_ALLOWED = tokenResponse.scope
+            ? tokenResponse.scope.split(" ") : [];
+        CURRENT_TOKEN = tokenResponse;
         CURRENT_USER = await OAuthClient.me();
         if (CURRENT_USER && CURRENT_USER.level) {
             setLevel(CURRENT_USER.level);
@@ -98,11 +95,13 @@ export const LoginContextProvider = (props: any) => {
                 username: CURRENT_USER.username,
                 level: CURRENT_USER.level,
             });
+        } else {
+            setLevel("info");
         }
 
     }
 
-    const handleLogout = (): void => {
+    const handleLogout = async (): Promise<void> => {
 
         logger.info({
             context: "LoginContext.handleLogout",
@@ -116,11 +115,8 @@ export const LoginContextProvider = (props: any) => {
         setScope(null);
         setUsername(null);
 
-        CURRENT_ACCESS_TOKEN = null;
-        CURRENT_REFRESH_TOKEN = null;
-        CURRENT_SCOPE = null;
-        CURRENT_USERNAME = null;
-
+        CURRENT_ALLOWED = [];
+        CURRENT_TOKEN = null;
         CURRENT_USER = null;
         setLevel("info");
 
@@ -129,42 +125,35 @@ export const LoginContextProvider = (props: any) => {
     // Return true if there is a logged in user that has the required
     // scope being requested
     const validateScope = (required: string): boolean => {
-        if (loggedIn && CURRENT_SCOPE) {
-            // Handle superuser scope
-            if (CURRENT_SCOPE.includes("superuser")) {
-                return true;
-            }
-            // Handle request for logged in user with any scope
-            if (required === "") {
-                return true;
-            }
-            // Otherwise, check required scope versus allowed scope
-            let requiredScopes: string[]
-                = required ? required.split(" ") : [];
-            if (requiredScopes.length === 0) {
-                return true;
-            }
-            let allowedScopes: string[]
-                = CURRENT_SCOPE ? CURRENT_SCOPE.split(" ") : [];
-            if (allowedScopes.length === 0) {
-                return false;
-            }
-            let result = true;
-            requiredScopes.forEach(requiredScope => {
-                let match: boolean = false;
-                allowedScopes.forEach(allowedScope => {
-                    if (requiredScope === allowedScope) {
-                        match = true;
-                    }
-                });
-                if (!match) {
-                    result = false;
-                }
-            });
-            return result;
-        } else {
+
+        // Users not logged in will never pass scope requirements
+        if (!loggedIn) {
             return false;
         }
+
+        // Handle superuser scope
+        if (CURRENT_ALLOWED.includes("superuser")) {
+            return true;
+        }
+
+        // Handle request for logged in user with any scope
+        if (required === "") {
+            return true;
+        }
+
+        // Otherwise, check required scope versus allowed scope
+        let requiredScopes: string[]
+            = required ? required.split(" ") : [];
+        if (requiredScopes.length === 0) {
+            return true;
+        }
+        requiredScopes.forEach(requiredScope => {
+            if (!CURRENT_ALLOWED.includes(requiredScope)) {
+                return false;
+            }
+        });
+        return true;
+
     }
 
     // Create the context object

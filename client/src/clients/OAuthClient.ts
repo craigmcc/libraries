@@ -12,7 +12,7 @@ import OAuthBase from "./OAuthBase";
 import PasswordTokenRequest from "../models/PasswordTokenRequest";
 import RefreshTokenRequest from "../models/RefreshTokenRequest";
 
-import {CURRENT_ACCESS_TOKEN, CURRENT_USERNAME} from "../contexts/LoginContext";
+import {CURRENT_TOKEN, CURRENT_USER} from "../contexts/LoginContext";
 
 // Public Objects ------------------------------------------------------------
 
@@ -21,8 +21,10 @@ class OAuthClient {
     async me<User>(): Promise<User> {
         return (await OAuthBase.get("/token", {
             headers: {
-                "Authorization": `Bearer ${CURRENT_ACCESS_TOKEN}`,
-                "X-LIB-Username": CURRENT_USERNAME,
+                "Authorization": (CURRENT_TOKEN && CURRENT_TOKEN.access_token)
+                    ? `Bearer ${CURRENT_TOKEN.access_token}` : undefined,
+                "X-LIB-Username": (CURRENT_USER && CURRENT_USER.username)
+                    ? `${CURRENT_USER.username}` : undefined,
             }
         })).data;
     }
@@ -53,8 +55,10 @@ class OAuthClient {
     async revoke(): Promise<void> {
         await OAuthBase.delete(`/token`, {
             headers: {
-                "Authorization": `Bearer ${CURRENT_ACCESS_TOKEN}`,
-                "X-CTG-Username": CURRENT_USERNAME,
+                "Authorization": (CURRENT_TOKEN && CURRENT_TOKEN.access_token)
+                    ? `Bearer ${CURRENT_TOKEN.access_token}` : undefined,
+                "X-LIB-Username": (CURRENT_USER && CURRENT_USER.username)
+                    ? `${CURRENT_USER.username}` : undefined,
             }
         });
     }
