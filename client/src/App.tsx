@@ -16,6 +16,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 // Internal Modules ----------------------------------------------------------
 
 import LoggedInUser from "./components/LoggedInUser";
+import {LibraryContextProvider} from "./contexts/LibraryContext";
 import {LoginContextProvider} from "./contexts/LoginContext";
 import HomeView from "./views/HomeView";
 //import UsersView from "./views/Users";
@@ -26,6 +27,7 @@ function App() {
     return (
 
         <LoginContextProvider>
+        <LibraryContextProvider>
 
             <Router>
 
@@ -90,6 +92,7 @@ function App() {
 
             </Router>
 
+        </LibraryContextProvider>
         </LoginContextProvider>
 
     );

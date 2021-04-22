@@ -8,9 +8,11 @@ import React from "react";
 
 // Internal Modules ----------------------------------------------------------
 
-//import User from "../models/User";
+import Library from "../models/Library";
 
-// Data Object Handlers ------------------------------------------------------
+// Model Object Handlers -----------------------------------------------------
+
+export type HandleLibrary = (library: Library) => void;
 
 // HTML Event Handlers -------------------------------------------------------
 
@@ -22,6 +24,10 @@ export type OnChangeTextArea = (event: React.ChangeEvent<HTMLTextAreaElement>) =
 export type OnClick = (event: React.MouseEvent<HTMLElement>) => void;
 export type OnFocus = (event: React.FocusEvent<HTMLElement>) => void;
 export type OnKeyDown = (event: React.KeyboardEvent<HTMLElement>) => void;
+
+// Miscellaneous Handlers ----------------------------------------------------
+
+export type HandleFlag = (flag: boolean) => void;
 
 // Enumerations --------------------------------------------------------------
 

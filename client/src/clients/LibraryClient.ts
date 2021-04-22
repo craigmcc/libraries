@@ -27,7 +27,7 @@ class LibraryClient {
             + `${queryParameters(params)}`)).data;
     }
 
-    async authors<Library>(libraryId: number, params?: Object): Promise<Author[]> {
+    async authors(libraryId: number, params?: Object): Promise<Author[]> {
         return (await ApiBase.get(LIBRARIES_BASE
             + `/${libraryId}${queryParameters(params)}`)).data;
     }
@@ -55,7 +55,7 @@ class LibraryClient {
         return (await ApiBase.delete(LIBRARIES_BASE + `/${libraryId}`)).data;
     }
 
-    async series<Library>(libraryId: number, params?: Object): Promise<Series[]> {
+    async series(libraryId: number, params?: Object): Promise<Series[]> {
         return (await ApiBase.get(LIBRARIES_BASE
             + `/${libraryId}${queryParameters(params)}`)).data;
     }
@@ -65,7 +65,7 @@ class LibraryClient {
             + `/scope/${scope}${queryParameters(params)}`)).data;
     }
 
-    async stories<Library>(libraryId: number, params?: Object): Promise<Story[]> {
+    async stories(libraryId: number, params?: Object): Promise<Story[]> {
         return (await ApiBase.get(LIBRARIES_BASE
             + `/${libraryId}${queryParameters(params)}`)).data;
     }
@@ -75,7 +75,7 @@ class LibraryClient {
             + `/${libraryId}`, library)).data;
     }
 
-    async volumes<Library>(libraryId: number, params?: Object): Promise<Volume[]> {
+    async volumes(libraryId: number, params?: Object): Promise<Volume[]> {
         return (await ApiBase.get(LIBRARIES_BASE
             + `/${libraryId}${queryParameters(params)}`)).data;
     }
