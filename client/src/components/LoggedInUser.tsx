@@ -12,13 +12,13 @@ import { useHistory } from "react-router-dom";
 
 // Internal Modules ----------------------------------------------------------
 
+import OAuthClient from "../clients/OAuthClient";
 import LoginContext from "../contexts/LoginContext";
 import LoginForm from "../forms/LoginForm";
 import Credentials from "../models/Credentials";
 import PasswordTokenRequest from "../models/PasswordTokenRequest";
 import TokenResponse from "../models/TokenResponse";
-import OAuthClient from "../clients/OAuthClient";
-//import logger from "../util/client-logger";
+import logger from "../util/client-logger";
 import ReportError from "../util/ReportError";
 
 // Component Details ---------------------------------------------------------
@@ -41,32 +41,48 @@ export const LoggedInUser = () => {
             username: credentials.username,
         }
         try {
+            logger.info({
+                context: "LoggedInUser.handleLogin",
+                msg: "Processing credentials",
+                username: credentials.username
+            });
             const tokenResponse: TokenResponse = await OAuthClient.password(tokenRequest);
             setShowCredentials(false);
             loginContext.handleLogin(credentials.username, tokenResponse);
-/*
             logger.info({
-                 context: "LoggedInUser.handleLogin",
-                 username: credentials.username,
+                context: "LoggedInUser.handleLogin",
+
+                msg: "Successfully logged in",
+                tokenResponse: JSON.stringify(tokenResponse),
             });
-*/
         } catch (error) {
             ReportError("LoggedInUser.handleLogin", error);
         }
     }
 
-    const handleLogout = async () => {
+    const handleLogout = async (): Promise<void> => {
         try {
-//            const loggedOutUsername = loginContext.username;
-            await OAuthClient.revoke();
-            loginContext.handleLogout();
-            history.push("/home");
-/*
             logger.info({
                 context: "LoggedInUser.handleLogout",
-                username: loggedOutUsername,
-            });
-*/
+                msg: "Received logout click",
+                access_token: `${loginContext.accessToken}`,
+                username: `${loginContext.username}`,
+            })
+            await OAuthClient.revoke();
+            logger.info({
+                context: "LoggedInUser.handleLogout",
+                msg: "Revoked access token",
+                access_token: `${loginContext.accessToken}`,
+                username: `${loginContext.username}`,
+            })
+            loginContext.handleLogout();
+            logger.info({
+                context: "LoggedInUser.handleLogout",
+                msg: "Updated context",
+                access_token: `${loginContext.accessToken}`,
+                username: `${loginContext.username}`,
+            })
+            history.push("/home");
         } catch (error) {
             ReportError("LoggedInUser.handleLogout", error);
         }

@@ -66,6 +66,13 @@ export const LoginContextProvider = (props: any) => {
 
     const handleLogin = async (newUsername: string, tokenResponse: TokenResponse): Promise<void> => {
 
+        logger.info({
+            context: "LoginContext.handleLogin",
+            username: newUsername,
+            tokenResponse: JSON.stringify(tokenResponse),
+        })
+
+        // Set relevant state variables
         setAccessToken(tokenResponse.access_token);
         const newExpires: Date = new Date
             ((new Date()).getTime() + (tokenResponse.expires_in * 1000));
@@ -79,11 +86,7 @@ export const LoginContextProvider = (props: any) => {
         setScope(tokenResponse.scope);
         setUsername(newUsername);
 
-        logger.info({
-            context: "LoginContext.handleLogin",
-            username: newUsername,
-        });
-
+        // Set global statics for HTTP clients
         CURRENT_ALLOWED = tokenResponse.scope
             ? tokenResponse.scope.split(" ") : [];
         CURRENT_TOKEN = tokenResponse;

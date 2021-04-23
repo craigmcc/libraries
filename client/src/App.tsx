@@ -19,6 +19,7 @@ import LoggedInUser from "./components/LoggedInUser";
 import {LibraryContextProvider} from "./contexts/LibraryContext";
 import {LoginContextProvider} from "./contexts/LoginContext";
 import HomeView from "./views/HomeView";
+import LibrarySelector from "./components/LibrarySelector";
 //import UsersView from "./views/Users";
 
 // Component Details ---------------------------------------------------------
@@ -72,10 +73,7 @@ function App() {
 
                     <LoggedInUser/>
                     <span className="mr-4"/>
-                    <strong>LibrarySelector</strong>
-                    {/*
                     <LibrarySelector/>
-*/}
 
                 </Navbar>
 

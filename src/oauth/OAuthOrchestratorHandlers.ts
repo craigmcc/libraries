@@ -25,6 +25,7 @@ import OAuthRefreshToken from "./OAuthRefreshToken";
 import {generateRandomToken, verifyPassword} from "./oauth-utils";
 import OAuthUser from "../models/User";
 import {NotFound} from "../util/http-errors";
+import logger from "../util/server-logger";
 
 // Private Objects -----------------------------------------------------------
 
@@ -47,7 +48,7 @@ const authenticateUser: AuthenticateUser
         // Creative subterfuge to not give anything away
         throw new NotFound(
             "username: Invalid or missing username or password",
-            "OAuthOrchestratorHandlers.authenticateUser()"
+            "OAuthOrchestratorHandlers.authenticateUser"
         );
     }
 
@@ -56,7 +57,7 @@ const authenticateUser: AuthenticateUser
         // Creative subterfuge to not give anything away
         throw new NotFound(
             "username: Missing or invalid username or password",
-            "OAuthOrchestratorHandlers.authenticateUser()"
+            "OAuthOrchestratorHandlers.authenticateUser"
         );
     }
 
@@ -188,6 +189,11 @@ const retrieveRefreshToken: RetrieveRefreshToken
 const revokeAccessToken: RevokeAccessToken = async (token: string): Promise<void> => {
 
     // Look up the specified token
+    logger.info({
+        context: "OAuthOrchestratorHandlers.revokeAccessToken",
+        msg: "Looking up access token",
+        token: token
+    });
 /*
     const oauthAccessToken: OAuthAccessToken | null
         = await OAuthAccessToken.findOne({
@@ -195,6 +201,11 @@ const revokeAccessToken: RevokeAccessToken = async (token: string): Promise<void
     });
 */
     const oauthAccessToken = await OAuthAccessToken.lookup(token);
+    logger.info({
+        context: "OAuthOrchestratorHandlers.revokeAccessToken",
+        msg: "Found OAuthAccessToken",
+        oauthAccessToken: oauthAccessToken ? JSON.stringify(oauthAccessToken) : "null"
+    })
     if (!oauthAccessToken) {
         throw new NotFound(
             "token: Missing or invalid token",
@@ -216,6 +227,11 @@ const revokeAccessToken: RevokeAccessToken = async (token: string): Promise<void
     });
 */
     await OAuthAccessToken.destroy(token);
+    logger.info({
+        context: "OAuthOrchestratorHandlers.revokeAccessToken",
+        msg: "Destroyed oauthAccessToken",
+        oauthAccessToken: oauthAccessToken ? JSON.stringify(oauthAccessToken) : "null"
+    })
 
 }
 

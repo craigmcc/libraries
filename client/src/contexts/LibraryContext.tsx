@@ -66,6 +66,7 @@ export const LibraryContextProvider = (props: any) => {
                         context: "LibraryContext.fetchLibraries",
                         countAvailable: newLibraries.length,
                         countActive: activeLibraries.length,
+                        libraries: newLibraries,
                     });
                 } else {
                     logger.info({               // TODO - debug
@@ -91,15 +92,23 @@ export const LibraryContextProvider = (props: any) => {
     }, [loginContext]);
 
     const doSelect: HandleLibrary = (newLibrary: Library) => {
+        logger.info({
+            context: "LibraryContext.doSelect",
+            msg: `Checking id ${newLibrary.id} against ${JSON.stringify(libraries)}`
+        });
+        let found = false;
         libraries.forEach(library => {
             if (library.id === newLibrary.id) {
                 setLibrary(newLibrary);
-                logger.warn({
-                    context: "LibraryContext.doSelect",
-                    msg: `Skipped invalid newLibrary.id ${newLibrary.id}`
-                });
+                found = true;
             }
         })
+        if (!found) {
+            logger.warn({
+                context: "LibraryContext.doSelect",
+                msg: `Skipped invalid newLibrary.id ${newLibrary.id}`
+            });
+        }
     }
 
     const libraryContext: LibraryContextData = {
