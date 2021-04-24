@@ -27,7 +27,8 @@ export type OnKeyDown = (event: React.KeyboardEvent<HTMLElement>) => void;
 
 // Miscellaneous Handlers ----------------------------------------------------
 
-export type HandleFlag = (flag: boolean) => void;
+export type HandleFlag = (newFlag: boolean) => void;
+export type HandleIndex = (newIndex: number) => void;
 
 // Enumerations --------------------------------------------------------------
 

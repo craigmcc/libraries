@@ -33,6 +33,12 @@ const authenticateUser: AuthenticateUser
     = async (username: string, password: string): Promise<User> =>
 {
 
+    logger.info({
+        context: "OAuthOrchestratorHandlers.authenticateUser",
+        username: username,
+        password: "*REDACTED*",
+    });
+
     // Look up the specified user
     const oauthUser: OAuthUser | null
         = await OAuthUser.findOne({
@@ -191,7 +197,6 @@ const revokeAccessToken: RevokeAccessToken = async (token: string): Promise<void
     // Look up the specified token
     logger.info({
         context: "OAuthOrchestratorHandlers.revokeAccessToken",
-        msg: "Looking up access token",
         token: token
     });
 /*
@@ -201,11 +206,6 @@ const revokeAccessToken: RevokeAccessToken = async (token: string): Promise<void
     });
 */
     const oauthAccessToken = await OAuthAccessToken.lookup(token);
-    logger.info({
-        context: "OAuthOrchestratorHandlers.revokeAccessToken",
-        msg: "Found OAuthAccessToken",
-        oauthAccessToken: oauthAccessToken ? JSON.stringify(oauthAccessToken) : "null"
-    })
     if (!oauthAccessToken) {
         throw new NotFound(
             "token: Missing or invalid token",
@@ -227,11 +227,6 @@ const revokeAccessToken: RevokeAccessToken = async (token: string): Promise<void
     });
 */
     await OAuthAccessToken.destroy(token);
-    logger.info({
-        context: "OAuthOrchestratorHandlers.revokeAccessToken",
-        msg: "Destroyed oauthAccessToken",
-        oauthAccessToken: oauthAccessToken ? JSON.stringify(oauthAccessToken) : "null"
-    })
 
 }
 

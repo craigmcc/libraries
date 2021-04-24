@@ -46,25 +46,10 @@ export const OAuthTokenRouter = Router({
 OAuthTokenRouter.delete("/",
     requireAny,
     async (req: Request, res: Response) => {
-        logger.info({
-            context: "OAuthTokenRouter.revoke",
-            msg: "Calling OAuthOrchestrator.revoke",
-            token: res.locals.token
-        });
         // Successful request processing stored our token in res.locals.token
         const token: string = res.locals.token;
         if (token) {
-            logger.info({
-                context: "OAuthTokenRouter.revoke",
-                msg: "Started OAuthOrchestrator.revoke",
-                token: token
-            });
             await OAuthOrchestrator.revoke(token);
-            logger.info({
-                context: "OAuthTokenRouter.revoke",
-                msg: "Finished OAuthOrchestrator.revoke",
-                token: token
-            });
             // Any thrown error will get handled by middleware
             res.status(204).send();
         } else {
@@ -79,16 +64,11 @@ OAuthTokenRouter.delete("/",
 OAuthTokenRouter.get("/",
     requireAny,
     async (req: Request, res: Response) => {
-        logger.info({
-            context: "OAuthTokenRouter.me",
-            msg: "Performing lookup",
-            token: res.locals.token
-        });
         const accessToken = await OAuthAccessToken.lookup(res.locals.token);
         if (accessToken) {
             const user = await User.findByPk(accessToken.userId);
             if (user) {
-                user.password = "";
+                user.password = "*REDACTED*";
                 logger.info({
                     context: "OAuthTokenRouter.me",
                     msg: "Returning user",
@@ -135,21 +115,11 @@ OAuthTokenRouter.post("/",
             input.password = "*REDACTED*";
         }
         try {
-            logger.info({
-                context: "OAuthTokenRouter.token",
-                msg: "Authenticating request",
-                input: JSON.stringify(input),
-            })
             const tokenResponse: TokenResponse
                 = await OAuthOrchestrator.token(tokenRequest);
-            logger.info({
-                context: "OAuthTokenRouter.token",
-                msg: "Returning response",
-                output: JSON.stringify(tokenResponse),
-            })
             res.send(tokenResponse);
         } catch (error) {
-            logger.info({
+            logger.error({
                 context: "OAuthTokenRouter.token",
                 input: input,
                 error: error,

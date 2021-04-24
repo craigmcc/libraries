@@ -13,7 +13,6 @@
 
 import LogClient from "../clients/LogClient";
 import {Levels} from "../components/types";
-import {CURRENT_USER} from "../contexts/LoginContext";
 
 // Private Objects -----------------------------------------------------------
 
@@ -30,8 +29,6 @@ LOG_LEVEL_MAP.set(Levels.WARN, 40);
 const write = (object: any, level: number): void => {
     if (level >= LOG_LEVEL) {
         object.level = level;
-        object.login = CURRENT_USER && CURRENT_USER.username
-            ? CURRENT_USER.username : undefined;
         LogClient.log(object);
     }
 }

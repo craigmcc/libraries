@@ -15,14 +15,19 @@ import LibraryClient from "../clients/LibraryClient";
 import Library from "../models/Library";
 import logger from "../util/client-logger";
 import ReportError from "../util/ReportError";
-import {HandleLibrary} from "../components/types";
+import {HandleIndex} from "../components/types";
 
 // Context Properties --------------------------------------------------------
 
+export type LibraryContextState = {
+    index: number;                      // Index to currently selected Library
+    libraries: Library[];               // Libraries visible to this User
+    library: Library;                   // Currently selected Library or dummy
+}
+
 export type LibraryContextData = {
-    libraries: Library[];               // Libraries visible to this user
-    library: Library;                   // Currently selected library (or dummy)
-    doSelect: HandleLibrary;            // Select new current library
+    state: LibraryContextState;
+    doSelect: HandleIndex;              // Select new current library
 }
 
 const DUMMY_LIBRARY: Library = {
@@ -33,10 +38,15 @@ const DUMMY_LIBRARY: Library = {
     scope: "",
 };
 
-export const LibraryContext = createContext<LibraryContextData>({
+const DUMMY_STATE: LibraryContextState = {
+    index: -1,
     libraries: [],
     library: DUMMY_LIBRARY,
-    doSelect: (library: Library): void => {},
+}
+
+export const LibraryContext = createContext<LibraryContextData>({
+    state: DUMMY_STATE,
+    doSelect: (newIndex: number): void => {},
 });
 
 export default LibraryContext;
@@ -47,43 +57,44 @@ export const LibraryContextProvider = (props: any) => {
 
     const loginContext = useContext(LoginContext);
 
-    const [libraries, setLibraries] = useState<Library[]>([]);
-    const [library, setLibrary] = useState<Library>(DUMMY_LIBRARY);
+    const [state, setState] = useState<LibraryContextState>(DUMMY_STATE);
 
     useEffect(() => {
 
         const fetchLibraries = async () => {
             try {
                 const newLibraries: Library[] = [];
-                if (loginContext.loggedIn) {
+                if (loginContext.state.loggedIn) {
                     const activeLibraries: Library[] = await LibraryClient.active();
                     activeLibraries.forEach(activeLibrary => {
                         if (loginContext.validateScope(activeLibrary.scope)) {
                             newLibraries.push(activeLibrary);
                         }
                     })
-                    logger.info({               // TODO - debug
+                    logger.info({
                         context: "LibraryContext.fetchLibraries",
                         countAvailable: newLibraries.length,
                         countActive: activeLibraries.length,
-                        libraries: newLibraries,
+//                        libraries: newLibraries,
                     });
                 } else {
-                    logger.info({               // TODO - debug
+                    logger.info({
                         context: "LibraryContext.fetchLibraries",
                         msg: "SKIPPED",
                     });
                 }
-                setLibraries(newLibraries);
-                if (newLibraries.length > 0) {
-                    setLibrary(newLibraries[0]);
-                } else {
-                    setLibrary(DUMMY_LIBRARY);
-                }
+                setState({
+                    index: newLibraries.length > 0 ? 0 : -1,
+                    libraries: newLibraries,
+                    library: newLibraries.length > 0 ? newLibraries[0] : DUMMY_LIBRARY
+                });
             } catch (error) {
                 ReportError("LibraryContext.fetchLibraries", error);
-                setLibraries([]);
-                setLibrary(DUMMY_LIBRARY);
+                setState({
+                    index: -1,
+                    libraries: [],
+                    library: DUMMY_LIBRARY,
+                })
             }
         }
 
@@ -91,29 +102,25 @@ export const LibraryContextProvider = (props: any) => {
 
     }, [loginContext]);
 
-    const doSelect: HandleLibrary = (newLibrary: Library) => {
+    const doSelect: HandleIndex = (newIndex: number) => {
+        const newState = state;
+        if ((newIndex >= 0) && (newIndex < state.libraries.length)) {
+            newState.index = newIndex;
+            newState.library = newState.libraries[newIndex];
+        } else {
+            newState.index = -1;
+            newState.library = DUMMY_LIBRARY
+        }
         logger.info({
             context: "LibraryContext.doSelect",
-            msg: `Checking id ${newLibrary.id} against ${JSON.stringify(libraries)}`
+            index: newState.index,
+            library: newState.library,
         });
-        let found = false;
-        libraries.forEach(library => {
-            if (library.id === newLibrary.id) {
-                setLibrary(newLibrary);
-                found = true;
-            }
-        })
-        if (!found) {
-            logger.warn({
-                context: "LibraryContext.doSelect",
-                msg: `Skipped invalid newLibrary.id ${newLibrary.id}`
-            });
-        }
+        setState(newState);
     }
 
     const libraryContext: LibraryContextData = {
-        libraries: libraries,
-        library: library,
+        state: state,
         doSelect: doSelect
     }
 

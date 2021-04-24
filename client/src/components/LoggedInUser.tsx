@@ -32,7 +32,7 @@ export const LoggedInUser = () => {
 
     useEffect(() => {
         // Just trigger rerender when login or logout occurs
-    }, [loginContext.loggedIn])
+    }, [loginContext])
 
     const handleLogin = async (credentials: Credentials) => {
         const tokenRequest: PasswordTokenRequest = {
@@ -44,12 +44,13 @@ export const LoggedInUser = () => {
             logger.info({
                 context: "LoggedInUser.handleLogin",
                 msg: "Processing credentials",
-                username: credentials.username
+                username: credentials.username,
+                password: "*REDACTED*",
             });
             const tokenResponse: TokenResponse = await OAuthClient.password(tokenRequest);
             setShowCredentials(false);
             loginContext.handleLogin(credentials.username, tokenResponse);
-            logger.info({
+            logger.debug({
                 context: "LoggedInUser.handleLogin",
 
                 msg: "Successfully logged in",
@@ -65,22 +66,22 @@ export const LoggedInUser = () => {
             logger.info({
                 context: "LoggedInUser.handleLogout",
                 msg: "Received logout click",
-                access_token: `${loginContext.accessToken}`,
-                username: `${loginContext.username}`,
+                access_token: `${loginContext.state.accessToken}`,
+                username: `${loginContext.state.username}`,
             })
             await OAuthClient.revoke();
-            logger.info({
+            logger.debug({
                 context: "LoggedInUser.handleLogout",
                 msg: "Revoked access token",
-                access_token: `${loginContext.accessToken}`,
-                username: `${loginContext.username}`,
+                access_token: `${loginContext.state.accessToken}`,
+                username: `${loginContext.state.username}`,
             })
-            loginContext.handleLogout();
-            logger.info({
+            await loginContext.handleLogout();
+            logger.debug({
                 context: "LoggedInUser.handleLogout",
                 msg: "Updated context",
-                access_token: `${loginContext.accessToken}`,
-                username: `${loginContext.username}`,
+                access_token: `${loginContext.state.accessToken}`,
+                username: `${loginContext.state.username}`,
             })
             history.push("/home");
         } catch (error) {
@@ -102,7 +103,7 @@ export const LoggedInUser = () => {
             {/* Logged In Display and Controls */}
             <Form inline>
                     <Form.Label htmlFor="loggedInUsername">
-                        {(loginContext.loggedIn) ? (
+                        {(loginContext.state.loggedIn) ? (
                             <Button
                                 className="mr-2"
                                 onClick={handleLogout}
@@ -132,7 +133,7 @@ export const LoggedInUser = () => {
                         id="loggedInUsername"
                         readOnly={true}
                         size="sm"
-                        value={loginContext.username ? loginContext.username : "-----"}
+                        value={loginContext.state.username ? loginContext.state.username : "-----"}
                     />
 
             </Form>
