@@ -15,7 +15,7 @@ const LIBRARIES_BASE = "/libraries";
 
 // Public Objects ------------------------------------------------------------
 
-class LibraryClient {
+export class LibraryClient {
 
     async active<Library>(params?: object): Promise<Library[]> {
         return (await ApiBase.get(LIBRARIES_BASE

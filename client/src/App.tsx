@@ -15,12 +15,12 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 // Internal Modules ----------------------------------------------------------
 
+import LibrarySelector from "./components/LibrarySelector";
 import LoggedInUser from "./components/LoggedInUser";
 import {LibraryContextProvider} from "./contexts/LibraryContext";
 import {LoginContextProvider} from "./contexts/LoginContext";
 import HomeView from "./views/HomeView";
-import LibrarySelector from "./components/LibrarySelector";
-//import UsersView from "./views/Users";
+import UsersView from "./views/UsersView";
 
 // Component Details ---------------------------------------------------------
 
@@ -78,11 +78,9 @@ function App() {
                 </Navbar>
 
                 <Switch>
-{/*
                     <Route exact path="/users">
                         <UsersView/>
                     </Route>
-*/}
                     <Route path="/">
                         <HomeView/>
                     </Route>

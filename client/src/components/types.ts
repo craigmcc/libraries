@@ -9,10 +9,13 @@ import React from "react";
 // Internal Modules ----------------------------------------------------------
 
 import Library from "../models/Library";
+import User from "../models/User";
 
 // Model Object Handlers -----------------------------------------------------
 
 export type HandleLibrary = (library: Library) => void;
+export type HandleUser = (user: User) => void;
+export type HandleUserOptional = (user: User | null) => void;
 
 // HTML Event Handlers -------------------------------------------------------
 
