@@ -54,7 +54,7 @@ const UsersView = () => {
             const inserted: User = await UserClient.insert(newUser);
             setRefresh(true);
             setUser(null);
-            logger.debug({
+            logger.trace({
                 context: "UsersView.handleInsert",
                 user: Abridgers.USER(inserted),
             });
@@ -68,7 +68,7 @@ const UsersView = () => {
             const removed: User = await UserClient.remove(newUser.id);
             setRefresh(true);
             setUser(null);
-            logger.debug({
+            logger.trace({
                 context: "UsersView.handleRemove",
                 user: Abridgers.USER(removed),
             });
@@ -82,7 +82,7 @@ const UsersView = () => {
             if (canEdit) {
                 setUser(newUser);
             }
-            logger.debug({
+            logger.trace({
                 context: "UsersView.handleSelect",
                 canEdit: canEdit,
                 canRemove: canRemove,
@@ -90,7 +90,7 @@ const UsersView = () => {
             });
         } else {
             setUser(null);
-            logger.debug({
+            logger.trace({
                 context: "UsersView.handleSelect",
                 msg: "UNSET"
             });
@@ -102,7 +102,7 @@ const UsersView = () => {
             const updated: User = await UserClient.update(newUser.id, newUser);
             setRefresh(true);
             setUser(null);
-            logger.debug({
+            logger.trace({
                 context: "UsersView.handleUpdate",
                 user: Abridgers.USER(updated),
             });
@@ -114,7 +114,7 @@ const UsersView = () => {
     const onAdd = () => {
         const newUser: User = new User();
         setUser(newUser);
-        logger.debug({
+        logger.trace({
             context: "UsersView.onAdd",
             user: newUser
         });
@@ -122,7 +122,7 @@ const UsersView = () => {
 
     const onBack = () => {
         setUser(null);
-        logger.debug({
+        logger.trace({
             context: "UsersView.onBack"
         });
     }
