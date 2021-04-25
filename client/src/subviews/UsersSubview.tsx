@@ -5,7 +5,7 @@
 
 // External Modules ----------------------------------------------------------
 
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import Container from "react-bootstrap/Container";
 import Table from "react-bootstrap/Table";
 
@@ -13,6 +13,7 @@ import Table from "react-bootstrap/Table";
 
 import UserClient from "../clients/UserClient";
 import {HandleIndex, HandleUserOptional} from "../components/types";
+import LoginContext from "../contexts/LoginContext";
 import User from "../models/User";
 import * as Abridgers from "../util/abridgers";
 import logger from "../util/client-logger";
@@ -29,39 +30,50 @@ export interface Props {
 
 const UsersSubview = (props: Props) => {
 
+    const loginContext = useContext(LoginContext);
+
     const [index, setIndex] = useState<number>(-1);
     const [users, setUsers] = useState<User[]>([]);
 
     useEffect(() => {
 
         const fetchUsers = async () => {
-            try {
-                const newUsers: User[] = await UserClient.all();
-                setIndex(-1);
-                setUsers(newUsers);
-                logger.debug({
-                    context: "UsersSubview.fetchUsers",
-                    count: newUsers.length,
-                    users: newUsers,
-                });
-
-            } catch (error) {
-                setIndex(-1);
-                setUsers([]);
-                if (error.response && (error.response.status === 403)) {
+            if (loginContext.state.loggedIn) {
+                try {
+                    const newUsers: User[] = await UserClient.all();
+                    setIndex(-1);
+                    setUsers(newUsers);
                     logger.debug({
                         context: "UsersSubview.fetchUsers",
-                        msg: "FORBIDDEN",
+                        count: newUsers.length,
+                        users: newUsers,
                     });
-                } else {
-                    ReportError("UsersSubview.fetchUsers", error);
+
+                } catch (error) {
+                    setIndex(-1);
+                    setUsers([]);
+                    if (error.response && (error.response.status === 403)) {
+                        logger.debug({
+                            context: "UsersSubview.fetchUsers",
+                            msg: "FORBIDDEN",
+                        });
+                    } else {
+                        ReportError("UsersSubview.fetchUsers", error);
+                    }
                 }
+            } else {
+                setIndex(-1);
+                setUsers([]);
+                logger.debug({
+                    context: "UsersSubview.fetchUsers",
+                    msg: "SKIPPED",
+                });
             }
         }
 
         fetchUsers();
 
-    }, []);
+    }, [loginContext]);
 
     const handleIndex: HandleIndex = (newIndex) => {
         if (newIndex === index) {

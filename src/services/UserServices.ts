@@ -92,13 +92,17 @@ export class UserServices extends AbstractServices<User> {
     }
 
     public async update(userId: number, user: User): Promise<User> {
+        const original = await User.findByPk(userId);
+        if (!original) {
+            throw new NotFound(`userId: Missing user ID ${userId}`);
+        }
         const updatedUser: Partial<User> = {
             ...user
         }
         if (user.password && (user.password.length > 0)) {
             updatedUser.password = await hashPassword(user.password);
         } else {
-            updatedUser.password = user.password;
+            updatedUser.password = original.password;
         }
         let transaction;
         try {
@@ -111,14 +115,12 @@ export class UserServices extends AbstractServices<User> {
             });
             await transaction.commit();
             transaction = null;
-            if (results[0] === 1) {
-                results[1][0].password = "";
-                return results[1][0];
-            } else {
+            if (results[0] < 1) {
                 throw new NotFound(
                     `userId: Cannot update User ${userId}`,
                     "UserServices.update()");
             }
+            return await this.find(userId);
         } catch (error) {
             if (transaction) {
                 await transaction.rollback();
