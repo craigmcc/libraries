@@ -34,8 +34,9 @@ export type OnKeyDown = (event: React.KeyboardEvent<HTMLElement>) => void;
 
 // Miscellaneous Handlers ----------------------------------------------------
 
-export type HandleFlag = (newFlag: boolean) => void;
+export type HandleBoolean = (newBoolean: boolean) => void;
 export type HandleIndex = (newIndex: number) => void;
+export type HandleValue = (newValue: string) => void;
 
 // Enumerations --------------------------------------------------------------
 
