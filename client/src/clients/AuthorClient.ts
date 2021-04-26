@@ -51,12 +51,12 @@ export class AuthorClient {
 
     async series<Series>(libraryId: number, authorId: number, params?: Object): Promise<Series[]> {
         return (await ApiBase.get(AUTHORS_BASE
-            + `/${libraryId}/${authorId}${queryParameters(params)}`)).data;
+            + `/${libraryId}/${authorId}/series${queryParameters(params)}`)).data;
     }
 
     async stories<Story>(libraryId: number, authorId: number, params?: Object): Promise<Story[]> {
         return (await ApiBase.get(AUTHORS_BASE
-            + `/${libraryId}/${authorId}${queryParameters(params)}`)).data;
+            + `/${libraryId}/${authorId}/stories${queryParameters(params)}`)).data;
     }
 
     async update<Author>(libraryId: number, authorId: number, author: Author): Promise<Author> {
@@ -66,9 +66,8 @@ export class AuthorClient {
 
     async volumes<Volume>(libraryId: number, authorId: number, params?: Object): Promise<Volume[]> {
         return (await ApiBase.get(AUTHORS_BASE
-            + `/${libraryId}/${authorId}${queryParameters(params)}`)).data;
+            + `/${libraryId}/${authorId}/volumes${queryParameters(params)}`)).data;
     }
-
 
 }
 
