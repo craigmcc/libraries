@@ -14,12 +14,30 @@
 
 // Internal Modules ----------------------------------------------------------
 
+import AuthorClient from "../clients/AuthorClient";
 import LibraryClient from "../clients/LibraryClient";
 import UserClient from "../clients/UserClient";
+import Author from "../models/Author";
 import Library from "../models/Library";
 import User from "../models/User";
 
 // Public Objects ------------------------------------------------------------
+
+export const validateAuthorNameUnique
+    = async (author: Author): Promise<boolean> =>
+{
+    if (author) {
+        try {
+            const result: Author = await AuthorClient.exact
+                (author.library_id, author.first_name, author.last_name);
+            return (result.id === author.id);
+        } catch (error) {
+            return true; // Definitely unique
+        }
+    } else {
+        return true;
+    }
+}
 
 export const validateLibraryNameUnique
     = async (library: Library): Promise<boolean> =>

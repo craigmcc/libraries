@@ -4,6 +4,17 @@
 
 // toEmptyStrings() ----------------------------------------------------------
 
+// Convert a value to how it will be presented in a table, if needed
+export const listValue = (value: any): string => {
+    if (typeof(value) === "boolean") {
+        return value ? "Yes" : "No"
+    } else if (!value) {
+        return "";
+    } else {
+        return value;
+    }
+}
+
 // Convert null field values in incoming to empty strings
 
 export const toEmptyStrings = (incoming: any): any => {

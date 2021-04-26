@@ -30,12 +30,6 @@ import {BadRequest} from "../util/http-errors";
                 (`name: Name '${this.name}' is already in use`);
             }
         },
-        isLibraryScopeUnique: async function(this: Library): Promise<void> {
-            if (!(await validateLibraryScopeUnique(this))) {
-                throw new BadRequest
-                (`scope: Scope '${this.scope}' is already in use`);
-            }
-        },
     }
 })
 export class Library extends AbstractModel<Library> {

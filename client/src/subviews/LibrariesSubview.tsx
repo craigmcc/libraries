@@ -1,7 +1,7 @@
-// UsersSubview --------------------------------------------------------------
+// LibrariesSubview ----------------------------------------------------------
 
-// Render a list of application Users, with a callback handler when a particular
-// User is selected (or null for deselected).
+// Render a list of  Libraries, with a callback handler when a particular
+// Library is selected (or null for deselected).
 
 // External Modules ----------------------------------------------------------
 
@@ -11,10 +11,10 @@ import Table from "react-bootstrap/Table";
 
 // Internal Modules ----------------------------------------------------------
 
-import UserClient from "../clients/UserClient";
-import {HandleIndex, HandleUserOptional} from "../components/types";
+import LibraryClient from "../clients/LibraryClient";
+import {HandleIndex, HandleLibraryOptional} from "../components/types";
 import LoginContext from "../contexts/LoginContext";
-import User from "../models/User";
+import Library from "../models/Library";
 import * as Abridgers from "../util/abridgers";
 import logger from "../util/client-logger";
 import ReportError from "../util/ReportError";
@@ -23,56 +23,56 @@ import {listValue} from "../util/transformations";
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
-    handleSelect: HandleUserOptional;   // Handle User selection or deselection
-    title?: string;                     // Table title [Libraries Application User]
+    handleSelect: HandleLibraryOptional;// Handle Library selection or deselection
+    title?: string;                     // Table title [Application Libraries]
 }
 
 // Component Details ---------------------------------------------------------
 
-const UsersSubview = (props: Props) => {
+const LibrariesSubview = (props: Props) => {
 
     const loginContext = useContext(LoginContext);
 
     const [index, setIndex] = useState<number>(-1);
-    const [users, setUsers] = useState<User[]>([]);
+    const [libraries, setLibraries] = useState<Library[]>([]);
 
     useEffect(() => {
 
-        const fetchUsers = async () => {
+        const fetchLibraries = async () => {
             if (loginContext.state.loggedIn) {
                 try {
-                    const newUsers: User[] = await UserClient.all();
+                    const newLibraries: Library[] = await LibraryClient.all();
                     setIndex(-1);
-                    setUsers(newUsers);
+                    setLibraries(newLibraries);
                     logger.debug({
-                        context: "UsersSubview.fetchUsers",
-                        count: newUsers.length,
-                        users: newUsers,
+                        context: "LibrariesSubview.fetchLibraries",
+                        count: newLibraries.length,
+                        libraries: newLibraries,
                     });
 
                 } catch (error) {
                     setIndex(-1);
-                    setUsers([]);
+                    setLibraries([]);
                     if (error.response && (error.response.status === 403)) {
                         logger.debug({
-                            context: "UsersSubview.fetchUsers",
+                            context: "LibrariesSubview.fetchLibraries",
                             msg: "FORBIDDEN",
                         });
                     } else {
-                        ReportError("UsersSubview.fetchUsers", error);
+                        ReportError("LibrariesSubview.fetchLibraries", error);
                     }
                 }
             } else {
                 setIndex(-1);
-                setUsers([]);
+                setLibraries([]);
                 logger.debug({
-                    context: "UsersSubview.fetchUsers",
+                    context: "LibrariesSubview.fetchLibraries",
                     msg: "SKIPPED",
                 });
             }
         }
 
-        fetchUsers();
+        fetchLibraries();
 
     }, [loginContext]);
 
@@ -80,28 +80,28 @@ const UsersSubview = (props: Props) => {
         if (newIndex === index) {
             setIndex(-1);
             logger.trace({
-                context: "UsersSubview.handleIndex",
+                context: "LibrariesSubview.handleIndex",
                 msg: "UNSET" });
             if (props.handleSelect) {
                 props.handleSelect(null);
             }
         } else {
-            const newUser = users[newIndex];
+            const newLibrary = libraries[newIndex];
             setIndex(newIndex);
             logger.debug({
-                context: "UsersSubview.handleIndex",
+                context: "LibrariesSubview.handleIndex",
                 index: newIndex,
-                user: Abridgers.USER(newUser),
+                library: Abridgers.LIBRARY(newLibrary),
             });
             if (props.handleSelect) {
-                props.handleSelect(newUser);
+                props.handleSelect(newLibrary);
             }
         }
     }
 
     return (
 
-        <Container fluid id="UsersSubview">
+        <Container fluid id="LibrariesSubview">
 
             <Table
                 bordered={true}
@@ -111,24 +111,25 @@ const UsersSubview = (props: Props) => {
             >
 
                 <thead>
-                    <tr className="table-dark">
-                        <th
-                            className="text-center"
-                            colSpan={3}
-                            key={101}
-                        >
-                            {props.title ? props.title : "Libraries Application Users"}
-                        </th>
-                    </tr>
-                    <tr className="table-secondary">
-                        <th scope="col>">Username</th>
-                        <th scope="col">Active</th>
-                        <th scope="col">Scope</th>
-                    </tr>
+                <tr className="table-dark">
+                    <th
+                        className="text-center"
+                        colSpan={4}
+                        key={101}
+                    >
+                        {props.title ? props.title : "Application Libraries"}
+                    </th>
+                </tr>
+                <tr className="table-secondary">
+                    <th scope="col>">Name</th>
+                    <th scope="col">Active</th>
+                    <th scope="col">Notes</th>
+                    <th scope="col">Scope</th>
+                </tr>
                 </thead>
 
                 <tbody>
-                {users.map((user, rowIndex) => (
+                {libraries.map((library, rowIndex) => (
                     <tr
                         className={"table-" +
                             (rowIndex === index ? "primary" : "default")}
@@ -136,13 +137,16 @@ const UsersSubview = (props: Props) => {
                         onClick={() => (handleIndex(rowIndex))}
                     >
                         <td key={1000 + (rowIndex * 100) + 1}>
-                            {user.username}
+                            {library.name}
                         </td>
                         <td key={1000 + (rowIndex * 100) + 2}>
-                            {listValue(user.active)}
+                            {listValue(library.active)}
                         </td>
                         <td key={1000 + (rowIndex * 100) + 3}>
-                            {user.scope}
+                            {library.notes}
+                        </td>
+                        <td key={1000 + (rowIndex * 100) + 4}>
+                            {library.scope}
                         </td>
                     </tr>
                 ))}
@@ -156,4 +160,4 @@ const UsersSubview = (props: Props) => {
 
 }
 
-export default UsersSubview;
+export default LibrariesSubview;

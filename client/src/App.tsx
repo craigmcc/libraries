@@ -7,7 +7,7 @@
 import React from 'react';
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
-//import NavDropdown from "react-bootstrap/cjs/NavDropdown";
+import NavDropdown from "react-bootstrap/cjs/NavDropdown";
 import NavItem from "react-bootstrap/NavItem";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { LinkContainer } from "react-router-bootstrap";
@@ -20,6 +20,8 @@ import LoggedInUser from "./components/LoggedInUser";
 import {LibraryContextProvider} from "./contexts/LibraryContext";
 import {LoginContextProvider} from "./contexts/LoginContext";
 import HomeView from "./views/HomeView";
+import AuthorsView from "./views/AuthorsView";
+import LibrariesView from "./views/LibrariesView";
 import UsersView from "./views/UsersView";
 
 // Component Details ---------------------------------------------------------
@@ -55,19 +57,17 @@ function App() {
                             <LinkContainer to="/home">
                                 <NavItem className="nav-link">Home</NavItem>
                             </LinkContainer>
-                            <LinkContainer to="/users">
-                                <NavItem className="nav-link">Users</NavItem>
+                            <LinkContainer to="/authors">
+                                <NavItem className="nav-link">Authors</NavItem>
                             </LinkContainer>
-{/*
-                            <NavDropdown id="reports" title="Reports">
-                                <LinkContainer to="/guestHistoryReport">
-                                    <NavDropdown.Item>Guest History</NavDropdown.Item>
+                            <NavDropdown id="master" title="Masters">
+                                <LinkContainer to="/libraries">
+                                    <NavDropdown.Item>Libraries</NavDropdown.Item>
                                 </LinkContainer>
-                                <LinkContainer to="/monthlySummaryReport">
-                                    <NavDropdown.Item>Monthly Summary</NavDropdown.Item>
+                                <LinkContainer to="/users">
+                                    <NavDropdown.Item>Users</NavDropdown.Item>
                                 </LinkContainer>
                             </NavDropdown>
-*/}
                         </Nav>
                     </Navbar.Collapse>
 
@@ -78,6 +78,12 @@ function App() {
                 </Navbar>
 
                 <Switch>
+                    <Route exact path="/authors">
+                        <AuthorsView/>
+                    </Route>
+                    <Route exact path="/libraries">
+                        <LibrariesView/>
+                    </Route>
                     <Route exact path="/users">
                         <UsersView/>
                     </Route>
@@ -96,32 +102,3 @@ function App() {
 }
 
 export default App;
-
-/*
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
-
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
-
-export default App;
-*/

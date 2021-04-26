@@ -101,7 +101,7 @@ AuthorRouter.get("/:libraryId/:authorId",
     });
 
 // PUT /:libraryId/:authorId - Update Author by ID
-AuthorRouter.put("/:libraryId",
+AuthorRouter.put("/:libraryId/:authorId",
     requireRegular,
     async (req: Request, res: Response) => {
         res.send(await AuthorServices.update(
@@ -112,6 +112,17 @@ AuthorRouter.put("/:libraryId",
     });
 
 // Child Lookup Routes -------------------------------------------------------
+
+// GET /:libraryId/:authorId/series - Find Series for this Author
+AuthorRouter.get("/:libraryId/:authorId/series",
+    requireRegular,
+    async (req: Request, res: Response) => {
+        res.send(await AuthorServices.series(
+            parseInt(req.params.libraryId, 10),
+            parseInt(req.params.authorId, 10),
+            req.query
+        ));
+    });
 
 // GET /:libraryId/:authorId/stories - Find Stories for this Author
 AuthorRouter.get("/:libraryId/:authorId/stories",

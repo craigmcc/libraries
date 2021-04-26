@@ -1,10 +1,10 @@
-// UserForm ------------------------------------------------------------------
+// AuthorForm ---------------------------------------------------------------
 
-// Detail editing form for User objects.
+// Detail editing form for Author objects.
 
 // External Modules ----------------------------------------------------------
 
-import React, {useContext, useState} from "react";
+import React, {useState} from "react";
 import {Formik,FormikHelpers,FormikValues} from "formik";
 import Button from "react-bootstrap/button";
 import Col from "react-bootstrap/Col";
@@ -16,40 +16,37 @@ import * as Yup from "yup";
 
 // Internal Modules ----------------------------------------------------------
 
-import {HandleUser} from "../components/types";
-import LoginContext from "../contexts/LoginContext";
-import User from "../models/User";
-import {validateUserUsernameUnique} from "../util/async-validators";
+import {HandleAuthor} from "../components/types";
+import Author from "../models/Author";
+import {validateAuthorNameUnique} from "../util/async-validators";
 import {toEmptyStrings, toNullValues} from "../util/transformations";
 
 // Property Details ----------------------------------------------------------
 
 export interface Props {
+    author: Author;                 // Initial values (id<0 for adding)
     autoFocus?: boolean;            // Should the first element receive autofocus? [false]
     canRemove?: boolean;            // Can Remove be performed? [false]
-    handleInsert: HandleUser;       // Handle (user) insert request
-    handleRemove: HandleUser;       // Handle (user) remove request
-    handleUpdate: HandleUser;       // Handle (user) update request
-    user: User;                     // Initial values (id<0 for adding)
+    handleInsert: HandleAuthor;     // Handle (Author) insert request
+    handleRemove: HandleAuthor;     // Handle (Author) remove request
+    handleUpdate: HandleAuthor;     // Handle (Author) update request
 }
 
 // Component Details ---------------------------------------------------------
 
-const UserForm = (props: Props) => {
+const AuthorForm = (props: Props) => {
 
-    const loginContext = useContext(LoginContext);
-
-    const [adding] = useState<boolean>(props.user.id < 0);
+    const [adding] = useState<boolean>(props.author.id < 0);
     const [canRemove] = useState<boolean>
         (props.canRemove !== undefined ? props.canRemove : false);
-    const [initialValues] = useState(toEmptyStrings(props.user));
+    const [initialValues] = useState(toEmptyStrings(props.author));
     const [showConfirm, setShowConfirm] = useState<boolean>(false);
 
     const handleSubmit = (values: FormikValues, actions: FormikHelpers<FormikValues>): void => {
         if (adding) {
-            props.handleInsert(toUser(values));
+            props.handleInsert(toAuthor(values));
         } else {
-            props.handleUpdate(toUser(values));
+            props.handleUpdate(toAuthor(values));
         }
     }
 
@@ -63,18 +60,18 @@ const UserForm = (props: Props) => {
 
     const onConfirmPositive = (): void => {
         setShowConfirm(false);
-        props.handleRemove(props.user)
+        props.handleRemove(props.author)
     }
 
-    const toUser = (values: FormikValues): User => {
+    const toAuthor = (values: FormikValues): Author => {
         const nulled = toNullValues(values);
-        const result = new User({
-            id: props.user.id,
+        const result = new Author({
             active: nulled.active,
-            level: nulled.level,
-            password: nulled.password,
-            scope: nulled.scope,
-            username: nulled.username,
+            first_name: nulled.first_name,
+            id: props.author.id,
+            last_name: nulled.last_name,
+            library_id: props.author.library_id,
+            notes: nulled.notes,
         });
         if (nulled.active !== undefined) {
             result.active = nulled.active;
@@ -82,34 +79,17 @@ const UserForm = (props: Props) => {
         return result;
     }
 
-    // NOTE - there is no server-side equivalent for this because there is
-    // not an individual logged-in user performing the request
-    const validateRequestedScope = (requested: string | undefined): boolean => {
-        if (!requested || ("" === requested)) {
-            return true;  // Not asking for scope but should be required
-        } else {
-            // TODO - deal with log:xxxxx pseudo-scopes
-            return loginContext.validateScope(requested);
-        }
-    }
-
     const validationSchema = () => {
         return Yup.object().shape({
             active: Yup.boolean(),
-            password: Yup.string(),
-            scope: Yup.string()
-                .required("Scope is required")
-                .test("allowed-scope",
-                    "You are not allowed to assign a scope you do not possess",
-                    function (value) {
-                        return validateRequestedScope(value);
-                    }),
-            username: Yup.string()
-                .required("Username is required")
-                .test("unique-username",
-                    "That username is already in use",
+            first_name: Yup.string()
+                .required("First Name is required"),
+            last_name: Yup.string()
+                .required("Last Name is required")
+                .test("unique-name",
+                    "That name is already in use within this Library",
                     async function (this) {
-                        return await validateUserUsernameUnique(toUser(this.parent))
+                        return await validateAuthorNameUnique(toAuthor(this.parent))
                     }),
         })
     }
@@ -119,7 +99,7 @@ const UserForm = (props: Props) => {
         <>
 
             {/* Details Form */}
-            <Container id="userForm">
+            <Container id="authorForm">
 
                 <Formik
                     initialValues={initialValues}
@@ -148,75 +128,71 @@ const UserForm = (props: Props) => {
                             onSubmit={handleSubmit}
                         >
 
-                            <Form.Row id="usernameRow">
+                            <Form.Row id="nameRow">
                                 <Form.Group as={Row} className="mr-4"
-                                            controlId="name" id="usernameGroup">
-                                    <Form.Label>Username:</Form.Label>
+                                            controlId="first_name" id="firstNameGroup">
+                                    <Form.Label>First Name:</Form.Label>
                                     <Form.Control
                                         htmlSize={25}
-                                        isInvalid={touched.username && !!errors.username}
-                                        isValid={!errors.username}
-                                        name="username"
+                                        isInvalid={touched.first_name && !!errors.first_name}
+                                        isValid={!errors.first_name}
+                                        name="first_name"
                                         onBlur={handleBlur}
                                         onChange={handleChange}
                                         size="sm"
                                         type="text"
-                                        value={values.username}
+                                        value={values.first_name}
                                     />
                                     <Form.Control.Feedback type="valid">
-                                        Username is required and must be unique.
+                                        Name is required and must be unique.
                                     </Form.Control.Feedback>
                                     <Form.Control.Feedback type="invalid">
-                                        {errors.username}
+                                        {errors.first_name}
+                                    </Form.Control.Feedback>
+                                </Form.Group>
+                                <Form.Group as={Row} className="mr-4"
+                                            controlId="last_name" id="lastNameGroup">
+                                    <Form.Label>Last Name:</Form.Label>
+                                    <Form.Control
+                                        htmlSize={25}
+                                        isInvalid={touched.last_name && !!errors.last_name}
+                                        isValid={!errors.last_name}
+                                        name="last_name"
+                                        onBlur={handleBlur}
+                                        onChange={handleChange}
+                                        size="sm"
+                                        type="text"
+                                        value={values.last_name}
+                                    />
+                                    <Form.Control.Feedback type="valid">
+                                        Name is required and must be unique.
+                                    </Form.Control.Feedback>
+                                    <Form.Control.Feedback type="invalid">
+                                        {errors.last_name}
                                     </Form.Control.Feedback>
                                 </Form.Group>
                             </Form.Row>
 
-                            <Form.Row id="passwordRow">
+                            <Form.Row id="notesRow">
                                 <Form.Group as={Row} className="mr-4"
-                                            controlId="name" id="passwordGroup">
-                                    <Form.Label>Password:</Form.Label>
+                                            controlId="notes" id="notesGroup">
+                                    <Form.Label>Notes:</Form.Label>
                                     <Form.Control
                                         htmlSize={25}
-                                        isInvalid={touched.password && !!errors.password}
-                                        isValid={!errors.password}
-                                        name="password"
+                                        isInvalid={touched.notes && !!errors.notes}
+                                        isValid={!errors.notes}
+                                        name="notes"
                                         onBlur={handleBlur}
                                         onChange={handleChange}
                                         size="sm"
                                         type="text"
-                                        value={values.password}
+                                        value={values.notes}
                                     />
                                     <Form.Control.Feedback type="valid">
-                                        Enter ONLY for a new User or if you want to
-                                        change the password for an old User.
+                                        Miscellaneous notes about this Author.
                                     </Form.Control.Feedback>
                                     <Form.Control.Feedback type="invalid">
-                                        {errors.password}
-                                    </Form.Control.Feedback>
-                                </Form.Group>
-                            </Form.Row>
-
-                            <Form.Row id="scopeRow">
-                                <Form.Group as={Row} className="mr-4"
-                                            controlId="name" id="scopeGroup">
-                                    <Form.Label>Scope:</Form.Label>
-                                    <Form.Control
-                                        htmlSize={25}
-                                        isInvalid={touched.scope && !!errors.scope}
-                                        isValid={!errors.scope}
-                                        name="scope"
-                                        onBlur={handleBlur}
-                                        onChange={handleChange}
-                                        size="sm"
-                                        type="text"
-                                        value={values.scope}
-                                    />
-                                    <Form.Control.Feedback type="valid">
-                                        Scope is required and sets access privileges.
-                                    </Form.Control.Feedback>
-                                    <Form.Control.Feedback type="invalid">
-                                        {errors.scope}
+                                        {errors.notes}
                                     </Form.Control.Feedback>
                                 </Form.Group>
                             </Form.Row>
@@ -282,12 +258,12 @@ const UserForm = (props: Props) => {
                 </Modal.Header>
                 <Modal.Body>
                     <p>
-                        Removing this User is not reversible, and
+                        Removing this Author is not reversible, and
                         <strong>
                             &nbsp;will also remove ALL related information.
                         </strong>.
                     </p>
-                    <p>Consider marking this User as inactive instead.</p>
+                    <p>Consider marking this Author as inactive instead.</p>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button
@@ -315,4 +291,4 @@ const UserForm = (props: Props) => {
 
 }
 
-export default UserForm;
+export default AuthorForm;
