@@ -9,8 +9,8 @@ import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import NavDropdown from "react-bootstrap/cjs/NavDropdown";
 import NavItem from "react-bootstrap/NavItem";
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import { LinkContainer } from "react-router-bootstrap";
+import {BrowserRouter as Router, Route, Switch} from "react-router-dom";
+import {LinkContainer} from "react-router-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 // Internal Modules ----------------------------------------------------------
@@ -22,6 +22,7 @@ import {LoginContextProvider} from "./contexts/LoginContext";
 import HomeView from "./views/HomeView";
 import AuthorsView from "./views/AuthorsView";
 import LibrariesView from "./views/LibrariesView";
+import SeriesView from "./views/SeriesView";
 import StoriesView from "./views/StoriesView";
 import UsersView from "./views/UsersView";
 import VolumesView from "./views/VolumesView";
@@ -49,7 +50,7 @@ function App() {
                             alt="Libraries Logo"
                             height={60}
                             src="./books.jpeg"
-                            width={120}
+                            width={100}
                         />
                     </Navbar.Brand>
                     <Navbar.Toggle aria-controls="basic-navbar-brand"/>
@@ -61,6 +62,9 @@ function App() {
                             </LinkContainer>
                             <LinkContainer to="/authors">
                                 <NavItem className="nav-link">Authors</NavItem>
+                            </LinkContainer>
+                            <LinkContainer to="/series">
+                                <NavItem className="nav-link">Series</NavItem>
                             </LinkContainer>
                             <LinkContainer to="/stories">
                                 <NavItem className="nav-link">Stories</NavItem>
@@ -91,6 +95,9 @@ function App() {
                     </Route>
                     <Route exact path="/libraries">
                         <LibrariesView/>
+                    </Route>
+                    <Route exact path="/series">
+                        <SeriesView/>
                     </Route>
                     <Route exact path="/stories">
                         <StoriesView/>

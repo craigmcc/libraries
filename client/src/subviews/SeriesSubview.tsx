@@ -1,7 +1,7 @@
-// StoriesSubview ------------------------------------------------------------
+// SeriesSubview ------------------------------------------------------------
 
-// Render a list of Stories for the currently selected Library, with a callback
-// handler when a particular Story is selected (or null for deselected).
+// Render a list of Series for the currently selected Library, with a callback
+// handler when a particular Series is selected (or null for deselected).
 
 // External Modules ----------------------------------------------------------
 
@@ -13,18 +13,18 @@ import Table from "react-bootstrap/Table";
 
 // Internal Modules ----------------------------------------------------------
 
-import StoryClient from "../clients/StoryClient";
+import SeriesClient from "../clients/SeriesClient";
 import Pagination from "../components/Pagination";
 import SearchBar from "../components/SearchBar";
 import {
     HandleIndex,
-    HandleStoryOptional,
+    HandleSeriesOptional,
     HandleValue,
     OnAction
 } from "../components/types";
 import LibraryContext from "../contexts/LibraryContext";
 import LoginContext from "../contexts/LoginContext";
-import Story from "../models/Story";
+import Series from "../models/Series";
 import * as Abridgers from "../util/abridgers";
 import logger from "../util/client-logger";
 import ReportError from "../util/ReportError";
@@ -33,13 +33,13 @@ import {listValue} from "../util/transformations";
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
-    handleSelect: HandleStoryOptional;  // Handle Story selection or deselection
-    title?: string;                     // Table title [Stories for Library XXXXX]
+    handleSelect: HandleSeriesOptional; // Handle Series selection or deselection
+    title?: string;                     // Table title [Series for Library XXXXX]
 }
 
 // Component Details ---------------------------------------------------------
 
-const StoriesSubview = (props: Props) => {
+const SeriesSubview = (props: Props) => {
 
     const libraryContext = useContext(LibraryContext);
     const loginContext = useContext(LoginContext);
@@ -48,58 +48,58 @@ const StoriesSubview = (props: Props) => {
     const [index, setIndex] = useState<number>(-1);
     const [pageSize] = useState<number>(25);
     const [searchText, setSearchText] = useState<string>("");
-    const [stories, setStories] = useState<Story[]>([]);
+    const [series, setSeries] = useState<Series[]>([]);
 
     useEffect(() => {
 
-        const fetchStories = async () => {
+        const fetchSeries = async () => {
 
             const libraryId = libraryContext.state.library.id;
             if (loginContext.state.loggedIn && (libraryId > 0)) {
-                let newStories: Story[] = [];
+                let newSeries: Series[] = [];
                 try {
                     if (searchText.length > 0) {
-                        newStories =
-                            await StoryClient.name(libraryId, searchText, {
+                        newSeries =
+                            await SeriesClient.name(libraryId, searchText, {
                                 limit: pageSize,
                                 offset: (pageSize * (currentPage - 1))
                             });
                     } else {
-                        newStories =
-                            await StoryClient.all(libraryId, {
+                        newSeries =
+                            await SeriesClient.all(libraryId, {
                                 limit: pageSize
                             });
                     }
                     logger.debug({
-                        context: "StoriesSubview.fetchStories",
-                        count: newStories.length,
-//                        stories: newStories,
+                        context: "SeriesSubview.fetchSeries",
+                        count: newSeries.length,
+//                        series: newSeries,
                     });
                     setIndex(-1);
-                    setStories(newStories);
+                    setSeries(newSeries);
                 } catch (error) {
                     setIndex(-1);
-                    setStories([]);
+                    setSeries([]);
                     if (error.response && (error.response.status === 403)) {
                         logger.debug({
-                            context: "StoriesSubview.fetchStories",
+                            context: "SeriesSubview.fetchSeries",
                             msg: "FORBIDDEN",
                         });
                     } else {
-                        ReportError("StoriesSubview.fetchStories", error);
+                        ReportError("SeriesSubview.fetchSeries", error);
                     }
                 }
             } else {
                 setIndex(-1);
-                setStories([]);
+                setSeries([]);
                 logger.debug({
-                    context: "StoriesSubview.fetchStories",
+                    context: "SeriesSubview.fetchSeries",
                     msg: "SKIPPED",
                 });
             }
         }
 
-        fetchStories();
+        fetchSeries();
 
     }, [libraryContext, loginContext, currentPage, pageSize, searchText]);
 
@@ -111,21 +111,21 @@ const StoriesSubview = (props: Props) => {
         if (newIndex === index) {
             setIndex(-1);
             logger.trace({
-                context: "StoriesSubview.handleIndex",
+                context: "SeriesSubview.handleIndex",
                 msg: "UNSET" });
             if (props.handleSelect) {
                 props.handleSelect(null);
             }
         } else {
-            const newStory = stories[newIndex];
+            const newSeries = series[newIndex];
             setIndex(newIndex);
             logger.debug({
-                context: "StoriesSubview.handleIndex",
+                context: "SeriesSubview.handleIndex",
                 index: newIndex,
-                volume: Abridgers.STORY(newStory),
+                volume: Abridgers.STORY(newSeries),
             });
             if (props.handleSelect) {
-                props.handleSelect(newStory);
+                props.handleSelect(newSeries);
             }
         }
     }
@@ -142,7 +142,7 @@ const StoriesSubview = (props: Props) => {
 
     return (
 
-        <Container fluid id="StoriesSubview">
+        <Container fluid id="SeriesSubview">
 
             <Row className="mb-3">
                 <Col className="col-10 mr-2">
@@ -156,8 +156,8 @@ const StoriesSubview = (props: Props) => {
                 <Col>
                     <Pagination
                         currentPage={currentPage}
-                        lastPage={(stories.length === 0) ||
-                        (stories.length < pageSize)}
+                        lastPage={(series.length === 0) ||
+                        (series.length < pageSize)}
                         onNext={onNext}
                         onPrevious={onPrevious}
                     />
@@ -179,7 +179,7 @@ const StoriesSubview = (props: Props) => {
                             colSpan={4}
                             key={101}
                         >
-                            {props.title ? props.title : `Stories for ${libraryContext.state.library.name}`}
+                            {props.title ? props.title : `Series for ${libraryContext.state.library.name}`}
                         </th>
                     </tr>
                     <tr className="table-secondary">
@@ -191,7 +191,7 @@ const StoriesSubview = (props: Props) => {
                     </thead>
 
                     <tbody>
-                    {stories.map((story, rowIndex) => (
+                    {series.map((series, rowIndex) => (
                         <tr
                             className={"table-" +
                                 (rowIndex === index ? "primary" : "default")}
@@ -199,16 +199,16 @@ const StoriesSubview = (props: Props) => {
                             onClick={() => (handleIndex(rowIndex))}
                         >
                             <td key={1000 + (rowIndex * 100) + 1}>
-                                {story.name}
+                                {series.name}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 2}>
-                                {listValue(story.active)}
+                                {listValue(series.active)}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 3}>
-                                {listValue(story.copyright)}
+                                {listValue(series.copyright)}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 4}>
-                                {story.notes}
+                                {series.notes}
                             </td>
                         </tr>
                     ))}
@@ -223,4 +223,4 @@ const StoriesSubview = (props: Props) => {
 
 }
 
-export default StoriesSubview;
+export default SeriesSubview;

@@ -8,10 +8,20 @@
 
 // Public Objects ------------------------------------------------------------
 
-export interface Series {
-    id: number;
+class Series {
+
+    constructor(data: any = {}) {
+        this.active = data.active || true;
+        this.copyright = data.copyright;
+        this.id = data.id || -1;
+        this.library_id = data.library_id;
+        this.name = data.name;
+        this.notes = data.notes;
+    }
+
     active: boolean;
     copyright: string;
+    id: number;
     library_id: number;
     name: string;
     notes: string;

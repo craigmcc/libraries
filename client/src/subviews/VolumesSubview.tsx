@@ -1,6 +1,6 @@
 // VolumesSubview ------------------------------------------------------------
 
-// Render a list of Volumes for the currently selected Volume, with a callback
+// Render a list of Volumes for the currently selected Library, with a callback
 // handler when a particular Volume is selected (or null for deselected).
 
 // External Modules ----------------------------------------------------------

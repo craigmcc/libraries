@@ -1,6 +1,6 @@
 // AuthorsSubview ------------------------------------------------------------
 
-// Render a list of Authors for the currently selected Author, with a callback
+// Render a list of Authors for the currently selected Library, with a callback
 // handler when a particular Author is selected (or null for deselected).
 
 // External Modules ----------------------------------------------------------
@@ -194,7 +194,7 @@ const AuthorsSubview = (props: Props) => {
                     {authors.map((author, rowIndex) => (
                         <tr
                             className={"table-" +
-                            (rowIndex === index ? "primary" : "default")}
+                                (rowIndex === index ? "primary" : "default")}
                             key={1000 + (rowIndex * 100)}
                             onClick={() => (handleIndex(rowIndex))}
                         >
