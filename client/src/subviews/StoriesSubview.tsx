@@ -1,7 +1,7 @@
-// VolumesSubview ------------------------------------------------------------
+// StoriesSubview ------------------------------------------------------------
 
-// Render a list of Volumes for the currently selected Volume, with a callback
-// handler when a particular Volume is selected (or null for deselected).
+// Render a list of Stories for the currently selected Story, with a callback
+// handler when a particular Story is selected (or null for deselected).
 
 // External Modules ----------------------------------------------------------
 
@@ -13,18 +13,18 @@ import Table from "react-bootstrap/Table";
 
 // Internal Modules ----------------------------------------------------------
 
-import VolumeClient from "../clients/VolumeClient";
+import StoryClient from "../clients/StoryClient";
 import Pagination from "../components/Pagination";
 import SearchBar from "../components/SearchBar";
 import {
     HandleIndex,
-    HandleVolumeOptional,
+    HandleStoryOptional,
     HandleValue,
     OnAction
 } from "../components/types";
 import LibraryContext from "../contexts/LibraryContext";
 import LoginContext from "../contexts/LoginContext";
-import Volume from "../models/Volume";
+import Story from "../models/Story";
 import * as Abridgers from "../util/abridgers";
 import logger from "../util/client-logger";
 import ReportError from "../util/ReportError";
@@ -33,13 +33,13 @@ import {listValue} from "../util/transformations";
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
-    handleSelect: HandleVolumeOptional; // Handle Volume selection or deselection
-    title?: string;                     // Table title [Volumes for Library XXXXX]
+    handleSelect: HandleStoryOptional;  // Handle Story selection or deselection
+    title?: string;                     // Table title [Stories for Library XXXXX]
 }
 
 // Component Details ---------------------------------------------------------
 
-const VolumesSubview = (props: Props) => {
+const StoriesSubview = (props: Props) => {
 
     const libraryContext = useContext(LibraryContext);
     const loginContext = useContext(LoginContext);
@@ -48,58 +48,58 @@ const VolumesSubview = (props: Props) => {
     const [index, setIndex] = useState<number>(-1);
     const [pageSize] = useState<number>(25);
     const [searchText, setSearchText] = useState<string>("");
-    const [volumes, setVolumes] = useState<Volume[]>([]);
+    const [stories, setStories] = useState<Story[]>([]);
 
     useEffect(() => {
 
-        const fetchVolumes = async () => {
+        const fetchStories = async () => {
 
             const libraryId = libraryContext.state.library.id;
             if (loginContext.state.loggedIn && (libraryId > 0)) {
-                let newVolumes: Volume[] = [];
+                let newStories: Story[] = [];
                 try {
                     if (searchText.length > 0) {
-                        newVolumes =
-                            await VolumeClient.name(libraryId, searchText, {
+                        newStories =
+                            await StoryClient.name(libraryId, searchText, {
                                 limit: pageSize,
                                 offset: (pageSize * (currentPage - 1))
                             });
                     } else {
-                        newVolumes =
-                            await VolumeClient.all(libraryId, {
+                        newStories =
+                            await StoryClient.all(libraryId, {
                                 limit: pageSize
                             });
                     }
                     logger.debug({
-                        context: "VolumesSubview.fetchVolumes",
-                        count: newVolumes.length,
-//                        volumes: newVolumes,
+                        context: "StoriesSubview.fetchStories",
+                        count: newStories.length,
+//                        stories: newStories,
                     });
                     setIndex(-1);
-                    setVolumes(newVolumes);
+                    setStories(newStories);
                 } catch (error) {
                     setIndex(-1);
-                    setVolumes([]);
+                    setStories([]);
                     if (error.response && (error.response.status === 403)) {
                         logger.debug({
-                            context: "VolumesSubview.fetchVolumes",
+                            context: "StoriesSubview.fetchStories",
                             msg: "FORBIDDEN",
                         });
                     } else {
-                        ReportError("VolumesSubview.fetchVolumes", error);
+                        ReportError("StoriesSubview.fetchStories", error);
                     }
                 }
             } else {
                 setIndex(-1);
-                setVolumes([]);
+                setStories([]);
                 logger.debug({
-                    context: "VolumesSubview.fetchVolumes",
+                    context: "StoriesSubview.fetchStories",
                     msg: "SKIPPED",
                 });
             }
         }
 
-        fetchVolumes();
+        fetchStories();
 
     }, [libraryContext, loginContext, currentPage, pageSize, searchText]);
 
@@ -111,21 +111,21 @@ const VolumesSubview = (props: Props) => {
         if (newIndex === index) {
             setIndex(-1);
             logger.trace({
-                context: "VolumesSubview.handleIndex",
+                context: "StoriesSubview.handleIndex",
                 msg: "UNSET" });
             if (props.handleSelect) {
                 props.handleSelect(null);
             }
         } else {
-            const newVolume = volumes[newIndex];
+            const newStory = stories[newIndex];
             setIndex(newIndex);
             logger.debug({
-                context: "VolumesSubview.handleIndex",
+                context: "StoriesSubview.handleIndex",
                 index: newIndex,
-                volume: Abridgers.VOLUME(newVolume),
+                volume: Abridgers.STORY(newStory),
             });
             if (props.handleSelect) {
-                props.handleSelect(newVolume);
+                props.handleSelect(newStory);
             }
         }
     }
@@ -142,7 +142,7 @@ const VolumesSubview = (props: Props) => {
 
     return (
 
-        <Container fluid id="VolumesSubview">
+        <Container fluid id="StoriesSubview">
 
             <Row className="mb-3">
                 <Col className="col-10 mr-2">
@@ -156,8 +156,8 @@ const VolumesSubview = (props: Props) => {
                 <Col>
                     <Pagination
                         currentPage={currentPage}
-                        lastPage={(volumes.length === 0) ||
-                        (volumes.length < pageSize)}
+                        lastPage={(stories.length === 0) ||
+                        (stories.length < pageSize)}
                         onNext={onNext}
                         onPrevious={onPrevious}
                     />
@@ -176,27 +176,25 @@ const VolumesSubview = (props: Props) => {
                     <tr className="table-dark">
                         <th
                             className="text-center"
-                            colSpan={6}
+                            colSpan={4}
                             key={101}
                         >
-                            {props.title ? props.title : `Volumes for ${libraryContext.state.library.name}`}
+                            {props.title ? props.title : `Stories for ${libraryContext.state.library.name}`}
                         </th>
                     </tr>
                     <tr className="table-secondary">
                         <th scope="col">Name</th>
                         <th scope="col">Active</th>
-                        <th scope="col">Read</th>
                         <th scope="col">Copyright</th>
-                        <th scope="col">Location</th>
                         <th scope="col">Notes</th>
                     </tr>
                     </thead>
 
                     <tbody>
-                    {volumes.map((volume, rowIndex) => (
+                    {stories.map((volume, rowIndex) => (
                         <tr
                             className={"table-" +
-                               (rowIndex === index ? "primary" : "default")}
+                            (rowIndex === index ? "primary" : "default")}
                             key={1000 + (rowIndex * 100)}
                             onClick={() => (handleIndex(rowIndex))}
                         >
@@ -207,15 +205,9 @@ const VolumesSubview = (props: Props) => {
                                 {listValue(volume.active)}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 3}>
-                                {listValue(volume.read)}
+                                {listValue(volume.copyright)}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 4}>
-                                {volume.copyright}
-                            </td>
-                            <td key={1000 + (rowIndex * 100) + 5}>
-                                {volume.location}
-                            </td>
-                            <td key={1000 + (rowIndex * 100) + 6}>
                                 {volume.notes}
                             </td>
                         </tr>
@@ -231,4 +223,4 @@ const VolumesSubview = (props: Props) => {
 
 }
 
-export default VolumesSubview;
+export default StoriesSubview;

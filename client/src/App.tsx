@@ -22,6 +22,7 @@ import {LoginContextProvider} from "./contexts/LoginContext";
 import HomeView from "./views/HomeView";
 import AuthorsView from "./views/AuthorsView";
 import LibrariesView from "./views/LibrariesView";
+import StoriesView from "./views/StoriesView";
 import UsersView from "./views/UsersView";
 import VolumesView from "./views/VolumesView";
 
@@ -61,6 +62,9 @@ function App() {
                             <LinkContainer to="/authors">
                                 <NavItem className="nav-link">Authors</NavItem>
                             </LinkContainer>
+                            <LinkContainer to="/stories">
+                                <NavItem className="nav-link">Stories</NavItem>
+                            </LinkContainer>
                             <LinkContainer to="/volumes">
                                 <NavItem className="nav-link">Volumes</NavItem>
                             </LinkContainer>
@@ -87,6 +91,9 @@ function App() {
                     </Route>
                     <Route exact path="/libraries">
                         <LibrariesView/>
+                    </Route>
+                    <Route exact path="/stories">
+                        <StoriesView/>
                     </Route>
                     <Route exact path="/users">
                         <UsersView/>
