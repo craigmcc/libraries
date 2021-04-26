@@ -15,19 +15,19 @@ import LibraryClient from "../clients/LibraryClient";
 import Library from "../models/Library";
 import logger from "../util/client-logger";
 import ReportError from "../util/ReportError";
-import {HandleIndex} from "../components/types";
+import {HandleLibraryOptional, OnAction} from "../components/types";
 
 // Context Properties --------------------------------------------------------
 
 export type LibraryContextState = {
-    index: number;                      // Index to currently selected Library
     libraries: Library[];               // Libraries visible to this User
     library: Library;                   // Currently selected Library or dummy
 }
 
 export type LibraryContextData = {
     state: LibraryContextState;
-    doSelect: HandleIndex;              // Select new current library
+    doRefresh: OnAction;                // Request a refresh of active Libraries
+    doSelect: HandleLibraryOptional;    // Select new current library
 }
 
 const DUMMY_LIBRARY: Library = {
@@ -39,14 +39,14 @@ const DUMMY_LIBRARY: Library = {
 };
 
 const DUMMY_STATE: LibraryContextState = {
-    index: -1,
     libraries: [],
     library: DUMMY_LIBRARY,
 }
 
 export const LibraryContext = createContext<LibraryContextData>({
     state: DUMMY_STATE,
-    doSelect: (newIndex: number): void => {},
+    doRefresh: (): void => {},
+    doSelect: (library: Library | null): void => {},
 });
 
 export default LibraryContext;
@@ -57,14 +57,17 @@ export const LibraryContextProvider = (props: any) => {
 
     const loginContext = useContext(LoginContext);
 
+    const [refresh, setRefresh] = useState<boolean>(false);
     const [state, setState] = useState<LibraryContextState>(DUMMY_STATE);
 
     useEffect(() => {
 
         const fetchLibraries = async () => {
+            setRefresh(false);
             try {
-                const newLibraries: Library[] = [];
                 if (loginContext.state.loggedIn) {
+                    const newLibraries: Library[] = [];
+                    // Select active Libraries visible to the logged in User
                     const activeLibraries: Library[] = await LibraryClient.active();
                     activeLibraries.forEach(activeLibrary => {
                         if (loginContext.validateScope(activeLibrary.scope)) {
@@ -75,23 +78,25 @@ export const LibraryContextProvider = (props: any) => {
                         context: "LibraryContext.fetchLibraries",
                         countAvailable: newLibraries.length,
                         countActive: activeLibraries.length,
-//                        libraries: newLibraries,
+                        libraries: newLibraries,
+                    });
+                    setState({
+                        libraries: newLibraries,
+                        library: (newLibraries.length > 0) ? newLibraries[0] : DUMMY_LIBRARY,
                     });
                 } else {
                     logger.info({
                         context: "LibraryContext.fetchLibraries",
                         msg: "SKIPPED",
                     });
+                    setState({
+                        libraries: [],
+                        library: DUMMY_LIBRARY,
+                    })
                 }
-                setState({
-                    index: newLibraries.length > 0 ? 0 : -1,
-                    libraries: newLibraries,
-                    library: newLibraries.length > 0 ? newLibraries[0] : DUMMY_LIBRARY
-                });
             } catch (error) {
                 ReportError("LibraryContext.fetchLibraries", error);
                 setState({
-                    index: -1,
                     libraries: [],
                     library: DUMMY_LIBRARY,
                 })
@@ -100,28 +105,32 @@ export const LibraryContextProvider = (props: any) => {
 
         fetchLibraries();
 
-    }, [loginContext]);
+    }, [loginContext, refresh]);
 
-    const doSelect: HandleIndex = (newIndex: number) => {
-        const newState = state;
-        if ((newIndex >= 0) && (newIndex < state.libraries.length)) {
-            newState.index = newIndex;
-            newState.library = newState.libraries[newIndex];
-        } else {
-            newState.index = -1;
-            newState.library = DUMMY_LIBRARY
-        }
+    const doRefresh: OnAction = () => {
+        logger.info({
+            context: "LibraryContext.doRefresh",
+            msg: "Triggering refresh of active Libraries",
+        });
+        setRefresh(true);
+    }
+
+    const doSelect: HandleLibraryOptional = (newLibrary) => {
         logger.info({
             context: "LibraryContext.doSelect",
-            index: newState.index,
-            library: newState.library,
+            library: newLibrary,
         });
+        const newState = {
+            ...state,
+            library: newLibrary ? newLibrary : DUMMY_LIBRARY,
+        };
         setState(newState);
     }
 
     const libraryContext: LibraryContextData = {
         state: state,
-        doSelect: doSelect
+        doRefresh: doRefresh,
+        doSelect: doSelect,
     }
 
     return (

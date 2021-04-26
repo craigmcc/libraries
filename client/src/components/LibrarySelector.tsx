@@ -11,7 +11,7 @@ import Form from "react-bootstrap/Form";
 
 // Internal Modules ----------------------------------------------------------
 
-import {HandleLibrary, OnChangeSelect} from "./types";
+import {HandleLibraryOptional, OnChangeSelect} from "./types";
 import LibraryContext from "../contexts/LibraryContext";
 import logger from "../util/client-logger";
 
@@ -20,7 +20,7 @@ import logger from "../util/client-logger";
 export interface Props {
     autoFocus?: boolean;            // Should element receive autoFocus? [false]
     disabled?: boolean;             // Should element be disabled? [false]
-    handleLibrary?: HandleLibrary;  // Handle change of selected library
+    handleLibrary?: HandleLibraryOptional;  // Handle change of selected library
     label?: string;                 // Element label [Library:]
 }
 
@@ -30,25 +30,35 @@ export const LibrarySelector = (props: Props) => {
 
     const libraryContext = useContext(LibraryContext);
 
-    const [index, setIndex] = useState<number>(libraryContext.state.index);
+    const [index, setIndex] = useState<number>(-1);
 
     useEffect(() => {
-        setIndex(libraryContext.state.index);
-    }, [libraryContext]);
+        let newIndex: number;
+        if (libraryContext.state.libraries.length > 0) {
+            newIndex = 0;
+        } else {
+            newIndex = -1;
+        }
+        logger.debug({
+            context: "LibrarySelector.useEffect",
+            index: newIndex,
+        });
+        setIndex(newIndex);
+    }, [libraryContext.state.libraries]);
 
     const onChange: OnChangeSelect = (event) => {
         const newIndex: number = parseInt(event.target.value);
+        const newLibrary = (newIndex >= 0) ? libraryContext.state.libraries[newIndex] : null;
         logger.debug({
             context: "LibrarySelector.onChange",
             index: newIndex,
+            library: newLibrary,
         })
         if (props.handleLibrary) {
-            if ((newIndex >= 0) && (newIndex < libraryContext.state.libraries.length)) {
-                props.handleLibrary(libraryContext.state.libraries[newIndex]);
-            }
+            props.handleLibrary(newLibrary);
         }
+        libraryContext.doSelect(newLibrary);
         setIndex(newIndex);
-        libraryContext.doSelect(newIndex);
     }
 
     return (
