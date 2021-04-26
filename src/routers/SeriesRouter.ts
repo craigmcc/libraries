@@ -100,7 +100,7 @@ SeriesRouter.get("/:libraryId/:seriesId",
     });
 
 // PUT /:libraryId/:seriesId - Update Series by ID
-SeriesRouter.put("/:libraryId",
+SeriesRouter.put("/:libraryId/:seriesId",
     requireRegular,
     async (req: Request, res: Response) => {
         res.send(await SeriesServices.update(

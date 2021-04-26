@@ -80,7 +80,6 @@ export class LibraryClient {
             + `/${libraryId}/volumes${queryParameters(params)}`)).data;
     }
 
-
 }
 
 export default new LibraryClient();

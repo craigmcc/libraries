@@ -100,7 +100,7 @@ StoryRouter.get("/:libraryId/:storyId",
     });
 
 // PUT /:libraryId/:storyId - Update Story by ID
-StoryRouter.put("/:libraryId",
+StoryRouter.put("/:libraryId/:storyId",
     requireRegular,
     async (req: Request, res: Response) => {
         res.send(await StoryServices.update(

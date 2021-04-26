@@ -100,7 +100,7 @@ VolumeRouter.get("/:libraryId/:volumeId",
     });
 
 // PUT /:libraryId/:volumeId - Update Volume by ID
-VolumeRouter.put("/:libraryId",
+VolumeRouter.put("/:libraryId/:volumeId",
     requireRegular,
     async (req: Request, res: Response) => {
         res.send(await VolumeServices.update(

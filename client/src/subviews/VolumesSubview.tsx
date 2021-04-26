@@ -1,7 +1,7 @@
-// AuthorsSubview ------------------------------------------------------------
+// VolumesSubview ------------------------------------------------------------
 
-// Render a list of Authors for the currently selected Author, with a callback
-// handler when a particular Author is selected (or null for deselected).
+// Render a list of Volumes for the currently selected Volume, with a callback
+// handler when a particular Volume is selected (or null for deselected).
 
 // External Modules ----------------------------------------------------------
 
@@ -13,18 +13,18 @@ import Table from "react-bootstrap/Table";
 
 // Internal Modules ----------------------------------------------------------
 
-import AuthorClient from "../clients/AuthorClient";
+import VolumeClient from "../clients/VolumeClient";
 import Pagination from "../components/Pagination";
 import SearchBar from "../components/SearchBar";
 import {
     HandleIndex,
-    HandleAuthorOptional,
+    HandleVolumeOptional,
     HandleValue,
     OnAction
 } from "../components/types";
 import LibraryContext from "../contexts/LibraryContext";
 import LoginContext from "../contexts/LoginContext";
-import Author from "../models/Author";
+import Volume from "../models/Volume";
 import * as Abridgers from "../util/abridgers";
 import logger from "../util/client-logger";
 import ReportError from "../util/ReportError";
@@ -33,18 +33,18 @@ import {listValue} from "../util/transformations";
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
-    handleSelect: HandleAuthorOptional; // Handle Author selection or deselection
-    title?: string;                     // Table title [Authors for Library XXXXX]
+    handleSelect: HandleVolumeOptional; // Handle Volume selection or deselection
+    title?: string;                     // Table title [Volumes for Library XXXXX]
 }
 
 // Component Details ---------------------------------------------------------
 
-const AuthorsSubview = (props: Props) => {
+const VolumesSubview = (props: Props) => {
 
     const libraryContext = useContext(LibraryContext);
     const loginContext = useContext(LoginContext);
 
-    const [authors, setAuthors] = useState<Author[]>([]);
+    const [volumes, setVolumes] = useState<Volume[]>([]);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [index, setIndex] = useState<number>(-1);
     const [pageSize] = useState<number>(25);
@@ -52,54 +52,54 @@ const AuthorsSubview = (props: Props) => {
 
     useEffect(() => {
 
-        const fetchAuthors = async () => {
+        const fetchVolumes = async () => {
 
             const libraryId = libraryContext.state.library.id;
             if (loginContext.state.loggedIn && (libraryId > 0)) {
-                let newAuthors: Author[] = [];
+                let newVolumes: Volume[] = [];
                 try {
                     if (searchText.length > 0) {
-                        newAuthors =
-                            await AuthorClient.name(libraryId, searchText, {
+                        newVolumes =
+                            await VolumeClient.name(libraryId, searchText, {
                                 limit: pageSize,
                                 offset: (pageSize * (currentPage - 1))
                             });
                     } else {
-                        newAuthors =
-                            await AuthorClient.all(libraryId, {
+                        newVolumes =
+                            await VolumeClient.all(libraryId, {
                                 limit: pageSize
                             });
                     }
                     logger.debug({
-                        context: "AuthorsSubview.fetchAuthors",
-                        count: newAuthors.length,
-//                        authors: newAuthors,
+                        context: "VolumesSubview.fetchVolumes",
+                        count: newVolumes.length,
+//                        volumes: newVolumes,
                     });
-                    setAuthors(newAuthors);
                     setIndex(-1);
+                    setVolumes(newVolumes);
                 } catch (error) {
-                    setAuthors([]);
                     setIndex(-1);
+                    setVolumes([]);
                     if (error.response && (error.response.status === 403)) {
                         logger.debug({
-                            context: "AuthorsSubview.fetchAuthors",
+                            context: "VolumesSubview.fetchVolumes",
                             msg: "FORBIDDEN",
                         });
                     } else {
-                        ReportError("AuthorsSubview.fetchAuthors", error);
+                        ReportError("VolumesSubview.fetchVolumes", error);
                     }
                 }
             } else {
-                setAuthors([]);
                 setIndex(-1);
+                setVolumes([]);
                 logger.debug({
-                    context: "AuthorsSubview.fetchAuthors",
+                    context: "VolumesSubview.fetchVolumes",
                     msg: "SKIPPED",
                 });
             }
         }
 
-        fetchAuthors();
+        fetchVolumes();
 
     }, [libraryContext, loginContext, currentPage, pageSize, searchText]);
 
@@ -111,21 +111,21 @@ const AuthorsSubview = (props: Props) => {
         if (newIndex === index) {
             setIndex(-1);
             logger.trace({
-                context: "AuthorsSubview.handleIndex",
+                context: "VolumesSubview.handleIndex",
                 msg: "UNSET" });
             if (props.handleSelect) {
                 props.handleSelect(null);
             }
         } else {
-            const newAuthor = authors[newIndex];
+            const newVolume = volumes[newIndex];
             setIndex(newIndex);
             logger.debug({
-                context: "AuthorsSubview.handleIndex",
+                context: "VolumesSubview.handleIndex",
                 index: newIndex,
-                author: Abridgers.AUTHOR(newAuthor),
+                volume: Abridgers.VOLUME(newVolume),
             });
             if (props.handleSelect) {
-                props.handleSelect(newAuthor);
+                props.handleSelect(newVolume);
             }
         }
     }
@@ -142,7 +142,7 @@ const AuthorsSubview = (props: Props) => {
 
     return (
 
-        <Container fluid id="AuthorsSubview">
+        <Container fluid id="VolumesSubview">
 
             <Row className="mb-3">
                 <Col className="col-10 mr-2">
@@ -150,14 +150,14 @@ const AuthorsSubview = (props: Props) => {
                         autoFocus
                         handleChange={handleChange}
                         label="Search For:"
-                        placeholder="Search by all or part of either name"
+                        placeholder="Search by all or part of name"
                     />
                 </Col>
                 <Col>
                     <Pagination
                         currentPage={currentPage}
-                        lastPage={(authors.length === 0) ||
-                            (authors.length < pageSize)}
+                        lastPage={(volumes.length === 0) ||
+                        (volumes.length < pageSize)}
                         onNext={onNext}
                         onPrevious={onPrevious}
                     />
@@ -176,39 +176,43 @@ const AuthorsSubview = (props: Props) => {
                     <tr className="table-dark">
                         <th
                             className="text-center"
-                            colSpan={4}
+                            colSpan={5}
                             key={101}
                         >
-                            {props.title ? props.title : `Authors for ${libraryContext.state.library.name}`}
+                            {props.title ? props.title : `Volumes for ${libraryContext.state.library.name}`}
                         </th>
                     </tr>
                     <tr className="table-secondary">
-                        <th scope="col">First Name</th>
-                        <th scope="col">Last Name</th>
+                        <th scope="col">Name</th>
                         <th scope="col">Active</th>
+                        <th scope="col">Read</th>
+                        <th scope="col">Location</th>
                         <th scope="col">Notes</th>
                     </tr>
                     </thead>
 
                     <tbody>
-                    {authors.map((author, rowIndex) => (
+                    {volumes.map((volume, rowIndex) => (
                         <tr
                             className={"table-" +
-                            (rowIndex === index ? "primary" : "default")}
+                               (rowIndex === index ? "primary" : "default")}
                             key={1000 + (rowIndex * 100)}
                             onClick={() => (handleIndex(rowIndex))}
                         >
                             <td key={1000 + (rowIndex * 100) + 1}>
-                                {author.first_name}
+                                {volume.name}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 2}>
-                                {author.last_name}
+                                {listValue(volume.active)}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 3}>
-                                {listValue(author.active)}
+                                {listValue(volume.read)}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 4}>
-                                {author.notes}
+                                {volume.location}
+                            </td>
+                            <td key={1000 + (rowIndex * 100) + 5}>
+                                {volume.notes}
                             </td>
                         </tr>
                     ))}
@@ -223,4 +227,4 @@ const AuthorsSubview = (props: Props) => {
 
 }
 
-export default AuthorsSubview;
+export default VolumesSubview;

@@ -23,6 +23,7 @@ import HomeView from "./views/HomeView";
 import AuthorsView from "./views/AuthorsView";
 import LibrariesView from "./views/LibrariesView";
 import UsersView from "./views/UsersView";
+import VolumesView from "./views/VolumesView";
 
 // Component Details ---------------------------------------------------------
 
@@ -60,6 +61,9 @@ function App() {
                             <LinkContainer to="/authors">
                                 <NavItem className="nav-link">Authors</NavItem>
                             </LinkContainer>
+                            <LinkContainer to="/volumes">
+                                <NavItem className="nav-link">Volumes</NavItem>
+                            </LinkContainer>
                             <NavDropdown id="master" title="Masters">
                                 <LinkContainer to="/libraries">
                                     <NavDropdown.Item>Libraries</NavDropdown.Item>
@@ -86,6 +90,9 @@ function App() {
                     </Route>
                     <Route exact path="/users">
                         <UsersView/>
+                    </Route>
+                    <Route exact path="/volumes">
+                        <VolumesView/>
                     </Route>
                     <Route path="/">
                         <HomeView/>
