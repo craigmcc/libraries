@@ -6,14 +6,15 @@
 
 import React, {useState} from "react";
 import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Tab from "react-bootstrap/Tab";
-import Tabs from "react-bootstrap/Tabs"
+import Form from "react-bootstrap/Form";
 
 // Internal Modules ----------------------------------------------------------
 
 import Volume from "../models/Volume";
 import AuthorsView from "../views/AuthorsView";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
+import {OnChangeSelect} from "../components/types";
 
 // Incoming Properties -------------------------------------------------------
 
@@ -25,50 +26,62 @@ export interface Props {
 
 const VolumeChildren = (props: Props) => {
 
-    const [key, setKey] = useState<string | null>("Home");
+    const items = [
+        "Authors",
+        "Stories",
+    ];
+
+    const [index, setIndex] = useState<number>(-1);
+
+    const onChange: OnChangeSelect = (event) => {
+        const newIndex = parseInt(event.target.value);
+        setIndex(newIndex);
+    }
 
     return (
 
         <Container fluid id="VolumeChildren">
 
-            <Row className="justify-content-center mb-3">
-                <strong>
-                    <span>Related Items for Volume:&nbsp;</span>
-                    <span className="text-info">
-                        {props.volume.name}
-                    </span>
-                </strong>
+            <Row className="ml-1 mr-1 mb-3">
+                <Col className="text-left">
+                    <strong>
+                        <span>Related Items for Volume:&nbsp;</span>
+                        <span className="text-info">{props.volume.name}</span>
+                    </strong>
+                </Col>
+                <Col className="text-right">
+                    <Form inline>
+                        <Form.Label className="mr-2" htmlFor="itemSelector">
+                            Item:
+                        </Form.Label>
+                        <Form.Control
+                            as="select"
+                            autoFocus={true}
+                            id="itemSelector"
+                            onChange={onChange}
+                            size="sm"
+                            value={index}
+                        >
+                            <option key="-1" value="-1">(Select)</option>
+                            {items.map((item, index) => (
+                                <option key={index} value={index}>{item}</option>
+                            ))}
+                        </Form.Control>
+                    </Form>
+                </Col>
             </Row>
 
-            <Tabs
-                activeKey={key}
-                onSelect={(k) => setKey(k)}
-            >
+            {(index === 0) ? (
+                <AuthorsView
+                    base={props.volume}
+                    nested={true}
+                    title={`Authors for Volume: ${props.volume.name}`}
+                />
+            ) : null}
 
-                <Tab eventKey="Home" title="Home">
-                    <Row className="mt-3">
-                        Select one of the following tabs to access
-                        information related to this Volume.
-                    </Row>
-                </Tab>
-
-                <Tab eventKey="Authors" title="Authors">
-                    <Row className="mt-3">
-                        <AuthorsView
-                            base={props.volume}
-                            nested={true}
-                            title={`Authors for Volume: ${props.volume.name}`}
-                        />
-                    </Row>
-                </Tab>
-
-                <Tab eventKey="Stories" title="Stories">
-                    <Row className="mt-3">
-                        Stories for this Volume.
-                    </Row>
-                </Tab>
-
-            </Tabs>
+            {(index === 1) ? (
+                <span>Stories</span>
+            ) : null}
 
         </Container>
 

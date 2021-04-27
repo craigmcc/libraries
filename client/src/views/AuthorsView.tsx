@@ -166,7 +166,7 @@ const AuthorsView = (props: Props) => {
                             <AuthorsSubview
                                 base={props.base ? props.base : undefined}
                                 handleSelect={handleSelect}
-                                nested={false}
+                                nested={nested}
                                 title={props.title ? props.title : undefined}
                             />
                         </Row>
