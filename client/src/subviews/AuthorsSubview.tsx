@@ -14,6 +14,9 @@ import Table from "react-bootstrap/Table";
 // Internal Modules ----------------------------------------------------------
 
 import AuthorClient from "../clients/AuthorClient";
+import SeriesClient from "../clients/SeriesClient";
+import StoryClient from "../clients/StoryClient";
+import VolumeClient from "../clients/VolumeClient";
 import Pagination from "../components/Pagination";
 import SearchBar from "../components/SearchBar";
 import {
@@ -25,6 +28,9 @@ import {
 import LibraryContext from "../contexts/LibraryContext";
 import LoginContext from "../contexts/LoginContext";
 import Author from "../models/Author";
+import Series from "../models/Series";
+import Story from "../models/Story";
+import Volume from "../models/Volume";
 import * as Abridgers from "../util/abridgers";
 import logger from "../util/client-logger";
 import ReportError from "../util/ReportError";
@@ -33,8 +39,10 @@ import {listValue} from "../util/transformations";
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
+    base?: Series | Story | Volume;     // Parent object to select for [Library]
     handleSelect: HandleAuthorOptional; // Handle Author selection or deselection
-    title?: string;                     // Table title [Authors for Library XXXXX]
+    nested?: boolean;                   // Show nested child list? [false]
+    title?: string;                     // Table title [Authors for Library: XXXXX]
 }
 
 // Component Details ---------------------------------------------------------
@@ -47,8 +55,12 @@ const AuthorsSubview = (props: Props) => {
     const [authors, setAuthors] = useState<Author[]>([]);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [index, setIndex] = useState<number>(-1);
+    const [nested] = useState<boolean>((props.nested !== undefined)
+        ? props.nested : false);
     const [pageSize] = useState<number>(25);
     const [searchText, setSearchText] = useState<string>("");
+    const [title] = useState<string>((props.title !== undefined)
+            ? props.title : `Authors for Library: ${libraryContext.state.library.name}`)
 
     useEffect(() => {
 
@@ -58,7 +70,26 @@ const AuthorsSubview = (props: Props) => {
             if (loginContext.state.loggedIn && (libraryId > 0)) {
                 let newAuthors: Author[] = [];
                 try {
-                    if (searchText.length > 0) {
+                    // TODO - cannot search by name on nested invocations
+                    if (props.base instanceof Series) {
+                        newAuthors =
+                            await SeriesClient.authors(libraryId, props.base.id, {
+                                limit: pageSize,
+                                offset: (pageSize * (currentPage - 1))
+                            });
+                    } else if (props.base instanceof Story) {
+                        newAuthors =
+                            await StoryClient.authors(libraryId, props.base.id, {
+                                limit: pageSize,
+                                offset: (pageSize * (currentPage - 1))
+                            });
+                    } else if (props.base instanceof Volume) {
+                        newAuthors =
+                            await VolumeClient.authors(libraryId, props.base.id, {
+                                limit: pageSize,
+                                offset: (pageSize * (currentPage - 1))
+                            });
+                    } else if (searchText.length > 0) {
                         newAuthors =
                             await AuthorClient.name(libraryId, searchText, {
                                 limit: pageSize,
@@ -70,10 +101,13 @@ const AuthorsSubview = (props: Props) => {
                                 limit: pageSize
                             });
                     }
-                    logger.debug({
+                    logger.info({
                         context: "AuthorsSubview.fetchAuthors",
                         count: newAuthors.length,
-//                        authors: newAuthors,
+                        authors: newAuthors,
+                        base: props.base,
+                        nested: nested,
+                        title: title,
                     });
                     setAuthors(newAuthors);
                     setIndex(-1);
@@ -101,7 +135,9 @@ const AuthorsSubview = (props: Props) => {
 
         fetchAuthors();
 
-    }, [libraryContext, loginContext, currentPage, pageSize, searchText]);
+    }, [libraryContext, loginContext,
+        currentPage, pageSize, searchText,
+        props.base, nested, title]);
 
     const handleChange: HandleValue = (newSearchText) => {
         setSearchText(newSearchText);
@@ -144,25 +180,27 @@ const AuthorsSubview = (props: Props) => {
 
         <Container fluid id="AuthorsSubview">
 
-            <Row className="mb-3">
-                <Col className="col-10 mr-2">
-                    <SearchBar
-                        autoFocus
-                        handleChange={handleChange}
-                        label="Search For:"
-                        placeholder="Search by all or part of either name"
-                    />
-                </Col>
-                <Col>
-                    <Pagination
-                        currentPage={currentPage}
-                        lastPage={(authors.length === 0) ||
-                            (authors.length < pageSize)}
-                        onNext={onNext}
-                        onPrevious={onPrevious}
-                    />
-                </Col>
-            </Row>
+            {(!nested) ? (
+                <Row className="mb-3">
+                    <Col className="col-10 mr-2">
+                        <SearchBar
+                            autoFocus
+                            handleChange={handleChange}
+                            label="Search For:"
+                            placeholder="Search by all or part of either name"
+                        />
+                    </Col>
+                    <Col>
+                        <Pagination
+                            currentPage={currentPage}
+                            lastPage={(authors.length === 0) ||
+                                (authors.length < pageSize)}
+                            onNext={onNext}
+                            onPrevious={onPrevious}
+                        />
+                    </Col>
+                </Row>
+            ) : null }
 
             <Row>
                 <Table
@@ -179,7 +217,7 @@ const AuthorsSubview = (props: Props) => {
                             colSpan={4}
                             key={101}
                         >
-                            {props.title ? props.title : `Authors for ${libraryContext.state.library.name}`}
+                            {title}
                         </th>
                     </tr>
                     <tr className="table-secondary">

@@ -12,6 +12,7 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
+import AuthorChildren from "../children/AuthorChildren";
 import AuthorClient from "../clients/AuthorClient";
 import {HandleAuthor, HandleAuthorOptional, Scopes} from "../components/types";
 import LibraryContext from "../contexts/LibraryContext";
@@ -22,20 +23,34 @@ import AuthorsSubview from "../subviews/AuthorsSubview";
 import * as Abridgers from "../util/abridgers";
 import logger from "../util/client-logger";
 import ReportError from "../util/ReportError";
+import Series from "../models/Series";
+import Story from "../models/Story";
+import Volume from "../models/Volume";
+
+// Incoming Properties --------------------------------------------------------
+
+export interface Props {
+    base?: Series | Story | Volume;     // Parent object to select for [Library]
+    nested?: boolean;                   // Show nested child list? [false]
+    title?: string;                     // Table title [Authors for Library: XXXXX]
+}
 
 // Component Details ---------------------------------------------------------
 
-const AuthorsView = () => {
+const AuthorsView = (props: Props) => {
 
     const libraryContext = useContext(LibraryContext);
     const loginContext = useContext(LoginContext);
 
+    const [author, setAuthor] = useState<Author | null>(null);
     const [canAdd, setCanAdd] = useState<boolean>(true);
     const [canEdit, setCanEdit] = useState<boolean>(true);
     const [canRemove, setCanRemove] = useState<boolean>(true);
+    const [nested] = useState<boolean>((props.nested !== undefined)
+        ? props.nested : false);
     const [libraryId, setLibraryId] = useState<number>(-1);
     const [refresh, setRefresh] = useState<boolean>(false);
-    const [author, setAuthor] = useState<Author | null>(null);
+
 
     useEffect(() => {
 
@@ -53,7 +68,8 @@ const AuthorsView = () => {
             setRefresh(false);
         }
 
-    }, [libraryContext, loginContext, refresh]);
+    }, [libraryContext, loginContext, refresh,
+        props.base, props.nested, props.title]);
 
     const handleInsert: HandleAuthor = async (newAuthor) => {
         try {
@@ -148,7 +164,10 @@ const AuthorsView = () => {
 
                         <Row className="ml-1 mr-1 mb-3">
                             <AuthorsSubview
+                                base={props.base ? props.base : undefined}
                                 handleSelect={handleSelect}
+                                nested={false}
+                                title={props.title ? props.title : undefined}
                             />
                         </Row>
 
@@ -171,41 +190,60 @@ const AuthorsView = () => {
 
                     <>
 
-                        <Row className="ml-1 mr-1 mb-3">
-                            <Col className="text-left">
-                                <strong>
-                                    <>
-                                        {(author.id < 0) ? (
-                                            <span>Adding New</span>
-                                        ) : (
-                                            <span>Editing Existing</span>
-                                        )}
-                                        &nbsp;Author for Library&nbsp;
-                                        {libraryContext.state.library.name}
-                                    </>
-                                </strong>
-                            </Col>
-                            <Col className="text-right">
-                                <Button
-                                    onClick={onBack}
-                                    size="sm"
-                                    type="button"
-                                    variant="secondary"
-                                >
-                                    Back
-                                </Button>
-                            </Col>
-                        </Row>
+                        <Row id="AuthorDetails" className="mr-1">
 
-                        <Row className="ml-1 mr-1">
-                            <AuthorForm
-                                autoFocus
-                                canRemove={canRemove}
-                                handleInsert={handleInsert}
-                                handleRemove={handleRemove}
-                                handleUpdate={handleUpdate}
-                                author={author}
-                            />
+                            <Col id="AuthorFormView">
+
+                                <Row className="ml-1 mr-1 mb-3">
+                                    <Col className="text-center col-8">
+                                        <strong>
+                                            <>
+                                                {(author.id < 0) ? (
+                                                    <span>Adding New</span>
+                                                ) : (
+                                                    <span>Editing Existing</span>
+                                                )}
+                                                &nbsp;Author for Library&nbsp;
+                                                <span className="text-info">
+                                                    {libraryContext.state.library.name}
+                                                </span>
+                                            </>
+                                        </strong>
+                                    </Col>
+                                    <Col className="text-right">
+                                        <Button
+                                            onClick={onBack}
+                                            size="sm"
+                                            type="button"
+                                            variant="secondary"
+                                        >
+                                            Back
+                                        </Button>
+                                    </Col>
+                                </Row>
+
+                                <Row className="ml-1 mr-1">
+                                    <AuthorForm
+                                        autoFocus
+                                        canRemove={canRemove}
+                                        handleInsert={handleInsert}
+                                        handleRemove={handleRemove}
+                                        handleUpdate={handleUpdate}
+                                        author={author}
+                                    />
+                                </Row>
+
+                            </Col>
+
+                            {((author.id > 0) && nested) ? (
+                                <Col id="authorChildren" className="bg-light">
+                                    <AuthorChildren
+                                        author={author}
+                                    />
+                                </Col>
+
+                            ) : null }
+
                         </Row>
 
                     </>

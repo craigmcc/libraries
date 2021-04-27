@@ -179,7 +179,7 @@ const VolumesSubview = (props: Props) => {
                             colSpan={6}
                             key={101}
                         >
-                            {props.title ? props.title : `Volumes for ${libraryContext.state.library.name}`}
+                            {props.title ? props.title : `Volumes for Library: ${libraryContext.state.library.name}`}
                         </th>
                     </tr>
                     <tr className="table-secondary">

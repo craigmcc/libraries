@@ -99,7 +99,7 @@ const AuthorForm = (props: Props) => {
         <>
 
             {/* Details Form */}
-            <Container id="authorForm">
+            <Container id="AuthorForm">
 
                 <Formik
                     initialValues={initialValues}

@@ -179,7 +179,7 @@ const StoriesSubview = (props: Props) => {
                             colSpan={4}
                             key={101}
                         >
-                            {props.title ? props.title : `Stories for ${libraryContext.state.library.name}`}
+                            {props.title ? props.title : `Stories for Library: ${libraryContext.state.library.name}`}
                         </th>
                     </tr>
                     <tr className="table-secondary">

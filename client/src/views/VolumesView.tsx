@@ -12,6 +12,7 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
+import VolumeChildren from "../children/VolumeChildren";
 import VolumeClient from "../clients/VolumeClient";
 import {HandleVolume, HandleVolumeOptional, Scopes} from "../components/types";
 import LibraryContext from "../contexts/LibraryContext";
@@ -171,41 +172,59 @@ const VolumesView = () => {
 
                     <>
 
-                        <Row className="ml-1 mr-1 mb-3">
-                            <Col className="text-left">
-                                <strong>
-                                    <>
-                                        {(volume.id < 0) ? (
-                                            <span>Adding New</span>
-                                        ) : (
-                                            <span>Editing Existing</span>
-                                        )}
-                                        &nbsp;Volume for Library&nbsp;
-                                        {libraryContext.state.library.name}
-                                    </>
-                                </strong>
-                            </Col>
-                            <Col className="text-right">
-                                <Button
-                                    onClick={onBack}
-                                    size="sm"
-                                    type="button"
-                                    variant="secondary"
-                                >
-                                    Back
-                                </Button>
-                            </Col>
-                        </Row>
+                        <Row id="VolumeDetails" className="mr-1">
 
-                        <Row className="ml-1 mr-1">
-                            <VolumeForm
-                                autoFocus
-                                canRemove={canRemove}
-                                handleInsert={handleInsert}
-                                handleRemove={handleRemove}
-                                handleUpdate={handleUpdate}
-                                volume={volume}
-                            />
+                            <Col id="VolumeFormView">
+
+                                <Row className="ml-1 mr-1 mb-3">
+                                    <Col className="text-left col-8">
+                                        <strong>
+                                            <>
+                                                {(volume.id < 0) ? (
+                                                    <span>Adding New</span>
+                                                ) : (
+                                                    <span>Editing Existing</span>
+                                                )}
+                                                &nbsp;Volume for Library:&nbsp;
+                                                <span className="text-info">
+                                                    {libraryContext.state.library.name}
+                                                </span>
+                                            </>
+                                        </strong>
+                                    </Col>
+                                    <Col className="text-right">
+                                        <Button
+                                            onClick={onBack}
+                                            size="sm"
+                                            type="button"
+                                            variant="secondary"
+                                        >
+                                            Back
+                                        </Button>
+                                    </Col>
+                                </Row>
+
+                                <Row className="ml-1 mr-1">
+                                    <VolumeForm
+                                        autoFocus
+                                        canRemove={canRemove}
+                                        handleInsert={handleInsert}
+                                        handleRemove={handleRemove}
+                                        handleUpdate={handleUpdate}
+                                        volume={volume}
+                                    />
+                                </Row>
+
+                            </Col>
+
+                            {(volume.id > 0) ? (
+                                <Col id="volumeChildren" className="bg-light">
+                                    <VolumeChildren
+                                        volume={volume}
+                                    />
+                                </Col>
+                            ) : null }
+
                         </Row>
 
                     </>
