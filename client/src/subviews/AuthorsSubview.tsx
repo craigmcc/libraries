@@ -60,7 +60,7 @@ const AuthorsSubview = (props: Props) => {
     const [pageSize] = useState<number>(25);
     const [searchText, setSearchText] = useState<string>("");
     const [title] = useState<string>((props.title !== undefined)
-            ? props.title : `Authors for Library: ${libraryContext.state.library.name}`)
+        ? props.title : `Authors for Library: ${libraryContext.state.library.name}`)
 
     useEffect(() => {
 

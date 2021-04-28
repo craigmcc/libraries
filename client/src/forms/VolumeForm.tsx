@@ -18,6 +18,7 @@ import * as Yup from "yup";
 
 import {HandleVolume} from "../components/types";
 import Volume from "../models/Volume";
+//import {toVolume} from "../util/to-model-types";
 import {toEmptyStrings, toNullValues} from "../util/transformations";
 
 // Property Details ----------------------------------------------------------
@@ -43,9 +44,9 @@ const VolumeForm = (props: Props) => {
 
     const handleSubmit = (values: FormikValues, actions: FormikHelpers<FormikValues>): void => {
         if (adding) {
-            props.handleInsert(toVolume(values));
+            props.handleInsert(toVolume1(values));
         } else {
-            props.handleUpdate(toVolume(values));
+            props.handleUpdate(toVolume1(values));
         }
     }
 
@@ -62,7 +63,7 @@ const VolumeForm = (props: Props) => {
         props.handleRemove(props.volume)
     }
 
-    const toVolume = (values: FormikValues): Volume => {
+    const toVolume1 = (values: FormikValues): Volume => {
         const nulled = toNullValues(values);
         const result = new Volume({
             active: nulled.active,
