@@ -6,10 +6,19 @@
 
 import ApiBase from "./ApiBase";
 import Author from "../models/Author";
+import Library from "../models/Library";
 import Series from "../models/Series";
 import Story from "../models/Story";
 import Volume from "../models/Volume";
 import {queryParameters} from "../util/query-parameters";
+import {
+    toAuthors,
+    toLibraries,
+    toLibrary,
+    toSerieses,
+    toStories,
+    toVolumes,
+} from "../util/to-model-types";
 
 const LIBRARIES_BASE = "/libraries";
 
@@ -17,67 +26,75 @@ const LIBRARIES_BASE = "/libraries";
 
 export class LibraryClient {
 
-    async active<Library>(params?: object): Promise<Library[]> {
-        return (await ApiBase.get(LIBRARIES_BASE
+    async active(params?: object): Promise<Library[]> {
+        const values = (await ApiBase.get<Library[]>(LIBRARIES_BASE
             + `/active${queryParameters(params)}`, params)).data;
+        return toLibraries(values);
     }
 
-    async all<Library>(params?: object): Promise<Library[]> {
-        return (await ApiBase.get(LIBRARIES_BASE
+    async all(params?: object): Promise<Library[]> {
+        const values = (await ApiBase.get<Library[]>(LIBRARIES_BASE
             + `${queryParameters(params)}`)).data;
+        return toLibraries(values);
     }
 
     async authors(libraryId: number, params?: Object): Promise<Author[]> {
-        return (await ApiBase.get(LIBRARIES_BASE
+        const values = (await ApiBase.get<Author[]>(LIBRARIES_BASE
             + `/${libraryId}/authors${queryParameters(params)}`)).data;
+        return toAuthors(values);
     }
 
-    async exact<Library>(name: string, params?: object): Promise<Library> {
-        return (await ApiBase.get(LIBRARIES_BASE
+    async exact(name: string, params?: object): Promise<Library> {
+        const value = (await ApiBase.get<Library>(LIBRARIES_BASE
             + `/exact/${name}${queryParameters(params)}`)).data;
+        return toLibrary(value);
     }
 
-    async find<Library>(libraryId: number, params?: Object): Promise<Library> {
-        return (await ApiBase.get(LIBRARIES_BASE
+    async find(libraryId: number, params?: Object): Promise<Library> {
+        const value = (await ApiBase.get<Library>(LIBRARIES_BASE
             + `/${libraryId}${queryParameters(params)}`)).data;
+        return toLibrary(value);
     }
 
-    async insert<Library>(library: Library): Promise<Library> {
-        return (await ApiBase.post(LIBRARIES_BASE, library)).data;
+    async insert(library: Library): Promise<Library> {
+        const value = (await ApiBase.post<Library>(LIBRARIES_BASE, library)).data;
+        return toLibrary(value);
     }
 
-    async name<Library>(name: string, params?: object): Promise<Library[]> {
-        return (await ApiBase.get(LIBRARIES_BASE
+    async name(name: string, params?: object): Promise<Library[]> {
+        const values = (await ApiBase.get<Library[]>(LIBRARIES_BASE
             + `/name/${name}${queryParameters(params)}`)).data;
+        return toLibraries(values);
     }
 
-    async remove<Library>(libraryId: number): Promise<Library> {
-        return (await ApiBase.delete(LIBRARIES_BASE + `/${libraryId}`)).data;
+    async remove(libraryId: number): Promise<Library> {
+        const value =
+            (await ApiBase.delete<Library>(LIBRARIES_BASE + `/${libraryId}`)).data;
+        return toLibrary(value);
     }
 
     async series(libraryId: number, params?: Object): Promise<Series[]> {
-        return (await ApiBase.get(LIBRARIES_BASE
+        const values = (await ApiBase.get<Series[]>(LIBRARIES_BASE
             + `/${libraryId}/series${queryParameters(params)}`)).data;
-    }
-
-    async scope<Library>(scope: string, params?: object): Promise<Library> {
-        return (await ApiBase.get(LIBRARIES_BASE
-            + `/scope/${scope}${queryParameters(params)}`)).data;
+        return toSerieses(values);
     }
 
     async stories(libraryId: number, params?: Object): Promise<Story[]> {
-        return (await ApiBase.get(LIBRARIES_BASE
+        const values = (await ApiBase.get<Story[]>(LIBRARIES_BASE
             + `/${libraryId}/stories${queryParameters(params)}`)).data;
+        return toStories(values);
     }
 
-    async update<Library>(libraryId: number, library: Library): Promise<Library> {
-        return (await ApiBase.put(LIBRARIES_BASE
+    async update(libraryId: number, library: Library): Promise<Library> {
+        const value = (await ApiBase.put<Library>(LIBRARIES_BASE
             + `/${libraryId}`, library)).data;
+        return toLibrary(value);
     }
 
     async volumes(libraryId: number, params?: Object): Promise<Volume[]> {
-        return (await ApiBase.get(LIBRARIES_BASE
+        const values = (await ApiBase.get<Volume[]>(LIBRARIES_BASE
             + `/${libraryId}/volumes${queryParameters(params)}`)).data;
+        return toVolumes(values);
     }
 
 }

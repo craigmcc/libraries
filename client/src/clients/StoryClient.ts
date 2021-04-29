@@ -5,7 +5,18 @@
 // Internal Modules ----------------------------------------------------------
 
 import ApiBase from "./ApiBase";
+import Author from "../models/Author";
+import Series from "../models/Series";
+import Story from "../models/Story";
+import Volume from "../models/Volume";
 import {queryParameters} from "../util/query-parameters";
+import {
+    toAuthors,
+    toSerieses,
+    toStories,
+    toStory,
+    toVolumes,
+} from "../util/to-model-types";
 
 const STORIES_BASE = "/stories";
 
@@ -13,58 +24,70 @@ const STORIES_BASE = "/stories";
 
 export class StoryClient {
 
-    async active<Story>(libraryId: number, params?: object): Promise<Story[]> {
-        return (await ApiBase.get(STORIES_BASE
+    async active(libraryId: number, params?: object): Promise<Story[]> {
+        const values = (await ApiBase.get<Story[]>(STORIES_BASE
             + `/${libraryId}/active${queryParameters(params)}`, params)).data;
+        return toStories(values);
     }
 
-    async all<Story>(libraryId: number, params?: object): Promise<Story[]> {
-        return (await ApiBase.get(STORIES_BASE
+    async all(libraryId: number, params?: object): Promise<Story[]> {
+        const values = (await ApiBase.get<Story[]>(STORIES_BASE
             + `/${libraryId}${queryParameters(params)}`)).data;
+        return toStories(values);
     }
 
-    async authors<Story>(libraryId: number, storyId: number, params?: Object): Promise<Story[]> {
-        return (await ApiBase.get(STORIES_BASE
+    async authors(libraryId: number, storyId: number, params?: Object): Promise<Author[]> {
+        const values = (await ApiBase.get<Author[]>(STORIES_BASE
             + `/${libraryId}/${storyId}/authors${queryParameters(params)}`)).data;
+        return toAuthors(values);
     }
 
-    async exact<Story>(libraryId: number, name: string, params?: object): Promise<Story>
-    {
-        return (await ApiBase.get(STORIES_BASE
+    async exact(libraryId: number, name: string, params?: object): Promise<Story> {
+        const value = (await ApiBase.get<Story>(STORIES_BASE
             + `/${libraryId}/exact/${name}${queryParameters(params)}`)).data;
+        return toStory(value);
     }
 
-    async find<Story>(libraryId: number, storyId: number, params?: Object): Promise<Story> {
-        return (await ApiBase.get(STORIES_BASE
+    async find(libraryId: number, storyId: number, params?: Object): Promise<Story> {
+        const value = (await ApiBase.get<Story>(STORIES_BASE
             + `/${libraryId}/${storyId}${queryParameters(params)}`)).data;
+        return toStory(value);
     }
 
-    async insert<Story>(libraryId: number, story: Story): Promise<Story> {
-        return (await ApiBase.post(STORIES_BASE + `/${libraryId}`, story)).data;
+    async insert(libraryId: number, story: Story): Promise<Story> {
+        const value = (await ApiBase.post<Story>(STORIES_BASE
+            + `/${libraryId}`, story)).data;
+        return toStory(value);
     }
 
-    async name<Story>(libraryId: number, name: string, params?: object): Promise<Story[]> {
-        return (await ApiBase.get(STORIES_BASE
+    async name(libraryId: number, name: string, params?: object): Promise<Story[]> {
+        const values = (await ApiBase.get<Story[]>(STORIES_BASE
             + `/${libraryId}/name/${name}${queryParameters(params)}`)).data;
+        return toStories(values);
     }
 
-    async remove<Story>(libraryId: number, storyId: number): Promise<Story> {
-        return (await ApiBase.delete(STORIES_BASE + `/${libraryId}/${storyId}`)).data;
+    async remove(libraryId: number, storyId: number): Promise<Story> {
+        const value = (await ApiBase.delete<Story>(STORIES_BASE
+            + `/${libraryId}/${storyId}`)).data;
+        return toStory(value);
     }
 
-    async series<Series>(libraryId: number, storyId: number, params?: Object): Promise<Series[]> {
-        return (await ApiBase.get(STORIES_BASE
+    async series(libraryId: number, storyId: number, params?: Object): Promise<Series[]> {
+        const values = (await ApiBase.get<Series[]>(STORIES_BASE
             + `/${libraryId}/${storyId}/series${queryParameters(params)}`)).data;
+        return toSerieses(values);
     }
 
-    async update<Story>(libraryId: number, storyId: number, story: Story): Promise<Story> {
-        return (await ApiBase.put(STORIES_BASE
+    async update(libraryId: number, storyId: number, story: Story): Promise<Story> {
+        const value = (await ApiBase.put<Story>(STORIES_BASE
             + `/${libraryId}/${storyId}`, story)).data;
+        return toStory(value);
     }
 
-    async volumes<Volume>(libraryId: number, storyId: number, params?: Object): Promise<Volume[]> {
-        return (await ApiBase.get(STORIES_BASE
+    async volumes(libraryId: number, storyId: number, params?: Object): Promise<Volume[]> {
+        const values = (await ApiBase.get<Volume[]>(STORIES_BASE
             + `/${libraryId}/${storyId}/volumes${queryParameters(params)}`)).data;
+        return toVolumes(values);
     }
 
 }
