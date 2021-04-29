@@ -7,7 +7,7 @@
 class User {
 
     constructor(data: any = {}) {
-        this.active = data.active || true;
+        this.active = (data.active !== undefined) ? data.active : true;
         this.id = data.id || -1;
         this.level = data.level || "info";
         this.password = data.password || null;

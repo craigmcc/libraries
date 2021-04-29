@@ -12,7 +12,7 @@
 class Volume {
 
     constructor(data: any = {}) {
-        this.active = data.active || true;
+        this.active = (data.active !== undefined) ? data.active : true;
         this.copyright = data.copyright;
         this.google_id = data.google_id;
         this.id = data.id || -1;
@@ -22,7 +22,7 @@ class Volume {
         this.media = data.media;
         this.name = data.name;
         this.notes = data.notes;
-        this.read = data.read || false;
+        this.read = (data.active !== undefined) ? data.read : false;
     }
 
     active: boolean;

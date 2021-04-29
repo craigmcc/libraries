@@ -11,7 +11,7 @@
 class Series {
 
     constructor(data: any = {}) {
-        this.active = data.active || true;
+        this.active = (data.active !== undefined) ? data.active : true;
         this.copyright = data.copyright;
         this.id = data.id || -1;
         this.library_id = data.library_id;

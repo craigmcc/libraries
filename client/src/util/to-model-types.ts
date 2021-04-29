@@ -15,7 +15,7 @@ import Volume from "../models/Volume";
 // Public Objects ------------------------------------------------------------
 
 export const toAuthor = (value: any): Author => {
-    return new Author(...value);
+    return new Author(value);
 }
 
 export const toAuthors = (values: any | undefined): Author[] => {
@@ -45,7 +45,7 @@ export const toLibraries = (values: any | undefined): Library[] => {
 }
 
 export const toSeries = (value: any): Series => {
-    return new Series(...value);
+    return new Series(value);
 }
 
 export const toSerieses = (values: any | undefined): Series[] => {
@@ -60,7 +60,7 @@ export const toSerieses = (values: any | undefined): Series[] => {
 }
 
 export const toStory = (value: any): Story => {
-    return new Story(...value);
+    return new Story(value);
 }
 
 export const toStories = (values: any | undefined): Story[] => {
@@ -75,7 +75,7 @@ export const toStories = (values: any | undefined): Story[] => {
 }
 
 export const toVolume = (value: any): Volume => {
-    return new Volume(...value);
+    return new Volume(value);
 }
 
 export const toVolumes = (values: any | undefined): Volume[] => {
