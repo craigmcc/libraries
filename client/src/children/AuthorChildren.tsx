@@ -9,8 +9,6 @@ import Col from "react-bootstrap/Col";
 import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
-//import Tab from "react-bootstrap/Tab";
-//import Tabs from "react-bootstrap/Tabs"
 
 // Internal Modules ----------------------------------------------------------
 
@@ -42,8 +40,6 @@ const AuthorChildren = (props: Props) => {
         const newIndex = parseInt(event.target.value);
         setIndex(newIndex);
     }
-
-
 
     return (
 
@@ -103,40 +99,6 @@ const AuthorChildren = (props: Props) => {
                     title={`Volumes for Author: ${props.author.first_name} ${props.author.last_name}`}
                 />
             ) : null}
-
-{/*
-            <Tabs
-                activeKey={key}
-                onSelect={(k) => setKey(k)}
-            >
-
-                <Tab eventKey="Home" title="Home">
-                    <Row className="mt-3">
-                        Select one of the following tabs to access
-                        information related to this Author.
-                    </Row>
-                </Tab>
-
-                <Tab eventKey="Series" title="Series">
-                    <Row className="mt-3">
-                        Series for this Author.
-                    </Row>
-                </Tab>
-
-                <Tab eventKey="Stories" title="Stories">
-                    <Row className="mt-3">
-                        Stories for this Author.
-                    </Row>
-                </Tab>
-
-                <Tab eventKey="Volumes" title="Volumes">
-                    <Row className="mt-3">
-                        Volumes for this Author.
-                    </Row>
-                </Tab>
-
-            </Tabs>
-*/}
 
         </Container>
 
