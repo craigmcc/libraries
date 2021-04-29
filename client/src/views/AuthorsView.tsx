@@ -19,13 +19,13 @@ import LibraryContext from "../contexts/LibraryContext";
 import LoginContext from "../contexts/LoginContext";
 import AuthorForm from "../forms/AuthorForm";
 import Author from "../models/Author";
+import Series from "../models/Series";
+import Story from "../models/Story";
+import Volume from "../models/Volume";
 import AuthorsSubview from "../subviews/AuthorsSubview";
 import * as Abridgers from "../util/abridgers";
 import logger from "../util/client-logger";
 import ReportError from "../util/ReportError";
-import Series from "../models/Series";
-import Story from "../models/Story";
-import Volume from "../models/Volume";
 
 // Incoming Properties --------------------------------------------------------
 
@@ -53,6 +53,13 @@ const AuthorsView = (props: Props) => {
 
 
     useEffect(() => {
+
+        logger.info({
+            context: "AuthorsView.useEffect",
+            base: props.base,
+            nested: props.nested,
+            title: props.title,
+        });
 
         // Record current Library ID
         setLibraryId(libraryContext.state.library.id);
@@ -105,7 +112,7 @@ const AuthorsView = (props: Props) => {
             if (canEdit) {
                 setAuthor(newAuthor);
             }
-            logger.trace({
+            logger.info({
                 context: "AuthorsView.handleSelect",
                 canEdit: canEdit,
                 canRemove: canRemove,
@@ -203,7 +210,7 @@ const AuthorsView = (props: Props) => {
                                                 ) : (
                                                     <span>Editing Existing</span>
                                                 )}
-                                                &nbsp;Author for Library&nbsp;
+                                                &nbsp;Author for Library:&nbsp;
                                                 <span className="text-info">
                                                     {libraryContext.state.library.name}
                                                 </span>
@@ -235,7 +242,7 @@ const AuthorsView = (props: Props) => {
 
                             </Col>
 
-                            {((author.id > 0) && nested) ? (
+                            {(author.id > 0) ? (
                                 <Col id="authorChildren" className="bg-light">
                                     <AuthorChildren
                                         author={author}

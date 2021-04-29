@@ -19,6 +19,7 @@ import * as Yup from "yup";
 import {HandleAuthor} from "../components/types";
 import Author from "../models/Author";
 import {validateAuthorNameUnique} from "../util/async-validators";
+import {toAuthor} from "../util/to-model-types";
 import {toEmptyStrings, toNullValues} from "../util/transformations";
 
 // Property Details ----------------------------------------------------------
@@ -44,9 +45,9 @@ const AuthorForm = (props: Props) => {
 
     const handleSubmit = (values: FormikValues, actions: FormikHelpers<FormikValues>): void => {
         if (adding) {
-            props.handleInsert(toAuthor(values));
+            props.handleInsert(toAuthor(toNullValues(values)));
         } else {
-            props.handleUpdate(toAuthor(values));
+            props.handleUpdate(toAuthor(toNullValues(values)));
         }
     }
 
@@ -61,22 +62,6 @@ const AuthorForm = (props: Props) => {
     const onConfirmPositive = (): void => {
         setShowConfirm(false);
         props.handleRemove(props.author)
-    }
-
-    const toAuthor = (values: FormikValues): Author => {
-        const nulled = toNullValues(values);
-        const result = new Author({
-            active: nulled.active,
-            first_name: nulled.first_name,
-            id: props.author.id,
-            last_name: nulled.last_name,
-            library_id: props.author.library_id,
-            notes: nulled.notes,
-        });
-        if (nulled.active !== undefined) {
-            result.active = nulled.active;
-        }
-        return result;
     }
 
     const validationSchema = () => {

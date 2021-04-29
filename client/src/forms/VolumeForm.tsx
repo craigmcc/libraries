@@ -5,7 +5,7 @@
 // External Modules ----------------------------------------------------------
 
 import React, {useState} from "react";
-import {Formik,FormikHelpers,FormikValues} from "formik";
+import {Formik, FormikHelpers, FormikValues} from "formik";
 import Button from "react-bootstrap/button";
 import Col from "react-bootstrap/Col";
 import Container from "react-bootstrap/Container";
@@ -62,31 +62,6 @@ const VolumeForm = (props: Props) => {
         setShowConfirm(false);
         props.handleRemove(props.volume)
     }
-
-/*
-    const toVolume1 = (values: FormikValues): Volume => {
-        const nulled = toNullValues(values);
-        const result = new Volume({
-            active: nulled.active,
-            copyright: nulled.copyright,
-            google_id: nulled.google_id,
-            id: props.volume.id,
-            isbn: nulled.isbn,
-            library_id: props.volume.library_id,
-            media: nulled.media,
-            name: nulled.name,
-            notes: nulled.notes,
-            read: nulled.read,
-        });
-        if (nulled.active !== undefined) {
-            result.active = nulled.active;
-        }
-        if (nulled.read !== undefined) {
-            result.read = nulled.read;
-        }
-        return result;
-    }
-*/
 
     const validationSchema = () => {
         return Yup.object().shape({

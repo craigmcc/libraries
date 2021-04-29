@@ -13,6 +13,8 @@ import Table from "react-bootstrap/Table";
 
 // Internal Modules ----------------------------------------------------------
 
+import AuthorClient from "../clients/AuthorClient";
+import StoryClient from "../clients/StoryClient";
 import VolumeClient from "../clients/VolumeClient";
 import Pagination from "../components/Pagination";
 import SearchBar from "../components/SearchBar";
@@ -24,6 +26,8 @@ import {
 } from "../components/types";
 import LibraryContext from "../contexts/LibraryContext";
 import LoginContext from "../contexts/LoginContext";
+import Author from "../models/Author";
+import Story from "../models/Story";
 import Volume from "../models/Volume";
 import * as Abridgers from "../util/abridgers";
 import logger from "../util/client-logger";
@@ -33,8 +37,10 @@ import {listValue} from "../util/transformations";
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
+    base?: Author | Story;              // Parent object to select for [Library]
     handleSelect: HandleVolumeOptional; // Handle Volume selection or deselection
-    title?: string;                     // Table title [Volumes for Library XXXXX]
+    nested?: boolean;                   // Show nested child list? [false]
+    title?: string;                     // Table title [Volumes for Library: XXXXX]
 }
 
 // Component Details ---------------------------------------------------------
@@ -46,8 +52,12 @@ const VolumesSubview = (props: Props) => {
 
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [index, setIndex] = useState<number>(-1);
+    const [nested] = useState<boolean>((props.nested !== undefined)
+        ? props.nested : false);
     const [pageSize] = useState<number>(25);
     const [searchText, setSearchText] = useState<string>("");
+    const [title] = useState<string>((props.title !== undefined)
+        ? props.title : `Volumes for Library: ${libraryContext.state.library.name}`);
     const [volumes, setVolumes] = useState<Volume[]>([]);
 
     useEffect(() => {
@@ -58,7 +68,20 @@ const VolumesSubview = (props: Props) => {
             if (loginContext.state.loggedIn && (libraryId > 0)) {
                 let newVolumes: Volume[] = [];
                 try {
-                    if (searchText.length > 0) {
+                    // TODO - cannot search by name on nested invocations
+                    if (props.base instanceof Author) {
+                        newVolumes =
+                            await AuthorClient.volumes(libraryId, props.base.id, {
+                                limit: pageSize,
+                                offset: (pageSize * (currentPage - 1))
+                            });
+                    } else if (props.base instanceof Story) {
+                        newVolumes =
+                            await StoryClient.volumes(libraryId, props.base.id, {
+                                limit: pageSize,
+                                offset: (pageSize * (currentPage - 1))
+                            });
+                    } else if (searchText.length > 0) {
                         newVolumes =
                             await VolumeClient.name(libraryId, searchText, {
                                 limit: pageSize,
@@ -70,10 +93,13 @@ const VolumesSubview = (props: Props) => {
                                 limit: pageSize
                             });
                     }
-                    logger.debug({
+                    logger.info({
                         context: "VolumesSubview.fetchVolumes",
                         count: newVolumes.length,
 //                        volumes: newVolumes,
+                        base: props.base,
+                        nested: nested,
+                        title: title,
                     });
                     setIndex(-1);
                     setVolumes(newVolumes);
@@ -101,7 +127,9 @@ const VolumesSubview = (props: Props) => {
 
         fetchVolumes();
 
-    }, [libraryContext, loginContext, currentPage, pageSize, searchText]);
+    }, [libraryContext, loginContext,
+        currentPage, pageSize, searchText,
+        props.base, nested, title]);
 
     const handleChange: HandleValue = (newSearchText) => {
         setSearchText(newSearchText);
@@ -144,25 +172,27 @@ const VolumesSubview = (props: Props) => {
 
         <Container fluid id="VolumesSubview">
 
-            <Row className="mb-3">
-                <Col className="col-10 mr-2">
-                    <SearchBar
-                        autoFocus
-                        handleChange={handleChange}
-                        label="Search For:"
-                        placeholder="Search by all or part of name"
-                    />
-                </Col>
-                <Col>
-                    <Pagination
-                        currentPage={currentPage}
-                        lastPage={(volumes.length === 0) ||
-                        (volumes.length < pageSize)}
-                        onNext={onNext}
-                        onPrevious={onPrevious}
-                    />
-                </Col>
-            </Row>
+            {(!nested) ? (
+                <Row className="mb-3">
+                    <Col className="col-10 mr-2">
+                        <SearchBar
+                            autoFocus
+                            handleChange={handleChange}
+                            label="Search For:"
+                            placeholder="Search by all or part of name"
+                        />
+                    </Col>
+                    <Col>
+                        <Pagination
+                            currentPage={currentPage}
+                            lastPage={(volumes.length === 0) ||
+                            (volumes.length < pageSize)}
+                            onNext={onNext}
+                            onPrevious={onPrevious}
+                        />
+                    </Col>
+                </Row>
+            ) : null}
 
             <Row>
                 <Table

@@ -5,16 +5,17 @@
 // External Modules ----------------------------------------------------------
 
 import React, {useState} from "react";
+import Col from "react-bootstrap/Col";
 import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
+import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
+import {OnChangeSelect} from "../components/types";
 import Volume from "../models/Volume";
 import AuthorsView from "../views/AuthorsView";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import {OnChangeSelect} from "../components/types";
+import StoriesView from "../views/StoriesView";
 
 // Incoming Properties -------------------------------------------------------
 
@@ -43,7 +44,7 @@ const VolumeChildren = (props: Props) => {
         <Container fluid id="VolumeChildren">
 
             <Row className="ml-1 mr-1 mb-3">
-                <Col className="text-left">
+                <Col className="text-left col-8">
                     <strong>
                         <span>Related Items for Volume:&nbsp;</span>
                         <span className="text-info">{props.volume.name}</span>
@@ -52,7 +53,7 @@ const VolumeChildren = (props: Props) => {
                 <Col className="text-right">
                     <Form inline>
                         <Form.Label className="mr-2" htmlFor="itemSelector">
-                            Item:
+                            Type:
                         </Form.Label>
                         <Form.Control
                             as="select"
@@ -80,7 +81,11 @@ const VolumeChildren = (props: Props) => {
             ) : null}
 
             {(index === 1) ? (
-                <span>Stories</span>
+                <StoriesView
+                    // base={props.volume}
+                    // nested={true}
+                    // title={`Stories for Volume: ${props.volume.name}`}
+                />
             ) : null}
 
         </Container>

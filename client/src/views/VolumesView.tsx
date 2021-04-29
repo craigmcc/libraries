@@ -18,15 +18,25 @@ import {HandleVolume, HandleVolumeOptional, Scopes} from "../components/types";
 import LibraryContext from "../contexts/LibraryContext";
 import LoginContext from "../contexts/LoginContext";
 import VolumeForm from "../forms/VolumeForm";
+import Author from "../models/Author";
+import Story from "../models/Story";
 import Volume from "../models/Volume";
 import VolumesSubview from "../subviews/VolumesSubview";
 import * as Abridgers from "../util/abridgers";
 import logger from "../util/client-logger";
 import ReportError from "../util/ReportError";
 
+// Incoming Properties -------------------------------------------------------
+
+export interface Props {
+    base?: Author | Story;              // Parent object to select for [Library]
+    nested?: boolean;                   // Show nested child list? [false]
+    title?: string;                     // Table title [Volumes for Library: XXXXX]
+}
+
 // Component Details ---------------------------------------------------------
 
-const VolumesView = () => {
+const VolumesView = (props: Props) => {
 
     const libraryContext = useContext(LibraryContext);
     const loginContext = useContext(LoginContext);
@@ -35,10 +45,19 @@ const VolumesView = () => {
     const [canEdit, setCanEdit] = useState<boolean>(true);
     const [canRemove, setCanRemove] = useState<boolean>(true);
     const [libraryId, setLibraryId] = useState<number>(-1);
+    const [nested] = useState<boolean>((props.nested !== undefined)
+        ? props.nested : false);
     const [refresh, setRefresh] = useState<boolean>(false);
     const [volume, setVolume] = useState<Volume | null>(null);
 
     useEffect(() => {
+
+        logger.info({
+            context: "VolumesView.useEffect",
+            base: props.base,
+            nested: props.nested,
+            title: props.title,
+        });
 
         // Record current Library ID
         setLibraryId(libraryContext.state.library.id);
@@ -54,7 +73,8 @@ const VolumesView = () => {
             setRefresh(false);
         }
 
-    }, [libraryContext, loginContext, refresh]);
+    }, [libraryContext, loginContext, refresh,
+        props.base, props.nested, props.title]);
 
     const handleInsert: HandleVolume = async (newVolume) => {
         try {
@@ -149,7 +169,10 @@ const VolumesView = () => {
 
                         <Row className="ml-1 mr-1 mb-3">
                             <VolumesSubview
+                                base={props.base ? props.base : undefined}
                                 handleSelect={handleSelect}
+                                nested={nested}
+                                title={props.title ? props.title : undefined}
                             />
                         </Row>
 
@@ -177,7 +200,7 @@ const VolumesView = () => {
                             <Col id="VolumeFormView">
 
                                 <Row className="ml-1 mr-1 mb-3">
-                                    <Col className="text-left col-8">
+                                    <Col className="text-center col-8">
                                         <strong>
                                             <>
                                                 {(volume.id < 0) ? (
