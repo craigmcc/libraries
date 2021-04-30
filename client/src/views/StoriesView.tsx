@@ -12,20 +12,31 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
+import StoryChildren from "../children/StoryChildren";
 import StoryClient from "../clients/StoryClient";
 import {HandleStory, HandleStoryOptional, Scopes} from "../components/types";
 import LibraryContext from "../contexts/LibraryContext";
 import LoginContext from "../contexts/LoginContext";
 import StoryForm from "../forms/StoryForm";
+import Author from "../models/Author";
 import Story from "../models/Story";
+import Volume from "../models/Volume";
 import StoriesSubview from "../subviews/StoriesSubview";
 import * as Abridgers from "../util/abridgers";
 import logger from "../util/client-logger";
 import ReportError from "../util/ReportError";
 
+// Incoming Properties -------------------------------------------------------
+
+export interface Props {
+    base?: Author | Volume;             // Parent object to select for [Library]
+    nested?: boolean;                   // Show nested child list? [false]
+    title?: string;                     // Table title [Stories for Library: XXXXX]
+}
+
 // Component Details ---------------------------------------------------------
 
-const StoriesView = () => {
+const StoriesView = (props: Props) => {
 
     const libraryContext = useContext(LibraryContext);
     const loginContext = useContext(LoginContext);
@@ -34,10 +45,19 @@ const StoriesView = () => {
     const [canEdit, setCanEdit] = useState<boolean>(true);
     const [canRemove, setCanRemove] = useState<boolean>(true);
     const [libraryId, setLibraryId] = useState<number>(-1);
+    const [nested] = useState<boolean>((props.nested !== undefined)
+        ? props.nested : false);
     const [refresh, setRefresh] = useState<boolean>(false);
     const [story, setStory] = useState<Story | null>(null);
 
     useEffect(() => {
+
+        logger.info({
+            context: "StoriesView.useEffect",
+            base: props.base,
+            nested: props.nested,
+            title: props.title,
+        });
 
         // Record current Library ID
         setLibraryId(libraryContext.state.library.id);
@@ -53,7 +73,8 @@ const StoriesView = () => {
             setRefresh(false);
         }
 
-    }, [libraryContext, loginContext, refresh]);
+    }, [libraryContext, loginContext, refresh,
+        props.base, props.nested, props.title]);
 
     const handleInsert: HandleStory = async (newStory) => {
         try {
@@ -148,7 +169,10 @@ const StoriesView = () => {
 
                         <Row className="ml-1 mr-1 mb-3">
                             <StoriesSubview
+                                base={props.base ? props.base : undefined}
                                 handleSelect={handleSelect}
+                                nested={nested}
+                                title={props.title ? props.title : undefined}
                             />
                         </Row>
 
@@ -171,41 +195,57 @@ const StoriesView = () => {
 
                     <>
 
-                        <Row className="ml-1 mr-1 mb-3">
-                            <Col className="text-left">
-                                <strong>
-                                    <>
-                                        {(story.id < 0) ? (
-                                            <span>Adding New</span>
-                                        ) : (
-                                            <span>Editing Existing</span>
-                                        )}
-                                        &nbsp;Story for Library&nbsp;
-                                        {libraryContext.state.library.name}
-                                    </>
-                                </strong>
-                            </Col>
-                            <Col className="text-right">
-                                <Button
-                                    onClick={onBack}
-                                    size="sm"
-                                    type="button"
-                                    variant="secondary"
-                                >
-                                    Back
-                                </Button>
-                            </Col>
-                        </Row>
+                        <Row id="StoryDetails" className="mr-1">
 
-                        <Row className="ml-1 mr-1">
-                            <StoryForm
-                                autoFocus
-                                canRemove={canRemove}
-                                handleInsert={handleInsert}
-                                handleRemove={handleRemove}
-                                handleUpdate={handleUpdate}
-                                story={story}
-                            />
+                            <Col id="StoryFormView">
+
+                                <Row className="ml-1 mr-1 mb-3">
+                                    <Col className="text-left">
+                                        <strong>
+                                            <>
+                                                {(story.id < 0) ? (
+                                                    <span>Adding New</span>
+                                                ) : (
+                                                    <span>Editing Existing</span>
+                                                )}
+                                                &nbsp;Story for Library&nbsp;
+                                                {libraryContext.state.library.name}
+                                            </>
+                                        </strong>
+                                    </Col>
+                                    <Col className="text-right">
+                                        <Button
+                                            onClick={onBack}
+                                            size="sm"
+                                            type="button"
+                                            variant="secondary"
+                                        >
+                                            Back
+                                        </Button>
+                                    </Col>
+                                </Row>
+
+                                <Row className="ml-1 mr-1">
+                                    <StoryForm
+                                        autoFocus
+                                        canRemove={canRemove}
+                                        handleInsert={handleInsert}
+                                        handleRemove={handleRemove}
+                                        handleUpdate={handleUpdate}
+                                        story={story}
+                                    />
+                                </Row>
+
+                            </Col>
+
+                            {(story.id > 0) ? (
+                                <Col id="storyChildren" className="bg-light">
+                                    <StoryChildren
+                                        story={story}
+                                    />
+                                </Col>
+                            ) : null}
+
                         </Row>
 
                     </>

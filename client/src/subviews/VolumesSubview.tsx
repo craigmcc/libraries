@@ -73,13 +73,11 @@ const VolumesSubview = (props: Props) => {
                         newVolumes =
                             await AuthorClient.volumes(libraryId, props.base.id, {
                                 limit: pageSize,
-                                offset: (pageSize * (currentPage - 1))
                             });
                     } else if (props.base instanceof Story) {
                         newVolumes =
                             await StoryClient.volumes(libraryId, props.base.id, {
                                 limit: pageSize,
-                                offset: (pageSize * (currentPage - 1))
                             });
                     } else if (searchText.length > 0) {
                         newVolumes =

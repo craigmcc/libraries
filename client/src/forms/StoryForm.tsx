@@ -18,6 +18,7 @@ import * as Yup from "yup";
 
 import {HandleStory} from "../components/types"
 import Story from "../models/Story";
+import {toStory} from "../util/to-model-types";
 import {toEmptyStrings, toNullValues} from "../util/transformations";
 
 // Property Details ----------------------------------------------------------
@@ -43,9 +44,9 @@ const StoryForm = (props: Props) => {
 
     const handleSubmit = (values: FormikValues, actions: FormikHelpers<FormikValues>): void => {
         if (adding) {
-            props.handleInsert(toStory(values));
+            props.handleInsert(toStory(toNullValues(values)));
         } else {
-            props.handleUpdate(toStory(values));
+            props.handleUpdate(toStory(toNullValues(values)));
         }
     }
 
@@ -60,22 +61,6 @@ const StoryForm = (props: Props) => {
     const onConfirmPositive = (): void => {
         setShowConfirm(false);
         props.handleRemove(props.story)
-    }
-
-    const toStory = (values: FormikValues): Story => {
-        const nulled = toNullValues(values);
-        const result = new Story({
-            active: nulled.active,
-            copyright: nulled.copyright,
-            id: props.story.id,
-            library_id: props.story.library_id,
-            name: nulled.name,
-            notes: nulled.notes,
-        });
-        if (nulled.active !== undefined) {
-            result.active = nulled.active;
-        }
-        return result;
     }
 
     const validationSchema = () => {

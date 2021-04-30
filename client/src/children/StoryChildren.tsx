@@ -1,6 +1,6 @@
-// VolumeChildren ------------------------------------------------------------
+// StoryChildren ------------------------------------------------------------
 
-// Access related child information for Volumes.
+// Access related child information for Storyies.
 
 // External Modules ----------------------------------------------------------
 
@@ -13,23 +13,23 @@ import Row from "react-bootstrap/Row";
 // Internal Modules ----------------------------------------------------------
 
 import {OnChangeSelect} from "../components/types";
-import Volume from "../models/Volume";
+import Story from "../models/Story";
 import AuthorsView from "../views/AuthorsView";
-import StoriesView from "../views/StoriesView";
+import VolumesView from "../views/VolumesView";
 
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
-    volume: Volume;                     // Volume for which to access children
+    story: Story;                     // Story for which to access children
 }
 
 // Component Details ---------------------------------------------------------
 
-const VolumeChildren = (props: Props) => {
+const StoryChildren = (props: Props) => {
 
     const items = [
         "Authors",
-        "Stories",
+        "Volumes",
     ];
 
     const [index, setIndex] = useState<number>(-1);
@@ -41,13 +41,13 @@ const VolumeChildren = (props: Props) => {
 
     return (
 
-        <Container fluid id="VolumeChildren">
+        <Container fluid id="StoryChildren">
 
             <Row className="ml-1 mr-1 mb-3">
                 <Col className="text-left col-8">
                     <strong>
-                        <span>Related Items for Volume:&nbsp;</span>
-                        <span className="text-info">{props.volume.name}</span>
+                        <span>Related Items for Story:&nbsp;</span>
+                        <span className="text-info">{props.story.name}</span>
                     </strong>
                 </Col>
                 <Col className="text-right">
@@ -74,17 +74,17 @@ const VolumeChildren = (props: Props) => {
 
             {(index === 0) ? (
                 <AuthorsView
-                    base={props.volume}
+                    base={props.story}
                     nested={true}
-                    title={`Authors for Volume: ${props.volume.name}`}
+                    title={`Authors for Story: ${props.story.name}`}
                 />
             ) : null}
 
             {(index === 1) ? (
-                <StoriesView
-                    base={props.volume}
+                <VolumesView
+                    base={props.story}
                     nested={true}
-                    title={`Stories for Volume: ${props.volume.name}`}
+                    title={`Stories for Story: ${props.story.name}`}
                 />
             ) : null}
 
@@ -94,4 +94,4 @@ const VolumeChildren = (props: Props) => {
 
 }
 
-export default VolumeChildren;
+export default StoryChildren;

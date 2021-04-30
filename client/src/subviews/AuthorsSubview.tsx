@@ -75,19 +75,16 @@ const AuthorsSubview = (props: Props) => {
                         newAuthors =
                             await SeriesClient.authors(libraryId, props.base.id, {
                                 limit: pageSize,
-                                offset: (pageSize * (currentPage - 1))
                             });
                     } else if (props.base instanceof Story) {
                         newAuthors =
                             await StoryClient.authors(libraryId, props.base.id, {
                                 limit: pageSize,
-                                offset: (pageSize * (currentPage - 1))
                             });
                     } else if (props.base instanceof Volume) {
                         newAuthors =
                             await VolumeClient.authors(libraryId, props.base.id, {
                                 limit: pageSize,
-                                offset: (pageSize * (currentPage - 1))
                             });
                     } else if (searchText.length > 0) {
                         newAuthors =
