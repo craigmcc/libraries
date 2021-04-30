@@ -18,6 +18,7 @@ import * as Yup from "yup";
 
 import {HandleSeries} from "../components/types"
 import Series from "../models/Series";
+import {toSeries} from "../util/to-model-types";
 import {toEmptyStrings, toNullValues} from "../util/transformations";
 
 // Property Details ----------------------------------------------------------
@@ -43,9 +44,9 @@ const SeriesForm = (props: Props) => {
 
     const handleSubmit = (values: FormikValues, actions: FormikHelpers<FormikValues>): void => {
         if (adding) {
-            props.handleInsert(toSeries(values));
+            props.handleInsert(toSeries(toNullValues(values)));
         } else {
-            props.handleUpdate(toSeries(values));
+            props.handleUpdate(toSeries(toNullValues(values)));
         }
     }
 
@@ -60,22 +61,6 @@ const SeriesForm = (props: Props) => {
     const onConfirmPositive = (): void => {
         setShowConfirm(false);
         props.handleRemove(props.series)
-    }
-
-    const toSeries = (values: FormikValues): Series => {
-        const nulled = toNullValues(values);
-        const result = new Series({
-            active: nulled.active,
-            copyright: nulled.copyright,
-            id: props.series.id,
-            library_id: props.series.library_id,
-            name: nulled.name,
-            notes: nulled.notes,
-        });
-        if (nulled.active !== undefined) {
-            result.active = nulled.active;
-        }
-        return result;
     }
 
     const validationSchema = () => {

@@ -13,7 +13,9 @@ import Table from "react-bootstrap/Table";
 
 // Internal Modules ----------------------------------------------------------
 
+import AuthorClient from "../clients/AuthorClient";
 import SeriesClient from "../clients/SeriesClient";
+import StoryClient from "../clients/StoryClient";
 import Pagination from "../components/Pagination";
 import SearchBar from "../components/SearchBar";
 import {
@@ -24,7 +26,9 @@ import {
 } from "../components/types";
 import LibraryContext from "../contexts/LibraryContext";
 import LoginContext from "../contexts/LoginContext";
+import Author from "../models/Author";
 import Series from "../models/Series";
+import Story from "../models/Story";
 import * as Abridgers from "../util/abridgers";
 import logger from "../util/client-logger";
 import ReportError from "../util/ReportError";
@@ -33,8 +37,10 @@ import {listValue} from "../util/transformations";
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
+    base?: Author | Story;              // Parent object to select for [Library]
     handleSelect: HandleSeriesOptional; // Handle Series selection or deselection
-    title?: string;                     // Table title [Series for Library XXXXX]
+    nested?: boolean;                   // Show nested child list? [false]
+    title?: string;                     // Table title [Series for Library: XXXXX]
 }
 
 // Component Details ---------------------------------------------------------
@@ -46,9 +52,13 @@ const SeriesSubview = (props: Props) => {
 
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [index, setIndex] = useState<number>(-1);
+    const [nested] = useState<boolean>((props.nested !== undefined)
+        ? props.nested : false);
     const [pageSize] = useState<number>(25);
     const [searchText, setSearchText] = useState<string>("");
     const [series, setSeries] = useState<Series[]>([]);
+    const [title] = useState<string>((props.title !== undefined)
+        ? props.title : `Stories for Library: ${libraryContext.state.library.name}`);
 
     useEffect(() => {
 
@@ -58,7 +68,18 @@ const SeriesSubview = (props: Props) => {
             if (loginContext.state.loggedIn && (libraryId > 0)) {
                 let newSeries: Series[] = [];
                 try {
-                    if (searchText.length > 0) {
+                    // TODO - cannot search by name on nested invocations
+                    if (props.base instanceof Author) {
+                        newSeries =
+                            await AuthorClient.series(libraryId, props.base.id, {
+                                limit: pageSize,
+                            });
+                    } else if (props.base instanceof Story) {
+                        newSeries =
+                            await StoryClient.series(libraryId, props.base.id, {
+                                limit: pageSize,
+                            });
+                    } else if (searchText.length > 0) {
                         newSeries =
                             await SeriesClient.name(libraryId, searchText, {
                                 limit: pageSize,
@@ -74,6 +95,8 @@ const SeriesSubview = (props: Props) => {
                         context: "SeriesSubview.fetchSeries",
                         count: newSeries.length,
 //                        series: newSeries,
+                        nested: nested,
+                        title: title,
                     });
                     setIndex(-1);
                     setSeries(newSeries);
@@ -101,7 +124,9 @@ const SeriesSubview = (props: Props) => {
 
         fetchSeries();
 
-    }, [libraryContext, loginContext, currentPage, pageSize, searchText]);
+    }, [libraryContext, loginContext,
+        currentPage, pageSize, searchText,
+        props.base, nested, title]);
 
     const handleChange: HandleValue = (newSearchText) => {
         setSearchText(newSearchText);
@@ -122,7 +147,7 @@ const SeriesSubview = (props: Props) => {
             logger.debug({
                 context: "SeriesSubview.handleIndex",
                 index: newIndex,
-                volume: Abridgers.STORY(newSeries),
+                volume: Abridgers.SERIES(newSeries),
             });
             if (props.handleSelect) {
                 props.handleSelect(newSeries);
@@ -144,25 +169,27 @@ const SeriesSubview = (props: Props) => {
 
         <Container fluid id="SeriesSubview">
 
-            <Row className="mb-3">
-                <Col className="col-10 mr-2">
-                    <SearchBar
-                        autoFocus
-                        handleChange={handleChange}
-                        label="Search For:"
-                        placeholder="Search by all or part of name"
-                    />
-                </Col>
-                <Col>
-                    <Pagination
-                        currentPage={currentPage}
-                        lastPage={(series.length === 0) ||
-                        (series.length < pageSize)}
-                        onNext={onNext}
-                        onPrevious={onPrevious}
-                    />
-                </Col>
-            </Row>
+            {(!nested) ? (
+                <Row className="mb-3">
+                    <Col className="col-10 mr-2">
+                        <SearchBar
+                            autoFocus
+                            handleChange={handleChange}
+                            label="Search For:"
+                            placeholder="Search by all or part of name"
+                        />
+                    </Col>
+                    <Col>
+                        <Pagination
+                            currentPage={currentPage}
+                            lastPage={(series.length === 0) ||
+                            (series.length < pageSize)}
+                            onNext={onNext}
+                            onPrevious={onPrevious}
+                        />
+                    </Col>
+                </Row>
+            ) : null}
 
             <Row>
                 <Table
@@ -179,7 +206,7 @@ const SeriesSubview = (props: Props) => {
                             colSpan={4}
                             key={101}
                         >
-                            {props.title ? props.title : `Series for Library: ${libraryContext.state.library.name}`}
+                            {title}
                         </th>
                     </tr>
                     <tr className="table-secondary">

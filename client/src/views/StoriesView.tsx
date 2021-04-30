@@ -19,6 +19,7 @@ import LibraryContext from "../contexts/LibraryContext";
 import LoginContext from "../contexts/LoginContext";
 import StoryForm from "../forms/StoryForm";
 import Author from "../models/Author";
+import Series from "../models/Series";
 import Story from "../models/Story";
 import Volume from "../models/Volume";
 import StoriesSubview from "../subviews/StoriesSubview";
@@ -29,7 +30,7 @@ import ReportError from "../util/ReportError";
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
-    base?: Author | Volume;             // Parent object to select for [Library]
+    base?: Author | Series | Volume;    // Parent object to select for [Library]
     nested?: boolean;                   // Show nested child list? [false]
     title?: string;                     // Table title [Stories for Library: XXXXX]
 }
@@ -208,7 +209,7 @@ const StoriesView = (props: Props) => {
                                                 ) : (
                                                     <span>Editing Existing</span>
                                                 )}
-                                                &nbsp;Story for Library&nbsp;
+                                                &nbsp;Story for Library:&nbsp;
                                                 {libraryContext.state.library.name}
                                             </>
                                         </strong>

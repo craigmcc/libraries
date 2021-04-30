@@ -12,20 +12,31 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
+import SeriesChildren from "../children/SeriesChildren";
 import SeriesClient from "../clients/SeriesClient";
 import {HandleSeries, HandleSeriesOptional, Scopes} from "../components/types";
 import LibraryContext from "../contexts/LibraryContext";
 import LoginContext from "../contexts/LoginContext";
 import SeriesForm from "../forms/SeriesForm";
+import Author from "../models/Author";
 import Series from "../models/Series";
+import Story from "../models/Story";
 import SeriesSubview from "../subviews/SeriesSubview";
 import * as Abridgers from "../util/abridgers";
 import logger from "../util/client-logger";
 import ReportError from "../util/ReportError";
 
+// Incoming Properties -------------------------------------------------------
+
+export interface Props {
+    base?: Author | Story;              // Parent object to select for [Library]
+    nested?: boolean;                   // Show nested child list? [false]
+    title?: string;                     // Table title [Series for Library: XXXXX]
+}
+
 // Component Details ---------------------------------------------------------
 
-const SeriesView = () => {
+const SeriesView = (props: Props) => {
 
     const libraryContext = useContext(LibraryContext);
     const loginContext = useContext(LoginContext);
@@ -34,6 +45,8 @@ const SeriesView = () => {
     const [canEdit, setCanEdit] = useState<boolean>(true);
     const [canRemove, setCanRemove] = useState<boolean>(true);
     const [libraryId, setLibraryId] = useState<number>(-1);
+    const [nested] = useState<boolean>((props.nested !== undefined)
+        ? props.nested : false);
     const [refresh, setRefresh] = useState<boolean>(false);
     const [series, setSeries] = useState<Series | null>(null);
 
@@ -53,7 +66,8 @@ const SeriesView = () => {
             setRefresh(false);
         }
 
-    }, [libraryContext, loginContext, refresh]);
+    }, [libraryContext, loginContext, refresh,
+        props.base, props.nested, props.title]);
 
     const handleInsert: HandleSeries = async (newSeries) => {
         try {
@@ -148,7 +162,10 @@ const SeriesView = () => {
 
                         <Row className="ml-1 mr-1 mb-3">
                             <SeriesSubview
+                                base={props.base ? props.base : undefined}
                                 handleSelect={handleSelect}
+                                nested={nested}
+                                title={props.title ? props.title : undefined}
                             />
                         </Row>
 
@@ -171,41 +188,57 @@ const SeriesView = () => {
 
                     <>
 
-                        <Row className="ml-1 mr-1 mb-3">
-                            <Col className="text-left">
-                                <strong>
-                                    <>
-                                        {(series.id < 0) ? (
-                                            <span>Adding New</span>
-                                        ) : (
-                                            <span>Editing Existing</span>
-                                        )}
-                                        &nbsp;Series for Library&nbsp;
-                                        {libraryContext.state.library.name}
-                                    </>
-                                </strong>
-                            </Col>
-                            <Col className="text-right">
-                                <Button
-                                    onClick={onBack}
-                                    size="sm"
-                                    type="button"
-                                    variant="secondary"
-                                >
-                                    Back
-                                </Button>
-                            </Col>
-                        </Row>
+                        <Row id="SeriesDetails" className="mr-1">
 
-                        <Row className="ml-1 mr-1">
-                            <SeriesForm
-                                autoFocus
-                                canRemove={canRemove}
-                                handleInsert={handleInsert}
-                                handleRemove={handleRemove}
-                                handleUpdate={handleUpdate}
-                                series={series}
-                            />
+                            <Col id="SeriesFormView">
+
+                                <Row className="ml-1 mr-1 mb-3">
+                                    <Col className="text-left">
+                                        <strong>
+                                            <>
+                                                {(series.id < 0) ? (
+                                                    <span>Adding New</span>
+                                                ) : (
+                                                    <span>Editing Existing</span>
+                                                )}
+                                                &nbsp;Series for Library:&nbsp;
+                                                {libraryContext.state.library.name}
+                                            </>
+                                        </strong>
+                                    </Col>
+                                    <Col className="text-right">
+                                        <Button
+                                            onClick={onBack}
+                                            size="sm"
+                                            type="button"
+                                            variant="secondary"
+                                        >
+                                            Back
+                                        </Button>
+                                    </Col>
+                                </Row>
+
+                                <Row className="ml-1 mr-1">
+                                    <SeriesForm
+                                        autoFocus
+                                        canRemove={canRemove}
+                                        handleInsert={handleInsert}
+                                        handleRemove={handleRemove}
+                                        handleUpdate={handleUpdate}
+                                        series={series}
+                                    />
+                                </Row>
+
+                            </Col>
+
+                            {(series.id > 0) ? (
+                                <Col id="seriesChildren" className="bg-light">
+                                    <SeriesChildren
+                                        series={series}
+                                    />
+                                </Col>
+                            ) : null}
+
                         </Row>
 
                     </>

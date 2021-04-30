@@ -78,9 +78,9 @@ const AuthorChildren = (props: Props) => {
 
             {(index === 0) ? (
                 <SeriesView
-                    // base={props.author}
-                    // nested={true}
-                    // title={`Series for Author: ${props.author.first_name} ${props.author.last_name}`}
+                    base={props.author}
+                    nested={true}
+                    title={`Series for Author: ${props.author.first_name} ${props.author.last_name}`}
                 />
             ) : null}
 

@@ -14,6 +14,7 @@ import Table from "react-bootstrap/Table";
 // Internal Modules ----------------------------------------------------------
 
 import AuthorClient from "../clients/AuthorClient";
+import SeriesClient from "../clients/SeriesClient";
 import StoryClient from "../clients/StoryClient";
 import VolumeClient from "../clients/VolumeClient";
 import Pagination from "../components/Pagination";
@@ -27,6 +28,7 @@ import {
 import LibraryContext from "../contexts/LibraryContext";
 import LoginContext from "../contexts/LoginContext";
 import Author from "../models/Author";
+import Series from "../models/Series";
 import Story from "../models/Story";
 import Volume from "../models/Volume";
 import * as Abridgers from "../util/abridgers";
@@ -37,7 +39,7 @@ import {listValue} from "../util/transformations";
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
-    base?: Author | Volume;             // Parent object to select or [Library]
+    base?: Author | Series | Volume;    // Parent object to select for [Library]
     handleSelect: HandleStoryOptional;  // Handle Story selection or deselection
     nested?: boolean;                   // Show nested child list? [false]
     title?: string;                     // Table title [Stories for Library: XXXXX]
@@ -72,6 +74,11 @@ const StoriesSubview = (props: Props) => {
                     if (props.base instanceof Author) {
                         newStories =
                             await AuthorClient.stories(libraryId, props.base.id, {
+                                limit: pageSize,
+                            });
+                    } else if (props.base instanceof Series) {
+                        newStories =
+                            await SeriesClient.stories(libraryId, props.base.id, {
                                 limit: pageSize,
                             });
                     } else if (props.base instanceof Volume) {
@@ -144,7 +151,7 @@ const StoriesSubview = (props: Props) => {
         } else {
             const newStory = stories[newIndex];
             setIndex(newIndex);
-            logger.info({
+            logger.debug({
                 context: "StoriesSubview.handleIndex",
                 index: newIndex,
                 volume: Abridgers.STORY(newStory),
@@ -207,7 +214,7 @@ const StoriesSubview = (props: Props) => {
                             colSpan={4}
                             key={101}
                         >
-                            {props.title ? props.title : `Stories for Library: ${libraryContext.state.library.name}`}
+                            {title}
                         </th>
                     </tr>
                     <tr className="table-secondary">

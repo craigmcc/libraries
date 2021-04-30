@@ -123,6 +123,17 @@ StoryRouter.get("/:libraryId/:storyId/authors",
         ));
     });
 
+// GET /:libraryId/:storyId/series - Find Series for this Story
+StoryRouter.get("/:libraryId/:storyId/series",
+    requireRegular,
+    async (req: Request, res: Response) => {
+        res.send(await StoryServices.series(
+            parseInt(req.params.libraryId, 10),
+            parseInt(req.params.storyId, 10),
+            req.query
+        ));
+    });
+
 // GET /:libraryId/:storyId/volumes - Find Volumes for this Story
 StoryRouter.get("/:libraryId/:storyId/volumes",
     requireRegular,
