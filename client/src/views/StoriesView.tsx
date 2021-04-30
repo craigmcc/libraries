@@ -239,7 +239,7 @@ const StoriesView = (props: Props) => {
 
                             </Col>
 
-                            {(story.id > 0) ? (
+                            {((story.id > 0) && !nested) ? (
                                 <Col id="storyChildren" className="bg-light">
                                     <StoryChildren
                                         story={story}

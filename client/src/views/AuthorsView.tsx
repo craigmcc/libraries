@@ -242,7 +242,7 @@ const AuthorsView = (props: Props) => {
 
                             </Col>
 
-                            {(author.id > 0) ? (
+                            {((author.id > 0) && !nested) ? (
                                 <Col id="authorChildren" className="bg-light">
                                     <AuthorChildren
                                         author={author}

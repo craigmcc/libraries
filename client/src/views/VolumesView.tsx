@@ -240,7 +240,7 @@ const VolumesView = (props: Props) => {
 
                             </Col>
 
-                            {(volume.id > 0) ? (
+                            {((volume.id > 0) && !nested) ? (
                                 <Col id="volumeChildren" className="bg-light">
                                     <VolumeChildren
                                         volume={volume}

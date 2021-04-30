@@ -52,6 +52,13 @@ const SeriesView = (props: Props) => {
 
     useEffect(() => {
 
+        logger.info({
+            context: "SeriesView.useEffect",
+            base: props.base,
+            nested: props.nested,
+            title: props.title,
+        });
+
         // Record current Library ID
         setLibraryId(libraryContext.state.library.id);
 
@@ -231,7 +238,7 @@ const SeriesView = (props: Props) => {
 
                             </Col>
 
-                            {(series.id > 0) ? (
+                            {((series.id > 0) && !nested) ? (
                                 <Col id="seriesChildren" className="bg-light">
                                     <SeriesChildren
                                         series={series}

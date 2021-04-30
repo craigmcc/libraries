@@ -58,7 +58,7 @@ const SeriesSubview = (props: Props) => {
     const [searchText, setSearchText] = useState<string>("");
     const [series, setSeries] = useState<Series[]>([]);
     const [title] = useState<string>((props.title !== undefined)
-        ? props.title : `Stories for Library: ${libraryContext.state.library.name}`);
+        ? props.title : `Series for Library: ${libraryContext.state.library.name}`);
 
     useEffect(() => {
 
