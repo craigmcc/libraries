@@ -1,6 +1,6 @@
-// SeriesForm ----------------------------------------------------------------
+// StoryForm ---------------------------------------------------------------
 
-// Detail editing form for Series objects.
+// Detail editing form for Story objects.
 
 // External Modules ----------------------------------------------------------
 
@@ -16,37 +16,37 @@ import * as Yup from "yup";
 
 // Internal Modules ----------------------------------------------------------
 
-import {HandleSeries} from "../components/types"
-import Series from "../models/Series";
-import {toSeries} from "../util/to-model-types";
-import {toEmptyStrings, toNullValues} from "../util/transformations";
+import {HandleStory} from "../types"
+import Story from "../../models/Story";
+import {toStory} from "../../util/to-model-types";
+import {toEmptyStrings, toNullValues} from "../../util/transformations";
 
 // Property Details ----------------------------------------------------------
 
 export interface Props {
     autoFocus?: boolean;            // Should the first element receive autofocus? [false]
     canRemove?: boolean;            // Can Remove be performed? [false]
-    handleInsert: HandleSeries;     // Handle (Series) insert request
-    handleRemove: HandleSeries;     // Handle (Series) remove request
-    handleUpdate: HandleSeries;     // Handle (Series) update request
-    series: Series;                 // Initial values (id<0 for adding)
+    handleInsert: HandleStory;      // Handle (Story) insert request
+    handleRemove: HandleStory;      // Handle (Story) remove request
+    handleUpdate: HandleStory;      // Handle (Story) update request
+    story: Story;                  // Initial values (id<0 for adding)
 }
 
 // Component Details ---------------------------------------------------------
 
-const SeriesForm = (props: Props) => {
+const StoryForm = (props: Props) => {
 
-    const [adding] = useState<boolean>(props.series.id < 0);
+    const [adding] = useState<boolean>(props.story.id < 0);
     const [canRemove] = useState<boolean>
         (props.canRemove !== undefined ? props.canRemove : false);
-    const [initialValues] = useState(toEmptyStrings(props.series));
+    const [initialValues] = useState(toEmptyStrings(props.story));
     const [showConfirm, setShowConfirm] = useState<boolean>(false);
 
     const handleSubmit = (values: FormikValues, actions: FormikHelpers<FormikValues>): void => {
         if (adding) {
-            props.handleInsert(toSeries(toNullValues(values)));
+            props.handleInsert(toStory(toNullValues(values)));
         } else {
-            props.handleUpdate(toSeries(toNullValues(values)));
+            props.handleUpdate(toStory(toNullValues(values)));
         }
     }
 
@@ -60,7 +60,7 @@ const SeriesForm = (props: Props) => {
 
     const onConfirmPositive = (): void => {
         setShowConfirm(false);
-        props.handleRemove(props.series)
+        props.handleRemove(props.story)
     }
 
     const validationSchema = () => {
@@ -76,7 +76,7 @@ const SeriesForm = (props: Props) => {
         <>
 
             {/* Details Form */}
-            <Container id="seriesForm">
+            <Container id="storyForm">
 
                 <Formik
                     initialValues={initialValues}
@@ -145,7 +145,7 @@ const SeriesForm = (props: Props) => {
                                         value={values.copyright}
                                     />
                                     <Form.Control.Feedback type="valid">
-                                        Copyright year (YYYY) for this Series.
+                                        Copyright year (YYYY) for this Story.
                                     </Form.Control.Feedback>
                                     <Form.Control.Feedback type="invalid">
                                         {errors.copyright}
@@ -169,7 +169,7 @@ const SeriesForm = (props: Props) => {
                                         value={values.notes}
                                     />
                                     <Form.Control.Feedback type="valid">
-                                        Miscellaneous notes about this Series.
+                                        Miscellaneous notes about this Story.
                                     </Form.Control.Feedback>
                                     <Form.Control.Feedback type="invalid">
                                         {errors.notes}
@@ -238,12 +238,12 @@ const SeriesForm = (props: Props) => {
                 </Modal.Header>
                 <Modal.Body>
                     <p>
-                        Removing this Series is not reversible, and
+                        Removing this Story is not reversible, and
                         <strong>
                             &nbsp;will also remove ALL related information.
                         </strong>.
                     </p>
-                    <p>Consider marking this Series as inactive instead.</p>
+                    <p>Consider marking this Story as inactive instead.</p>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button
@@ -271,4 +271,4 @@ const SeriesForm = (props: Props) => {
 
 }
 
-export default SeriesForm;
+export default StoryForm;

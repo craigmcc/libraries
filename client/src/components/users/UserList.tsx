@@ -11,14 +11,14 @@ import Table from "react-bootstrap/Table";
 
 // Internal Modules ----------------------------------------------------------
 
-import UserClient from "../clients/UserClient";
-import {HandleIndex, HandleUserOptional} from "../components/types";
-import LoginContext from "../contexts/LoginContext";
-import User from "../models/User";
-import * as Abridgers from "../util/abridgers";
-import logger from "../util/client-logger";
-import ReportError from "../util/ReportError";
-import {listValue} from "../util/transformations";
+import UserClient from "../../clients/UserClient";
+import {HandleIndex, HandleUserOptional} from "../types";
+import LoginContext from "../../contexts/LoginContext";
+import User from "../../models/User";
+import * as Abridgers from "../../util/abridgers";
+import logger from "../../util/client-logger";
+import ReportError from "../../util/ReportError";
+import {listValue} from "../../util/transformations";
 
 // Incoming Properties -------------------------------------------------------
 
@@ -29,7 +29,7 @@ export interface Props {
 
 // Component Details ---------------------------------------------------------
 
-const UsersSubview = (props: Props) => {
+const UserList = (props: Props) => {
 
     const loginContext = useContext(LoginContext);
 
@@ -156,4 +156,4 @@ const UsersSubview = (props: Props) => {
 
 }
 
-export default UsersSubview;
+export default UserList;

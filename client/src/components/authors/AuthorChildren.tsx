@@ -1,6 +1,6 @@
-// VolumeChildren ------------------------------------------------------------
+// AuthorChildren ------------------------------------------------------------
 
-// Access related child information for Volumes.
+// Access related child information for Authors.
 
 // External Modules ----------------------------------------------------------
 
@@ -12,24 +12,26 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
-import {OnChangeSelect} from "../components/types";
-import Volume from "../models/Volume";
-import AuthorsView from "../views/AuthorsView";
-import StoriesView from "../views/StoriesView";
+import {OnChangeSelect} from "../types";
+import Author from "../../models/Author";
+import SeriesView from "../series/SeriesView";
+import StoryView from "../stories/StoryView";
+import VolumeView from "../volumes/VolumeView";
 
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
-    volume: Volume;                     // Volume for which to access children
+    author: Author;                     // Author for which to access children
 }
 
 // Component Details ---------------------------------------------------------
 
-const VolumeChildren = (props: Props) => {
+const AuthorChildren = (props: Props) => {
 
     const items = [
-        "Authors",
+        "Series",
         "Stories",
+        "Volumes",
     ];
 
     const [index, setIndex] = useState<number>(-1);
@@ -41,13 +43,15 @@ const VolumeChildren = (props: Props) => {
 
     return (
 
-        <Container fluid id="VolumeChildren">
+        <Container fluid id="AuthorChildren">
 
             <Row className="ml-1 mr-1 mb-3">
                 <Col className="text-left col-8">
                     <strong>
-                        <span>Related Items for Volume:&nbsp;</span>
-                        <span className="text-info">{props.volume.name}</span>
+                        <span>Related Items for Author:&nbsp;</span>
+                        <span className="text-info">
+                            {props.author.first_name} {props.author.last_name}
+                        </span>
                     </strong>
                 </Col>
                 <Col className="text-right">
@@ -73,18 +77,26 @@ const VolumeChildren = (props: Props) => {
             </Row>
 
             {(index === 0) ? (
-                <AuthorsView
-                    base={props.volume}
+                <SeriesView
+                    base={props.author}
                     nested={true}
-                    title={`Authors for Volume: ${props.volume.name}`}
+                    title={`Series for Author: ${props.author.first_name} ${props.author.last_name}`}
                 />
             ) : null}
 
             {(index === 1) ? (
-                <StoriesView
-                    base={props.volume}
+                <StoryView
+                    base={props.author}
                     nested={true}
-                    title={`Stories for Volume: ${props.volume.name}`}
+                    title={`Stories for Author: ${props.author.first_name} ${props.author.last_name}`}
+                />
+            ) : null}
+
+            {(index === 2) ? (
+                <VolumeView
+                    base={props.author}
+                    nested={true}
+                    title={`Volumes for Author: ${props.author.first_name} ${props.author.last_name}`}
                 />
             ) : null}
 
@@ -94,4 +106,4 @@ const VolumeChildren = (props: Props) => {
 
 }
 
-export default VolumeChildren;
+export default AuthorChildren;

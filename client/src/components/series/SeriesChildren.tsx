@@ -12,10 +12,10 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
-import {OnChangeSelect} from "../components/types";
-import Series from "../models/Series";
-import AuthorsView from "../views/AuthorsView";
-import StoriesView from "../views/StoriesView";
+import {OnChangeSelect} from "../types";
+import Series from "../../models/Series";
+import AuthorView from "../authors/AuthorView";
+import StoryView from "../stories/StoryView";
 
 // Incoming Properties -------------------------------------------------------
 
@@ -73,7 +73,7 @@ const SeriesChildren = (props: Props) => {
             </Row>
 
             {(index === 0) ? (
-                <AuthorsView
+                <AuthorView
                     base={props.series}
                     nested={true}
                     title={`Authors for Series: ${props.series.name}`}
@@ -81,7 +81,7 @@ const SeriesChildren = (props: Props) => {
             ) : null}
 
             {(index === 1) ? (
-                <StoriesView
+                <StoryView
                     base={props.series}
                     nested={true}
                     title={`Stories for Series: ${props.series.name}`}

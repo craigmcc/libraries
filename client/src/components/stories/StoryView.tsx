@@ -12,20 +12,20 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
-import StoryChildren from "../children/StoryChildren";
-import StoryClient from "../clients/StoryClient";
-import {HandleStory, HandleStoryOptional, Scopes} from "../components/types";
-import LibraryContext from "../contexts/LibraryContext";
-import LoginContext from "../contexts/LoginContext";
-import StoryForm from "../forms/StoryForm";
-import Author from "../models/Author";
-import Series from "../models/Series";
-import Story from "../models/Story";
-import Volume from "../models/Volume";
-import StoriesSubview from "../subviews/StoriesSubview";
-import * as Abridgers from "../util/abridgers";
-import logger from "../util/client-logger";
-import ReportError from "../util/ReportError";
+import StoryChildren from "./StoryChildren";
+import StoryClient from "../../clients/StoryClient";
+import {HandleStory, HandleStoryOptional, Scopes} from "../types";
+import LibraryContext from "../../contexts/LibraryContext";
+import LoginContext from "../../contexts/LoginContext";
+import StoryForm from "./StoryForm";
+import Author from "../../models/Author";
+import Series from "../../models/Series";
+import Story from "../../models/Story";
+import Volume from "../../models/Volume";
+import StoryList from "./StoryList";
+import * as Abridgers from "../../util/abridgers";
+import logger from "../../util/client-logger";
+import ReportError from "../../util/ReportError";
 
 // Incoming Properties -------------------------------------------------------
 
@@ -37,7 +37,7 @@ export interface Props {
 
 // Component Details ---------------------------------------------------------
 
-const StoriesView = (props: Props) => {
+const StoryView = (props: Props) => {
 
     const libraryContext = useContext(LibraryContext);
     const loginContext = useContext(LoginContext);
@@ -169,7 +169,7 @@ const StoriesView = (props: Props) => {
                     <>
 
                         <Row className="ml-1 mr-1 mb-3">
-                            <StoriesSubview
+                            <StoryList
                                 base={props.base ? props.base : undefined}
                                 handleSelect={handleSelect}
                                 nested={nested}
@@ -259,4 +259,4 @@ const StoriesView = (props: Props) => {
 
 }
 
-export default StoriesView;
+export default StoryView;

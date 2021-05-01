@@ -12,19 +12,19 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
-import VolumeChildren from "../children/VolumeChildren";
-import VolumeClient from "../clients/VolumeClient";
-import {HandleVolume, HandleVolumeOptional, Scopes} from "../components/types";
-import LibraryContext from "../contexts/LibraryContext";
-import LoginContext from "../contexts/LoginContext";
-import VolumeForm from "../forms/VolumeForm";
-import Author from "../models/Author";
-import Story from "../models/Story";
-import Volume from "../models/Volume";
-import VolumesSubview from "../subviews/VolumesSubview";
-import * as Abridgers from "../util/abridgers";
-import logger from "../util/client-logger";
-import ReportError from "../util/ReportError";
+import VolumeChildren from "./VolumeChildren";
+import VolumeClient from "../../clients/VolumeClient";
+import {HandleVolume, HandleVolumeOptional, Scopes} from "../types";
+import LibraryContext from "../../contexts/LibraryContext";
+import LoginContext from "../../contexts/LoginContext";
+import VolumeForm from "./VolumeForm";
+import Author from "../../models/Author";
+import Story from "../../models/Story";
+import Volume from "../../models/Volume";
+import VolumeList from "./VolumeList";
+import * as Abridgers from "../../util/abridgers";
+import logger from "../../util/client-logger";
+import ReportError from "../../util/ReportError";
 
 // Incoming Properties -------------------------------------------------------
 
@@ -36,7 +36,7 @@ export interface Props {
 
 // Component Details ---------------------------------------------------------
 
-const VolumesView = (props: Props) => {
+const VolumeView = (props: Props) => {
 
     const libraryContext = useContext(LibraryContext);
     const loginContext = useContext(LoginContext);
@@ -168,7 +168,7 @@ const VolumesView = (props: Props) => {
                     <>
 
                         <Row className="ml-1 mr-1 mb-3">
-                            <VolumesSubview
+                            <VolumeList
                                 base={props.base ? props.base : undefined}
                                 handleSelect={handleSelect}
                                 nested={nested}
@@ -260,4 +260,4 @@ const VolumesView = (props: Props) => {
 
 }
 
-export default VolumesView;
+export default VolumeView;

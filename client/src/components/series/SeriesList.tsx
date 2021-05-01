@@ -1,7 +1,7 @@
-// AuthorsSubview ------------------------------------------------------------
+// SeriesSubview ------------------------------------------------------------
 
-// Render a list of Authors for the currently selected Library, with a callback
-// handler when a particular Author is selected (or null for deselected).
+// Render a list of Series for the currently selected Library, with a callback
+// handler when a particular Series is selected (or null for deselected).
 
 // External Modules ----------------------------------------------------------
 
@@ -13,124 +13,116 @@ import Table from "react-bootstrap/Table";
 
 // Internal Modules ----------------------------------------------------------
 
-import AuthorClient from "../clients/AuthorClient";
-import SeriesClient from "../clients/SeriesClient";
-import StoryClient from "../clients/StoryClient";
-import VolumeClient from "../clients/VolumeClient";
-import Pagination from "../components/Pagination";
-import SearchBar from "../components/SearchBar";
+import AuthorClient from "../../clients/AuthorClient";
+import SeriesClient from "../../clients/SeriesClient";
+import StoryClient from "../../clients/StoryClient";
+import Pagination from "../Pagination";
+import SearchBar from "../SearchBar";
 import {
     HandleIndex,
-    HandleAuthorOptional,
+    HandleSeriesOptional,
     HandleValue,
     OnAction
-} from "../components/types";
-import LibraryContext from "../contexts/LibraryContext";
-import LoginContext from "../contexts/LoginContext";
-import Author from "../models/Author";
-import Series from "../models/Series";
-import Story from "../models/Story";
-import Volume from "../models/Volume";
-import * as Abridgers from "../util/abridgers";
-import logger from "../util/client-logger";
-import ReportError from "../util/ReportError";
-import {listValue} from "../util/transformations";
+} from "../types";
+import LibraryContext from "../../contexts/LibraryContext";
+import LoginContext from "../../contexts/LoginContext";
+import Author from "../../models/Author";
+import Series from "../../models/Series";
+import Story from "../../models/Story";
+import * as Abridgers from "../../util/abridgers";
+import logger from "../../util/client-logger";
+import ReportError from "../../util/ReportError";
+import {listValue} from "../../util/transformations";
 
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
-    base?: Series | Story | Volume;     // Parent object to select for [Library]
-    handleSelect: HandleAuthorOptional; // Handle Author selection or deselection
+    base?: Author | Story;              // Parent object to select for [Library]
+    handleSelect: HandleSeriesOptional; // Handle Series selection or deselection
     nested?: boolean;                   // Show nested child list? [false]
-    title?: string;                     // Table title [Authors for Library: XXXXX]
+    title?: string;                     // Table title [Series for Library: XXXXX]
 }
 
 // Component Details ---------------------------------------------------------
 
-const AuthorsSubview = (props: Props) => {
+const SeriesList = (props: Props) => {
 
     const libraryContext = useContext(LibraryContext);
     const loginContext = useContext(LoginContext);
 
-    const [authors, setAuthors] = useState<Author[]>([]);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [index, setIndex] = useState<number>(-1);
     const [nested] = useState<boolean>((props.nested !== undefined)
         ? props.nested : false);
     const [pageSize] = useState<number>(25);
     const [searchText, setSearchText] = useState<string>("");
+    const [series, setSeries] = useState<Series[]>([]);
     const [title] = useState<string>((props.title !== undefined)
-        ? props.title : `Authors for Library: ${libraryContext.state.library.name}`);
+        ? props.title : `Series for Library: ${libraryContext.state.library.name}`);
 
     useEffect(() => {
 
-        const fetchAuthors = async () => {
+        const fetchSeries = async () => {
 
             const libraryId = libraryContext.state.library.id;
             if (loginContext.state.loggedIn && (libraryId > 0)) {
-                let newAuthors: Author[] = [];
+                let newSeries: Series[] = [];
                 try {
                     // TODO - cannot search by name on nested invocations
-                    if (props.base instanceof Series) {
-                        newAuthors =
-                            await SeriesClient.authors(libraryId, props.base.id, {
+                    if (props.base instanceof Author) {
+                        newSeries =
+                            await AuthorClient.series(libraryId, props.base.id, {
                                 limit: pageSize,
                             });
                     } else if (props.base instanceof Story) {
-                        newAuthors =
-                            await StoryClient.authors(libraryId, props.base.id, {
-                                limit: pageSize,
-                            });
-                    } else if (props.base instanceof Volume) {
-                        newAuthors =
-                            await VolumeClient.authors(libraryId, props.base.id, {
+                        newSeries =
+                            await StoryClient.series(libraryId, props.base.id, {
                                 limit: pageSize,
                             });
                     } else if (searchText.length > 0) {
-                        newAuthors =
-                            await AuthorClient.name(libraryId, searchText, {
+                        newSeries =
+                            await SeriesClient.name(libraryId, searchText, {
                                 limit: pageSize,
                                 offset: (pageSize * (currentPage - 1))
                             });
                     } else {
-                        newAuthors =
-                            await AuthorClient.all(libraryId, {
+                        newSeries =
+                            await SeriesClient.all(libraryId, {
                                 limit: pageSize
                             });
                     }
-                    logger.info({
-                        context: "AuthorsSubview.fetchAuthors",
-                        count: newAuthors.length,
-//                        authors: newAuthors,
-                        base: props.base,
+                    logger.debug({
+                        context: "SeriesSubview.fetchSeries",
+                        count: newSeries.length,
+//                        series: newSeries,
                         nested: nested,
                         title: title,
                     });
-                    setAuthors(newAuthors);
                     setIndex(-1);
+                    setSeries(newSeries);
                 } catch (error) {
-                    setAuthors([]);
                     setIndex(-1);
+                    setSeries([]);
                     if (error.response && (error.response.status === 403)) {
                         logger.debug({
-                            context: "AuthorsSubview.fetchAuthors",
+                            context: "SeriesSubview.fetchSeries",
                             msg: "FORBIDDEN",
                         });
                     } else {
-                        ReportError("AuthorsSubview.fetchAuthors", error);
+                        ReportError("SeriesSubview.fetchSeries", error);
                     }
                 }
             } else {
-                setAuthors([]);
                 setIndex(-1);
+                setSeries([]);
                 logger.debug({
-                    context: "AuthorsSubview.fetchAuthors",
+                    context: "SeriesSubview.fetchSeries",
                     msg: "SKIPPED",
                 });
             }
         }
 
-        fetchAuthors();
+        fetchSeries();
 
     }, [libraryContext, loginContext,
         currentPage, pageSize, searchText,
@@ -144,21 +136,21 @@ const AuthorsSubview = (props: Props) => {
         if (newIndex === index) {
             setIndex(-1);
             logger.trace({
-                context: "AuthorsSubview.handleIndex",
+                context: "SeriesSubview.handleIndex",
                 msg: "UNSET" });
             if (props.handleSelect) {
                 props.handleSelect(null);
             }
         } else {
-            const newAuthor = authors[newIndex];
+            const newSeries = series[newIndex];
             setIndex(newIndex);
             logger.debug({
-                context: "AuthorsSubview.handleIndex",
+                context: "SeriesSubview.handleIndex",
                 index: newIndex,
-                author: Abridgers.AUTHOR(newAuthor),
+                volume: Abridgers.SERIES(newSeries),
             });
             if (props.handleSelect) {
-                props.handleSelect(newAuthor);
+                props.handleSelect(newSeries);
             }
         }
     }
@@ -175,7 +167,7 @@ const AuthorsSubview = (props: Props) => {
 
     return (
 
-        <Container fluid id="AuthorsSubview">
+        <Container fluid id="SeriesSubview">
 
             {(!nested) ? (
                 <Row className="mb-3">
@@ -184,20 +176,20 @@ const AuthorsSubview = (props: Props) => {
                             autoFocus
                             handleChange={handleChange}
                             label="Search For:"
-                            placeholder="Search by all or part of either name"
+                            placeholder="Search by all or part of name"
                         />
                     </Col>
                     <Col>
                         <Pagination
                             currentPage={currentPage}
-                            lastPage={(authors.length === 0) ||
-                                (authors.length < pageSize)}
+                            lastPage={(series.length === 0) ||
+                            (series.length < pageSize)}
                             onNext={onNext}
                             onPrevious={onPrevious}
                         />
                     </Col>
                 </Row>
-            ) : null }
+            ) : null}
 
             <Row>
                 <Table
@@ -218,15 +210,15 @@ const AuthorsSubview = (props: Props) => {
                         </th>
                     </tr>
                     <tr className="table-secondary">
-                        <th scope="col">First Name</th>
-                        <th scope="col">Last Name</th>
+                        <th scope="col">Name</th>
                         <th scope="col">Active</th>
+                        <th scope="col">Copyright</th>
                         <th scope="col">Notes</th>
                     </tr>
                     </thead>
 
                     <tbody>
-                    {authors.map((author, rowIndex) => (
+                    {series.map((series, rowIndex) => (
                         <tr
                             className={"table-" +
                                 (rowIndex === index ? "primary" : "default")}
@@ -234,16 +226,16 @@ const AuthorsSubview = (props: Props) => {
                             onClick={() => (handleIndex(rowIndex))}
                         >
                             <td key={1000 + (rowIndex * 100) + 1}>
-                                {author.first_name}
+                                {series.name}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 2}>
-                                {author.last_name}
+                                {listValue(series.active)}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 3}>
-                                {listValue(author.active)}
+                                {listValue(series.copyright)}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 4}>
-                                {author.notes}
+                                {series.notes}
                             </td>
                         </tr>
                     ))}
@@ -258,4 +250,4 @@ const AuthorsSubview = (props: Props) => {
 
 }
 
-export default AuthorsSubview;
+export default SeriesList;

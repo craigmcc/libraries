@@ -14,7 +14,7 @@ import { useHistory } from "react-router-dom";
 
 import OAuthClient from "../clients/OAuthClient";
 import LoginContext from "../contexts/LoginContext";
-import LoginForm from "../forms/LoginForm";
+import LoginForm from "./LoginForm";
 import Credentials from "../models/Credentials";
 import PasswordTokenRequest from "../models/PasswordTokenRequest";
 import TokenResponse from "../models/TokenResponse";

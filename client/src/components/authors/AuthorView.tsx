@@ -1,6 +1,6 @@
-// SeriesView -------------------------------------------------------------
+// AuthorsView -------------------------------------------------------------
 
-// Administrator view for editing Series.
+// Administrator view for editing Authors.
 
 // External Modules ----------------------------------------------------------
 
@@ -12,48 +12,50 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
-import SeriesChildren from "../children/SeriesChildren";
-import SeriesClient from "../clients/SeriesClient";
-import {HandleSeries, HandleSeriesOptional, Scopes} from "../components/types";
-import LibraryContext from "../contexts/LibraryContext";
-import LoginContext from "../contexts/LoginContext";
-import SeriesForm from "../forms/SeriesForm";
-import Author from "../models/Author";
-import Series from "../models/Series";
-import Story from "../models/Story";
-import SeriesSubview from "../subviews/SeriesSubview";
-import * as Abridgers from "../util/abridgers";
-import logger from "../util/client-logger";
-import ReportError from "../util/ReportError";
+import AuthorChildren from "./AuthorChildren";
+import AuthorClient from "../../clients/AuthorClient";
+import {HandleAuthor, HandleAuthorOptional, Scopes} from "../types";
+import LibraryContext from "../../contexts/LibraryContext";
+import LoginContext from "../../contexts/LoginContext";
+import AuthorForm from "./AuthorForm";
+import Author from "../../models/Author";
+import Series from "../../models/Series";
+import Story from "../../models/Story";
+import Volume from "../../models/Volume";
+import AuthorList from "./AuthorList";
+import * as Abridgers from "../../util/abridgers";
+import logger from "../../util/client-logger";
+import ReportError from "../../util/ReportError";
 
-// Incoming Properties -------------------------------------------------------
+// Incoming Properties --------------------------------------------------------
 
 export interface Props {
-    base?: Author | Story;              // Parent object to select for [Library]
+    base?: Series | Story | Volume;     // Parent object to select for [Library]
     nested?: boolean;                   // Show nested child list? [false]
-    title?: string;                     // Table title [Series for Library: XXXXX]
+    title?: string;                     // Table title [Authors for Library: XXXXX]
 }
 
 // Component Details ---------------------------------------------------------
 
-const SeriesView = (props: Props) => {
+const AuthorView = (props: Props) => {
 
     const libraryContext = useContext(LibraryContext);
     const loginContext = useContext(LoginContext);
 
+    const [author, setAuthor] = useState<Author | null>(null);
     const [canAdd, setCanAdd] = useState<boolean>(true);
     const [canEdit, setCanEdit] = useState<boolean>(true);
     const [canRemove, setCanRemove] = useState<boolean>(true);
-    const [libraryId, setLibraryId] = useState<number>(-1);
     const [nested] = useState<boolean>((props.nested !== undefined)
         ? props.nested : false);
+    const [libraryId, setLibraryId] = useState<number>(-1);
     const [refresh, setRefresh] = useState<boolean>(false);
-    const [series, setSeries] = useState<Series | null>(null);
+
 
     useEffect(() => {
 
         logger.info({
-            context: "SeriesView.useEffect",
+            context: "AuthorsView.useEffect",
             base: props.base,
             nested: props.nested,
             title: props.title,
@@ -76,99 +78,99 @@ const SeriesView = (props: Props) => {
     }, [libraryContext, loginContext, refresh,
         props.base, props.nested, props.title]);
 
-    const handleInsert: HandleSeries = async (newSeries) => {
+    const handleInsert: HandleAuthor = async (newAuthor) => {
         try {
-            newSeries.library_id = libraryId;
-            const inserted: Series = await SeriesClient.insert(libraryId, newSeries);
+            newAuthor.library_id = libraryId;
+            const inserted: Author = await AuthorClient.insert(libraryId, newAuthor);
             setRefresh(true);
-            setSeries(null);
+            setAuthor(null);
             logger.trace({
-                context: "SeriesView.handleInsert",
-                series: Abridgers.SERIES(inserted),
+                context: "AuthorsView.handleInsert",
+                author: Abridgers.AUTHOR(inserted),
             });
         } catch (error) {
-            ReportError("SeriesView.handleInsert", error);
+            ReportError("AuthorsView.handleInsert", error);
         }
     }
 
-    const handleRemove: HandleSeries = async (newSeries) => {
+    const handleRemove: HandleAuthor = async (newAuthor) => {
         try {
-            const removed: Series = await SeriesClient.remove(libraryId, newSeries.id);
+            const removed: Author = await AuthorClient.remove(libraryId, newAuthor.id);
             setRefresh(true);
-            setSeries(null);
+            setAuthor(null);
             logger.trace({
-                context: "SeriesView.handleRemove",
-                series: Abridgers.SERIES(removed),
+                context: "AuthorsView.handleRemove",
+                author: Abridgers.AUTHOR(removed),
             });
         } catch (error) {
-            ReportError("SeriesView.handleRemove", error);
+            ReportError("AuthorsView.handleRemove", error);
         }
     }
 
-    const handleSelect: HandleSeriesOptional = (newSeries) => {
-        if (newSeries) {
+    const handleSelect: HandleAuthorOptional = (newAuthor) => {
+        if (newAuthor) {
             if (canEdit) {
-                setSeries(newSeries);
+                setAuthor(newAuthor);
             }
-            logger.trace({
-                context: "SeriesView.handleSelect",
+            logger.info({
+                context: "AuthorsView.handleSelect",
                 canEdit: canEdit,
                 canRemove: canRemove,
-                series: Abridgers.SERIES(newSeries),
+                author: Abridgers.AUTHOR(newAuthor),
             });
         } else {
-            setSeries(null);
+            setAuthor(null);
             logger.trace({
-                context: "SeriesView.handleSelect",
+                context: "AuthorsView.handleSelect",
                 msg: "UNSET"
             });
         }
     }
 
-    const handleUpdate: HandleSeries = async (newSeries) => {
+    const handleUpdate: HandleAuthor = async (newAuthor) => {
         try {
-            const updated: Series =
-                await SeriesClient.update(libraryId, newSeries.id, newSeries);
+            const updated: Author =
+                await AuthorClient.update(libraryId, newAuthor.id, newAuthor);
             setRefresh(true);
-            setSeries(null);
+            setAuthor(null);
             logger.trace({
-                context: "SeriesView.handleUpdate",
-                series: Abridgers.SERIES(updated),
+                context: "AuthorsView.handleUpdate",
+                author: Abridgers.AUTHOR(updated),
             });
         } catch (error) {
-            ReportError("SeriesView.handleUpdate", error);
+            ReportError("AuthorsView.handleUpdate", error);
         }
     }
 
     const onAdd = () => {
-        const newSeries: Series = new Series({
+        const newAuthor: Author = new Author({
             library_id: libraryId,
         });
-        setSeries(newSeries);
+        setAuthor(newAuthor);
         logger.trace({
-            context: "SeriesView.onAdd",
-            series: newSeries
+            context: "AuthorsView.onAdd",
+            author: newAuthor
         });
     }
 
     const onBack = () => {
-        setSeries(null);
+        setAuthor(null);
         logger.trace({
-            context: "SeriesView.onBack"
+            context: "AuthorsView.onBack"
         });
     }
 
     return (
         <>
-            <Container fluid id="SeriesView">
+            <Container fluid id="AuthorsView">
 
                 {/* List View */}
-                {(!series) ? (
+                {(!author) ? (
 
                     <>
 
                         <Row className="ml-1 mr-1 mb-3">
-                            <SeriesSubview
+                            <AuthorList
                                 base={props.base ? props.base : undefined}
                                 handleSelect={handleSelect}
                                 nested={nested}
@@ -191,25 +193,27 @@ const SeriesView = (props: Props) => {
 
                 ) : null }
 
-                {(series) ? (
+                {(author) ? (
 
                     <>
 
-                        <Row id="SeriesDetails" className="mr-1">
+                        <Row id="AuthorDetails" className="mr-1">
 
-                            <Col id="SeriesFormView">
+                            <Col id="AuthorFormView">
 
                                 <Row className="ml-1 mr-1 mb-3">
-                                    <Col className="text-left">
+                                    <Col className="text-center col-8">
                                         <strong>
                                             <>
-                                                {(series.id < 0) ? (
+                                                {(author.id < 0) ? (
                                                     <span>Adding New</span>
                                                 ) : (
                                                     <span>Editing Existing</span>
                                                 )}
-                                                &nbsp;Series for Library:&nbsp;
-                                                {libraryContext.state.library.name}
+                                                &nbsp;Author for Library:&nbsp;
+                                                <span className="text-info">
+                                                    {libraryContext.state.library.name}
+                                                </span>
                                             </>
                                         </strong>
                                     </Col>
@@ -226,25 +230,26 @@ const SeriesView = (props: Props) => {
                                 </Row>
 
                                 <Row className="ml-1 mr-1">
-                                    <SeriesForm
+                                    <AuthorForm
                                         autoFocus
                                         canRemove={canRemove}
                                         handleInsert={handleInsert}
                                         handleRemove={handleRemove}
                                         handleUpdate={handleUpdate}
-                                        series={series}
+                                        author={author}
                                     />
                                 </Row>
 
                             </Col>
 
-                            {((series.id > 0) && !nested) ? (
-                                <Col id="seriesChildren" className="bg-light">
-                                    <SeriesChildren
-                                        series={series}
+                            {((author.id > 0) && !nested) ? (
+                                <Col id="authorChildren" className="bg-light">
+                                    <AuthorChildren
+                                        author={author}
                                     />
                                 </Col>
-                            ) : null}
+
+                            ) : null }
 
                         </Row>
 
@@ -258,4 +263,4 @@ const SeriesView = (props: Props) => {
 
 }
 
-export default SeriesView;
+export default AuthorView;

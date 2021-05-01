@@ -1,6 +1,6 @@
-// UsersView -----------------------------------------------------------------
+// LibrariesView -------------------------------------------------------------
 
-// Administrator view for editing Users.
+// Administrator view for editing Libraries.
 
 // External Modules ----------------------------------------------------------
 
@@ -12,19 +12,19 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
-import UserClient from "../clients/UserClient";
-import {HandleUser, HandleUserOptional, Scopes} from "../components/types";
-import LoginContext from "../contexts/LoginContext";
-import UserForm from "../forms/UserForm";
-import User from "../models/User";
-import UsersSubview from "../subviews/UsersSubview";
-import * as Abridgers from "../util/abridgers";
-import logger from "../util/client-logger";
-import ReportError from "../util/ReportError";
+import LibraryClient from "../../clients/LibraryClient";
+import {HandleLibrary, HandleLibraryOptional, Scopes} from "../types";
+import LoginContext from "../../contexts/LoginContext";
+import LibraryForm from "./LibraryForm";
+import Library from "../../models/Library";
+import LibraryList from "./LibraryList";
+import * as Abridgers from "../../util/abridgers";
+import logger from "../../util/client-logger";
+import ReportError from "../../util/ReportError";
 
 // Component Details ---------------------------------------------------------
 
-const UsersView = () => {
+const LibraryView = () => {
 
     const loginContext = useContext(LoginContext);
 
@@ -32,7 +32,7 @@ const UsersView = () => {
     const [canEdit, setCanEdit] = useState<boolean>(true);
     const [canRemove, setCanRemove] = useState<boolean>(true);
     const [refresh, setRefresh] = useState<boolean>(false);
-    const [user, setUser] = useState<User | null>(null);
+    const [library, setLibrary] = useState<Library | null>(null);
 
     useEffect(() => {
 
@@ -49,95 +49,95 @@ const UsersView = () => {
 
     }, [loginContext, refresh]);
 
-    const handleInsert: HandleUser = async (newUser) => {
+    const handleInsert: HandleLibrary = async (newLibrary) => {
         try {
-            const inserted: User = await UserClient.insert(newUser);
+            const inserted: Library = await LibraryClient.insert(newLibrary);
             setRefresh(true);
-            setUser(null);
+            setLibrary(null);
             logger.trace({
-                context: "UsersView.handleInsert",
-                user: Abridgers.USER(inserted),
+                context: "LibrariesView.handleInsert",
+                library: Abridgers.LIBRARY(inserted),
             });
         } catch (error) {
-            ReportError("UsersView.handleInsert", error);
+            ReportError("LibrariesView.handleInsert", error);
         }
     }
 
-    const handleRemove: HandleUser = async (newUser) => {
+    const handleRemove: HandleLibrary = async (newLibrary) => {
         try {
-            const removed: User = await UserClient.remove(newUser.id);
+            const removed: Library = await LibraryClient.remove(newLibrary.id);
             setRefresh(true);
-            setUser(null);
+            setLibrary(null);
             logger.trace({
-                context: "UsersView.handleRemove",
-                user: Abridgers.USER(removed),
+                context: "LibrariesView.handleRemove",
+                library: Abridgers.LIBRARY(removed),
             });
         } catch (error) {
-            ReportError("UsersView.handleRemove", error);
+            ReportError("LibrariesView.handleRemove", error);
         }
     }
 
-    const handleSelect: HandleUserOptional = (newUser) => {
-        if (newUser) {
+    const handleSelect: HandleLibraryOptional = (newLibrary) => {
+        if (newLibrary) {
             if (canEdit) {
-                setUser(newUser);
+                setLibrary(newLibrary);
             }
             logger.trace({
-                context: "UsersView.handleSelect",
+                context: "LibrariesView.handleSelect",
                 canEdit: canEdit,
                 canRemove: canRemove,
-                user: Abridgers.USER(newUser),
+                library: Abridgers.LIBRARY(newLibrary),
             });
         } else {
-            setUser(null);
+            setLibrary(null);
             logger.trace({
-                context: "UsersView.handleSelect",
+                context: "LibrariesView.handleSelect",
                 msg: "UNSET"
             });
         }
     }
 
-    const handleUpdate: HandleUser = async (newUser) => {
+    const handleUpdate: HandleLibrary = async (newLibrary) => {
         try {
-            const updated: User = await UserClient.update(newUser.id, newUser);
+            const updated: Library = await LibraryClient.update(newLibrary.id, newLibrary);
             setRefresh(true);
-            setUser(null);
+            setLibrary(null);
             logger.trace({
-                context: "UsersView.handleUpdate",
-                user: Abridgers.USER(updated),
+                context: "LibrariesView.handleUpdate",
+                library: Abridgers.LIBRARY(updated),
             });
         } catch (error) {
-            ReportError("UsersView.handleUpdate", error);
+            ReportError("LibrariesView.handleUpdate", error);
         }
     }
 
     const onAdd = () => {
-        const newUser: User = new User();
-        setUser(newUser);
+        const newLibrary: Library = new Library();
+        setLibrary(newLibrary);
         logger.trace({
-            context: "UsersView.onAdd",
-            user: newUser
+            context: "LibrariesView.onAdd",
+            library: newLibrary
         });
     }
 
     const onBack = () => {
-        setUser(null);
+        setLibrary(null);
         logger.trace({
-            context: "UsersView.onBack"
+            context: "LibrariesView.onBack"
         });
     }
 
     return (
         <>
-            <Container fluid id="UsersView">
+            <Container fluid id="LibrariesView">
 
                 {/* List View */}
-                {(!user) ? (
+                {(!library) ? (
 
                     <>
 
                         <Row className="ml-1 mr-1 mb-3">
-                            <UsersSubview
+                            <LibraryList
                                 handleSelect={handleSelect}
                             />
                         </Row>
@@ -157,7 +157,7 @@ const UsersView = () => {
 
                 ) : null }
 
-                {(user) ? (
+                {(library) ? (
 
                     <>
 
@@ -165,12 +165,12 @@ const UsersView = () => {
                             <Col className="text-left">
                                 <strong>
                                     <>
-                                        {(user.id < 0) ? (
+                                        {(library.id < 0) ? (
                                             <span>Adding New</span>
                                         ) : (
                                             <span>Editing Existing</span>
                                         )}
-                                        &nbsp;User
+                                        &nbsp;Library
                                     </>
                                 </strong>
                             </Col>
@@ -187,13 +187,13 @@ const UsersView = () => {
                         </Row>
 
                         <Row className="ml-1 mr-1">
-                            <UserForm
+                            <LibraryForm
                                 autoFocus
                                 canRemove={canRemove}
                                 handleInsert={handleInsert}
                                 handleRemove={handleRemove}
                                 handleUpdate={handleUpdate}
-                                user={user}
+                                library={library}
                             />
                         </Row>
 
@@ -207,4 +207,4 @@ const UsersView = () => {
 
 }
 
-export default UsersView;
+export default LibraryView;

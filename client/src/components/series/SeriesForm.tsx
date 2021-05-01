@@ -1,6 +1,6 @@
-// AuthorForm ---------------------------------------------------------------
+// SeriesForm ----------------------------------------------------------------
 
-// Detail editing form for Author objects.
+// Detail editing form for Series objects.
 
 // External Modules ----------------------------------------------------------
 
@@ -16,38 +16,37 @@ import * as Yup from "yup";
 
 // Internal Modules ----------------------------------------------------------
 
-import {HandleAuthor} from "../components/types";
-import Author from "../models/Author";
-import {validateAuthorNameUnique} from "../util/async-validators";
-import {toAuthor} from "../util/to-model-types";
-import {toEmptyStrings, toNullValues} from "../util/transformations";
+import {HandleSeries} from "../types"
+import Series from "../../models/Series";
+import {toSeries} from "../../util/to-model-types";
+import {toEmptyStrings, toNullValues} from "../../util/transformations";
 
 // Property Details ----------------------------------------------------------
 
 export interface Props {
-    author: Author;                 // Initial values (id<0 for adding)
     autoFocus?: boolean;            // Should the first element receive autofocus? [false]
     canRemove?: boolean;            // Can Remove be performed? [false]
-    handleInsert: HandleAuthor;     // Handle (Author) insert request
-    handleRemove: HandleAuthor;     // Handle (Author) remove request
-    handleUpdate: HandleAuthor;     // Handle (Author) update request
+    handleInsert: HandleSeries;     // Handle (Series) insert request
+    handleRemove: HandleSeries;     // Handle (Series) remove request
+    handleUpdate: HandleSeries;     // Handle (Series) update request
+    series: Series;                 // Initial values (id<0 for adding)
 }
 
 // Component Details ---------------------------------------------------------
 
-const AuthorForm = (props: Props) => {
+const SeriesForm = (props: Props) => {
 
-    const [adding] = useState<boolean>(props.author.id < 0);
+    const [adding] = useState<boolean>(props.series.id < 0);
     const [canRemove] = useState<boolean>
         (props.canRemove !== undefined ? props.canRemove : false);
-    const [initialValues] = useState(toEmptyStrings(props.author));
+    const [initialValues] = useState(toEmptyStrings(props.series));
     const [showConfirm, setShowConfirm] = useState<boolean>(false);
 
     const handleSubmit = (values: FormikValues, actions: FormikHelpers<FormikValues>): void => {
         if (adding) {
-            props.handleInsert(toAuthor(toNullValues(values)));
+            props.handleInsert(toSeries(toNullValues(values)));
         } else {
-            props.handleUpdate(toAuthor(toNullValues(values)));
+            props.handleUpdate(toSeries(toNullValues(values)));
         }
     }
 
@@ -61,22 +60,15 @@ const AuthorForm = (props: Props) => {
 
     const onConfirmPositive = (): void => {
         setShowConfirm(false);
-        props.handleRemove(props.author)
+        props.handleRemove(props.series)
     }
 
     const validationSchema = () => {
         return Yup.object().shape({
             active: Yup.boolean(),
-            first_name: Yup.string()
-                .required("First Name is required"),
-            last_name: Yup.string()
-                .required("Last Name is required")
-                .test("unique-name",
-                    "That name is already in use within this Library",
-                    async function (this) {
-                        return await validateAuthorNameUnique(toAuthor(this.parent))
-                    }),
-        })
+            name: Yup.string()
+                .required("Name is required"),
+        });
     }
 
     return (
@@ -84,7 +76,7 @@ const AuthorForm = (props: Props) => {
         <>
 
             {/* Details Form */}
-            <Container id="AuthorForm">
+            <Container id="seriesForm">
 
                 <Formik
                     initialValues={initialValues}
@@ -115,45 +107,48 @@ const AuthorForm = (props: Props) => {
 
                             <Form.Row id="nameRow">
                                 <Form.Group as={Row} className="mr-4"
-                                            controlId="first_name" id="firstNameGroup">
-                                    <Form.Label>First Name:</Form.Label>
+                                            controlId="name" id="nameGroup">
+                                    <Form.Label>Name:</Form.Label>
                                     <Form.Control
                                         htmlSize={25}
-                                        isInvalid={touched.first_name && !!errors.first_name}
-                                        isValid={!errors.first_name}
-                                        name="first_name"
+                                        isInvalid={touched.name && !!errors.name}
+                                        isValid={!errors.name}
+                                        name="name"
                                         onBlur={handleBlur}
                                         onChange={handleChange}
                                         size="sm"
                                         type="text"
-                                        value={values.first_name}
+                                        value={values.name}
                                     />
                                     <Form.Control.Feedback type="valid">
-                                        Name is required and must be unique.
+                                        Name is required and might not be unique.
                                     </Form.Control.Feedback>
                                     <Form.Control.Feedback type="invalid">
-                                        {errors.first_name}
+                                        {errors.name}
                                     </Form.Control.Feedback>
                                 </Form.Group>
+                            </Form.Row>
+
+                            <Form.Row id="copyrightRow">
                                 <Form.Group as={Row} className="mr-4"
-                                            controlId="last_name" id="lastNameGroup">
-                                    <Form.Label>Last Name:</Form.Label>
+                                            controlId="copyright" id="copyrightGroup">
+                                    <Form.Label>Copyright Year:</Form.Label>
                                     <Form.Control
-                                        htmlSize={25}
-                                        isInvalid={touched.last_name && !!errors.last_name}
-                                        isValid={!errors.last_name}
-                                        name="last_name"
+                                        htmlSize={8}
+                                        isInvalid={touched.copyright && !!errors.copyright}
+                                        isValid={!errors.copyright}
+                                        name="copyright"
                                         onBlur={handleBlur}
                                         onChange={handleChange}
                                         size="sm"
                                         type="text"
-                                        value={values.last_name}
+                                        value={values.copyright}
                                     />
                                     <Form.Control.Feedback type="valid">
-                                        Name is required and must be unique.
+                                        Copyright year (YYYY) for this Series.
                                     </Form.Control.Feedback>
                                     <Form.Control.Feedback type="invalid">
-                                        {errors.last_name}
+                                        {errors.copyright}
                                     </Form.Control.Feedback>
                                 </Form.Group>
                             </Form.Row>
@@ -174,7 +169,7 @@ const AuthorForm = (props: Props) => {
                                         value={values.notes}
                                     />
                                     <Form.Control.Feedback type="valid">
-                                        Miscellaneous notes about this Author.
+                                        Miscellaneous notes about this Series.
                                     </Form.Control.Feedback>
                                     <Form.Control.Feedback type="invalid">
                                         {errors.notes}
@@ -243,12 +238,12 @@ const AuthorForm = (props: Props) => {
                 </Modal.Header>
                 <Modal.Body>
                     <p>
-                        Removing this Author is not reversible, and
+                        Removing this Series is not reversible, and
                         <strong>
                             &nbsp;will also remove ALL related information.
                         </strong>.
                     </p>
-                    <p>Consider marking this Author as inactive instead.</p>
+                    <p>Consider marking this Series as inactive instead.</p>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button
@@ -276,4 +271,4 @@ const AuthorForm = (props: Props) => {
 
 }
 
-export default AuthorForm;
+export default SeriesForm;

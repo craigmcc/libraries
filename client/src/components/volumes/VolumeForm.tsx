@@ -16,10 +16,10 @@ import * as Yup from "yup";
 
 // Internal Modules ----------------------------------------------------------
 
-import {HandleVolume} from "../components/types";
-import Volume from "../models/Volume";
-import {toVolume} from "../util/to-model-types";
-import {toEmptyStrings, toNullValues} from "../util/transformations";
+import {HandleVolume} from "../types";
+import Volume from "../../models/Volume";
+import {toVolume} from "../../util/to-model-types";
+import {toEmptyStrings, toNullValues} from "../../util/transformations";
 
 // Property Details ----------------------------------------------------------
 

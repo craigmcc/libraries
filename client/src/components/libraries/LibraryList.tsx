@@ -11,14 +11,14 @@ import Table from "react-bootstrap/Table";
 
 // Internal Modules ----------------------------------------------------------
 
-import LibraryClient from "../clients/LibraryClient";
-import {HandleIndex, HandleLibraryOptional} from "../components/types";
-import LoginContext from "../contexts/LoginContext";
-import Library from "../models/Library";
-import * as Abridgers from "../util/abridgers";
-import logger from "../util/client-logger";
-import ReportError from "../util/ReportError";
-import {listValue} from "../util/transformations";
+import LibraryClient from "../../clients/LibraryClient";
+import {HandleIndex, HandleLibraryOptional} from "../types";
+import LoginContext from "../../contexts/LoginContext";
+import Library from "../../models/Library";
+import * as Abridgers from "../../util/abridgers";
+import logger from "../../util/client-logger";
+import ReportError from "../../util/ReportError";
+import {listValue} from "../../util/transformations";
 
 // Incoming Properties -------------------------------------------------------
 
@@ -29,7 +29,7 @@ export interface Props {
 
 // Component Details ---------------------------------------------------------
 
-const LibrariesSubview = (props: Props) => {
+const LibraryList = (props: Props) => {
 
     const loginContext = useContext(LoginContext);
 
@@ -160,4 +160,4 @@ const LibrariesSubview = (props: Props) => {
 
 }
 
-export default LibrariesSubview;
+export default LibraryList;

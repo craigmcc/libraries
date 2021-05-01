@@ -1,7 +1,7 @@
-// SeriesSubview ------------------------------------------------------------
+// StoriesSubview ------------------------------------------------------------
 
-// Render a list of Series for the currently selected Library, with a callback
-// handler when a particular Series is selected (or null for deselected).
+// Render a list of Stories for the currently selected Library, with a callback
+// handler when a particular Story is selected (or null for deselected).
 
 // External Modules ----------------------------------------------------------
 
@@ -13,39 +13,41 @@ import Table from "react-bootstrap/Table";
 
 // Internal Modules ----------------------------------------------------------
 
-import AuthorClient from "../clients/AuthorClient";
-import SeriesClient from "../clients/SeriesClient";
-import StoryClient from "../clients/StoryClient";
-import Pagination from "../components/Pagination";
-import SearchBar from "../components/SearchBar";
+import AuthorClient from "../../clients/AuthorClient";
+import SeriesClient from "../../clients/SeriesClient";
+import StoryClient from "../../clients/StoryClient";
+import VolumeClient from "../../clients/VolumeClient";
+import Pagination from "../Pagination";
+import SearchBar from "../SearchBar";
 import {
     HandleIndex,
-    HandleSeriesOptional,
+    HandleStoryOptional,
     HandleValue,
     OnAction
-} from "../components/types";
-import LibraryContext from "../contexts/LibraryContext";
-import LoginContext from "../contexts/LoginContext";
-import Author from "../models/Author";
-import Series from "../models/Series";
-import Story from "../models/Story";
-import * as Abridgers from "../util/abridgers";
-import logger from "../util/client-logger";
-import ReportError from "../util/ReportError";
-import {listValue} from "../util/transformations";
+} from "../types";
+import LibraryContext from "../../contexts/LibraryContext";
+import LoginContext from "../../contexts/LoginContext";
+import Author from "../../models/Author";
+import Series from "../../models/Series";
+import Story from "../../models/Story";
+import Volume from "../../models/Volume";
+import * as Abridgers from "../../util/abridgers";
+import logger from "../../util/client-logger";
+import ReportError from "../../util/ReportError";
+import {listValue} from "../../util/transformations";
 
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
-    base?: Author | Story;              // Parent object to select for [Library]
-    handleSelect: HandleSeriesOptional; // Handle Series selection or deselection
+    base?: Author | Series | Volume;    // Parent object to select for [Library]
+    handleSelect: HandleStoryOptional;  // Handle Story selection or deselection
     nested?: boolean;                   // Show nested child list? [false]
-    title?: string;                     // Table title [Series for Library: XXXXX]
+    title?: string;                     // Table title [Stories for Library: XXXXX]
 }
 
 // Component Details ---------------------------------------------------------
 
-const SeriesSubview = (props: Props) => {
+const StoryList = (props: Props) => {
 
     const libraryContext = useContext(LibraryContext);
     const loginContext = useContext(LoginContext);
@@ -56,73 +58,78 @@ const SeriesSubview = (props: Props) => {
         ? props.nested : false);
     const [pageSize] = useState<number>(25);
     const [searchText, setSearchText] = useState<string>("");
-    const [series, setSeries] = useState<Series[]>([]);
+    const [stories, setStories] = useState<Story[]>([]);
     const [title] = useState<string>((props.title !== undefined)
-        ? props.title : `Series for Library: ${libraryContext.state.library.name}`);
+        ? props.title : `Stories for Library: ${libraryContext.state.library.name}`);
 
     useEffect(() => {
 
-        const fetchSeries = async () => {
+        const fetchStories = async () => {
 
             const libraryId = libraryContext.state.library.id;
             if (loginContext.state.loggedIn && (libraryId > 0)) {
-                let newSeries: Series[] = [];
+                let newStories: Story[] = [];
                 try {
                     // TODO - cannot search by name on nested invocations
                     if (props.base instanceof Author) {
-                        newSeries =
-                            await AuthorClient.series(libraryId, props.base.id, {
+                        newStories =
+                            await AuthorClient.stories(libraryId, props.base.id, {
                                 limit: pageSize,
                             });
-                    } else if (props.base instanceof Story) {
-                        newSeries =
-                            await StoryClient.series(libraryId, props.base.id, {
+                    } else if (props.base instanceof Series) {
+                        newStories =
+                            await SeriesClient.stories(libraryId, props.base.id, {
+                                limit: pageSize,
+                            });
+                    } else if (props.base instanceof Volume) {
+                        newStories =
+                            await VolumeClient.stories(libraryId, props.base.id, {
                                 limit: pageSize,
                             });
                     } else if (searchText.length > 0) {
-                        newSeries =
-                            await SeriesClient.name(libraryId, searchText, {
+                        newStories =
+                            await StoryClient.name(libraryId, searchText, {
                                 limit: pageSize,
                                 offset: (pageSize * (currentPage - 1))
                             });
                     } else {
-                        newSeries =
-                            await SeriesClient.all(libraryId, {
+                        newStories =
+                            await StoryClient.all(libraryId, {
                                 limit: pageSize
                             });
                     }
                     logger.debug({
-                        context: "SeriesSubview.fetchSeries",
-                        count: newSeries.length,
-//                        series: newSeries,
+                        context: "StoriesSubview.fetchStories",
+                        count: newStories.length,
+//                        stories: newStories,
                         nested: nested,
                         title: title,
                     });
                     setIndex(-1);
-                    setSeries(newSeries);
+                    setStories(newStories);
                 } catch (error) {
                     setIndex(-1);
-                    setSeries([]);
+                    setStories([]);
                     if (error.response && (error.response.status === 403)) {
                         logger.debug({
-                            context: "SeriesSubview.fetchSeries",
+                            context: "StoriesSubview.fetchStories",
                             msg: "FORBIDDEN",
                         });
                     } else {
-                        ReportError("SeriesSubview.fetchSeries", error);
+                        ReportError("StoriesSubview.fetchStories", error);
                     }
                 }
             } else {
                 setIndex(-1);
-                setSeries([]);
+                setStories([]);
                 logger.debug({
-                    context: "SeriesSubview.fetchSeries",
+                    context: "StoriesSubview.fetchStories",
                     msg: "SKIPPED",
                 });
             }
         }
 
-        fetchSeries();
+        fetchStories();
 
     }, [libraryContext, loginContext,
         currentPage, pageSize, searchText,
@@ -136,21 +143,21 @@ const SeriesSubview = (props: Props) => {
         if (newIndex === index) {
             setIndex(-1);
             logger.trace({
-                context: "SeriesSubview.handleIndex",
+                context: "StoriesSubview.handleIndex",
                 msg: "UNSET" });
             if (props.handleSelect) {
                 props.handleSelect(null);
             }
         } else {
-            const newSeries = series[newIndex];
+            const newStory = stories[newIndex];
             setIndex(newIndex);
             logger.debug({
-                context: "SeriesSubview.handleIndex",
+                context: "StoriesSubview.handleIndex",
                 index: newIndex,
-                volume: Abridgers.SERIES(newSeries),
+                volume: Abridgers.STORY(newStory),
             });
             if (props.handleSelect) {
-                props.handleSelect(newSeries);
+                props.handleSelect(newStory);
             }
         }
     }
@@ -167,7 +174,7 @@ const SeriesSubview = (props: Props) => {
 
     return (
 
-        <Container fluid id="SeriesSubview">
+        <Container fluid id="StoriesSubview">
 
             {(!nested) ? (
                 <Row className="mb-3">
@@ -182,14 +189,15 @@ const SeriesSubview = (props: Props) => {
                     <Col>
                         <Pagination
                             currentPage={currentPage}
-                            lastPage={(series.length === 0) ||
-                            (series.length < pageSize)}
+                            lastPage={(stories.length === 0) ||
+                            (stories.length < pageSize)}
                             onNext={onNext}
                             onPrevious={onPrevious}
                         />
                     </Col>
                 </Row>
             ) : null}
+
 
             <Row>
                 <Table
@@ -218,7 +226,7 @@ const SeriesSubview = (props: Props) => {
                     </thead>
 
                     <tbody>
-                    {series.map((series, rowIndex) => (
+                    {stories.map((story, rowIndex) => (
                         <tr
                             className={"table-" +
                                 (rowIndex === index ? "primary" : "default")}
@@ -226,16 +234,16 @@ const SeriesSubview = (props: Props) => {
                             onClick={() => (handleIndex(rowIndex))}
                         >
                             <td key={1000 + (rowIndex * 100) + 1}>
-                                {series.name}
+                                {story.name}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 2}>
-                                {listValue(series.active)}
+                                {listValue(story.active)}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 3}>
-                                {listValue(series.copyright)}
+                                {listValue(story.copyright)}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 4}>
-                                {series.notes}
+                                {story.notes}
                             </td>
                         </tr>
                     ))}
@@ -250,4 +258,4 @@ const SeriesSubview = (props: Props) => {
 
 }
 
-export default SeriesSubview;
+export default StoryList;

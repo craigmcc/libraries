@@ -16,10 +16,10 @@ import * as Yup from "yup";
 
 // Internal Modules ----------------------------------------------------------
 
-import {HandleLibrary} from "../components/types";
-import Library from "../models/Library";
-import {validateLibraryNameUnique} from "../util/async-validators";
-import {toEmptyStrings, toNullValues} from "../util/transformations";
+import {HandleLibrary} from "../types";
+import Library from "../../models/Library";
+import {validateLibraryNameUnique} from "../../util/async-validators";
+import {toEmptyStrings, toNullValues} from "../../util/transformations";
 
 // Property Details ----------------------------------------------------------
 

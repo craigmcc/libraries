@@ -19,13 +19,13 @@ import LibrarySelector from "./components/LibrarySelector";
 import LoggedInUser from "./components/LoggedInUser";
 import {LibraryContextProvider} from "./contexts/LibraryContext";
 import {LoginContextProvider} from "./contexts/LoginContext";
-import HomeView from "./views/HomeView";
-import AuthorsView from "./views/AuthorsView";
-import LibrariesView from "./views/LibrariesView";
-import SeriesView from "./views/SeriesView";
-import StoriesView from "./views/StoriesView";
-import UsersView from "./views/UsersView";
-import VolumesView from "./views/VolumesView";
+import HomeView from "./components/HomeView";
+import AuthorView from "./components/authors/AuthorView";
+import LibraryView from "./components/libraries/LibraryView";
+import SeriesView from "./components/series/SeriesView";
+import StoryView from "./components/stories/StoryView";
+import UserView from "./components/users/UserView";
+import VolumeView from "./components/volumes/VolumeView";
 
 // Component Details ---------------------------------------------------------
 
@@ -91,22 +91,22 @@ function App() {
 
                 <Switch>
                     <Route exact path="/authors">
-                        <AuthorsView/>
+                        <AuthorView/>
                     </Route>
                     <Route exact path="/libraries">
-                        <LibrariesView/>
+                        <LibraryView/>
                     </Route>
                     <Route exact path="/series">
                         <SeriesView/>
                     </Route>
                     <Route exact path="/stories">
-                        <StoriesView/>
+                        <StoryView/>
                     </Route>
                     <Route exact path="/users">
-                        <UsersView/>
+                        <UserView/>
                     </Route>
                     <Route exact path="/volumes">
-                        <VolumesView/>
+                        <VolumeView/>
                     </Route>
                     <Route path="/">
                         <HomeView/>
