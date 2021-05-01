@@ -1,4 +1,4 @@
-// VolumesSubview ------------------------------------------------------------
+// VolumeList ------------------------------------------------------------
 
 // Render a list of Volumes for the currently selected Library, with a callback
 // handler when a particular Volume is selected (or null for deselected).
@@ -92,7 +92,7 @@ const VolumeList = (props: Props) => {
                             });
                     }
                     logger.info({
-                        context: "VolumesSubview.fetchVolumes",
+                        context: "VolumeList.fetchVolumes",
                         count: newVolumes.length,
 //                        volumes: newVolumes,
                         base: props.base,
@@ -106,18 +106,18 @@ const VolumeList = (props: Props) => {
                     setVolumes([]);
                     if (error.response && (error.response.status === 403)) {
                         logger.debug({
-                            context: "VolumesSubview.fetchVolumes",
+                            context: "VolumeList.fetchVolumes",
                             msg: "FORBIDDEN",
                         });
                     } else {
-                        ReportError("VolumesSubview.fetchVolumes", error);
+                        ReportError("VolumeList.fetchVolumes", error);
                     }
                 }
             } else {
                 setIndex(-1);
                 setVolumes([]);
                 logger.debug({
-                    context: "VolumesSubview.fetchVolumes",
+                    context: "VolumeList.fetchVolumes",
                     msg: "SKIPPED",
                 });
             }
@@ -137,7 +137,7 @@ const VolumeList = (props: Props) => {
         if (newIndex === index) {
             setIndex(-1);
             logger.trace({
-                context: "VolumesSubview.handleIndex",
+                context: "VolumeList.handleIndex",
                 msg: "UNSET" });
             if (props.handleSelect) {
                 props.handleSelect(null);
@@ -146,7 +146,7 @@ const VolumeList = (props: Props) => {
             const newVolume = volumes[newIndex];
             setIndex(newIndex);
             logger.debug({
-                context: "VolumesSubview.handleIndex",
+                context: "VolumeList.handleIndex",
                 index: newIndex,
                 volume: Abridgers.VOLUME(newVolume),
             });
@@ -168,7 +168,7 @@ const VolumeList = (props: Props) => {
 
     return (
 
-        <Container fluid id="VolumesSubview">
+        <Container fluid id="VolumeList">
 
             {(!nested) ? (
                 <Row className="mb-3">

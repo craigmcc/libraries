@@ -21,6 +21,7 @@ import {LibraryContextProvider} from "./contexts/LibraryContext";
 import {LoginContextProvider} from "./contexts/LoginContext";
 import HomeView from "./components/HomeView";
 import AuthorView from "./components/authors/AuthorView";
+import GuideVolume from "./components/guide-volume/GuideVolume";
 import LibraryView from "./components/libraries/LibraryView";
 import SeriesView from "./components/series/SeriesView";
 import StoryView from "./components/stories/StoryView";
@@ -60,6 +61,9 @@ function App() {
                             <LinkContainer to="/home">
                                 <NavItem className="nav-link">Home</NavItem>
                             </LinkContainer>
+                            <LinkContainer to="/guide-volume">
+                                <NavItem className="nav-link">Guide</NavItem>
+                            </LinkContainer>
                             <LinkContainer to="/authors">
                                 <NavItem className="nav-link">Authors</NavItem>
                             </LinkContainer>
@@ -92,6 +96,9 @@ function App() {
                 <Switch>
                     <Route exact path="/authors">
                         <AuthorView/>
+                    </Route>
+                    <Route exact path="/guide-volume">
+                        <GuideVolume/>
                     </Route>
                     <Route exact path="/libraries">
                         <LibraryView/>

@@ -160,7 +160,7 @@ const VolumeView = (props: Props) => {
 
     return (
         <>
-            <Container fluid id="VolumesView">
+            <Container fluid id="VolumeView">
 
                 {/* List View */}
                 {(!volume) ? (
