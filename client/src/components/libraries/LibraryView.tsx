@@ -12,12 +12,12 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
-import LibraryClient from "../../clients/LibraryClient";
-import {HandleLibrary, HandleLibraryOptional, Scopes} from "../types";
-import LoginContext from "../../contexts/LoginContext";
 import LibraryForm from "./LibraryForm";
-import Library from "../../models/Library";
 import LibraryList from "./LibraryList";
+import {HandleLibrary, HandleLibraryOptional, Scopes} from "../types";
+import LibraryClient from "../../clients/LibraryClient";
+import LoginContext from "../../contexts/LoginContext";
+import Library from "../../models/Library";
 import * as Abridgers from "../../util/abridgers";
 import logger from "../../util/client-logger";
 import ReportError from "../../util/ReportError";

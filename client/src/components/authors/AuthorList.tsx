@@ -1,4 +1,4 @@
-// AuthorsSubview ------------------------------------------------------------
+// AuthorList ----------------------------------------------------------------
 
 // Render a list of Authors for the currently selected Library, with a callback
 // handler when a particular Author is selected (or null for deselected).
@@ -13,10 +13,6 @@ import Table from "react-bootstrap/Table";
 
 // Internal Modules ----------------------------------------------------------
 
-import AuthorClient from "../../clients/AuthorClient";
-import SeriesClient from "../../clients/SeriesClient";
-import StoryClient from "../../clients/StoryClient";
-import VolumeClient from "../../clients/VolumeClient";
 import Pagination from "../Pagination";
 import SearchBar from "../SearchBar";
 import {
@@ -25,6 +21,10 @@ import {
     HandleValue,
     OnAction
 } from "../types";
+import AuthorClient from "../../clients/AuthorClient";
+import SeriesClient from "../../clients/SeriesClient";
+import StoryClient from "../../clients/StoryClient";
+import VolumeClient from "../../clients/VolumeClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
 import Author from "../../models/Author";

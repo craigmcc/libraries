@@ -1,4 +1,4 @@
-// StoryChildren ------------------------------------------------------------
+// StoryChildren -------------------------------------------------------------
 
 // Access related child information for Stories.
 
@@ -13,10 +13,10 @@ import Row from "react-bootstrap/Row";
 // Internal Modules ----------------------------------------------------------
 
 import {OnChangeSelect} from "../types";
-import Story from "../../models/Story";
 import AuthorView from "../authors/AuthorView";
 import VolumeView from "../volumes/VolumeView";
 import SeriesView from "../series/SeriesView";
+import Story from "../../models/Story";
 
 // Incoming Properties -------------------------------------------------------
 

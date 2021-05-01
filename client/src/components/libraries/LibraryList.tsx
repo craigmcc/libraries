@@ -1,4 +1,4 @@
-// LibrariesSubview ----------------------------------------------------------
+// LibraryList ---------------------------------------------------------------
 
 // Render a list of  Libraries, with a callback handler when a particular
 // Library is selected (or null for deselected).
@@ -11,8 +11,8 @@ import Table from "react-bootstrap/Table";
 
 // Internal Modules ----------------------------------------------------------
 
-import LibraryClient from "../../clients/LibraryClient";
 import {HandleIndex, HandleLibraryOptional} from "../types";
+import LibraryClient from "../../clients/LibraryClient";
 import LoginContext from "../../contexts/LoginContext";
 import Library from "../../models/Library";
 import * as Abridgers from "../../util/abridgers";

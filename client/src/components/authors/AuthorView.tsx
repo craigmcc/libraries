@@ -1,4 +1,4 @@
-// AuthorsView -------------------------------------------------------------
+// AuthorView ----------------------------------------------------------------
 
 // Administrator view for editing Authors.
 
@@ -13,16 +13,16 @@ import Row from "react-bootstrap/Row";
 // Internal Modules ----------------------------------------------------------
 
 import AuthorChildren from "./AuthorChildren";
-import AuthorClient from "../../clients/AuthorClient";
+import AuthorForm from "./AuthorForm";
+import AuthorList from "./AuthorList";
 import {HandleAuthor, HandleAuthorOptional, Scopes} from "../types";
+import AuthorClient from "../../clients/AuthorClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
-import AuthorForm from "./AuthorForm";
 import Author from "../../models/Author";
 import Series from "../../models/Series";
 import Story from "../../models/Story";
 import Volume from "../../models/Volume";
-import AuthorList from "./AuthorList";
 import * as Abridgers from "../../util/abridgers";
 import logger from "../../util/client-logger";
 import ReportError from "../../util/ReportError";

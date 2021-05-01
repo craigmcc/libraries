@@ -13,9 +13,9 @@ import Row from "react-bootstrap/Row";
 // Internal Modules ----------------------------------------------------------
 
 import {OnChangeSelect} from "../types";
-import Series from "../../models/Series";
 import AuthorView from "../authors/AuthorView";
 import StoryView from "../stories/StoryView";
+import Series from "../../models/Series";
 
 // Incoming Properties -------------------------------------------------------
 

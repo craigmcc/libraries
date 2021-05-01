@@ -13,9 +13,6 @@ import Table from "react-bootstrap/Table";
 
 // Internal Modules ----------------------------------------------------------
 
-import AuthorClient from "../../clients/AuthorClient";
-import SeriesClient from "../../clients/SeriesClient";
-import StoryClient from "../../clients/StoryClient";
 import Pagination from "../Pagination";
 import SearchBar from "../SearchBar";
 import {
@@ -24,6 +21,9 @@ import {
     HandleValue,
     OnAction
 } from "../types";
+import AuthorClient from "../../clients/AuthorClient";
+import SeriesClient from "../../clients/SeriesClient";
+import StoryClient from "../../clients/StoryClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
 import Author from "../../models/Author";
