@@ -65,13 +65,6 @@ const StageVolume = (props: Props) => {
         setVolume(newVolume);
     }
 
-    const handleBack: OnAction = () => {
-        logger.trace({
-            context: "StageVolume.handleBack"
-        });
-        setVolume(null);
-    }
-
     const handleEdit: HandleVolume = (newVolume) => {
         logger.info({
             context: "StageVolume.handleEdit",
@@ -132,7 +125,7 @@ const StageVolume = (props: Props) => {
             setVolume(null);
             logger.trace({
                 context: "StageVolume.handleUpdate",
-                inserted: updated,
+                updated: updated,
             });
         } catch (error) {
             ReportError("StageVolume.handleUpdate", error);
@@ -165,7 +158,7 @@ const StageVolume = (props: Props) => {
                                 disabled={props.volume.id <= 0}
                                 onClick={() => props.handleStage(Stage.AUTHORS)}
                                 size="sm"
-                                variant="outline-success"
+                                variant={(props.volume.id <= 0) ? "outline-success" : "success"}
                             >Next</Button>
                         </Col>
                     </Row>
@@ -202,7 +195,7 @@ const StageVolume = (props: Props) => {
                         </Col>
                         <Col className="text-right">
                             <Button
-                                onClick={handleBack}
+                                onClick={() => setVolume(null)}
                                 size="sm"
                                 type="button"
                                 variant="secondary"

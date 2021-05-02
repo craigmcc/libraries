@@ -1,7 +1,8 @@
-// VolumeOptions -------------------------------------------------------------
+// AuthorOptions -------------------------------------------------------------
 
-// List Volumes that match search criteria, offering callbacks for adding,
-// editing, or selecting a Volume.
+// List Authors that match search criteria, offering callbacks for adding,
+// editing, including (marking this Author as creator of this Volume),
+// or excluding (marking this AUthor as not a creator of this Volume).
 
 // External Modules ----------------------------------------------------------
 
@@ -10,86 +11,89 @@ import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/Container";
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
-import Table from "react-bootstrap/Table";
 
 // Internal Modules ----------------------------------------------------------
 
 import Pagination from "../Pagination";
 import SearchBar from "../SearchBar";
-import {HandleValue, HandleVolume, OnAction} from "../types";
-import VolumeClient from "../../clients/VolumeClient";
+import {HandleAuthor, HandleValue, OnAction} from "../types";
+import AuthorClient from "../../clients/AuthorClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
-import Volume from "../../models/Volume";
+import Author from "../../models/Author";
 import logger from "../../util/client-logger";
 import ReportError from "../../util/ReportError";
 import {listValue} from "../../util/transformations";
+import Table from "react-bootstrap/Table";
 
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
-    handleEdit: HandleVolume;           // Handle request to edit a Volume
-    handleSelect: HandleVolume;         // Handle request to select a Volume
+    handleEdit: HandleAuthor;           // Handle request to edit an Author
+    handleExclude: HandleAuthor;        // Handle request to exclude an Author
+    handleInclude: HandleAuthor;        // Handle request to include an Author
+    included: (author: Author) => boolean;
+                                        // Is the specified Author included?
 }
 
 // Component Details ---------------------------------------------------------
 
-const VolumeOptions = (props: Props) => {
+const AuthorOptions = (props: Props) => {
 
     const libraryContext = useContext(LibraryContext);
     const loginContext = useContext(LoginContext);
 
+    const [authors, setAuthors] = useState<Author[]>([]);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [libraryId] = useState<number>(libraryContext.state.library.id);
     const [pageSize] = useState<number>(25);
     const [searchText, setSearchText] = useState<string>("");
-    const [volumes, setVolumes] = useState<Volume[]>([]);
 
     useEffect(() => {
 
-        const fetchVolumes = async () => {
+        const fetchAuthors = async () => {
 
             // Fetch matching or first N volumes
             if (loginContext.state.loggedIn && (libraryId > 0)) {
-                let newVolumes: Volume[] = [];
+                let newAuthors: Author[] = [];
                 try {
                     if (searchText.length > 0) {
-                        newVolumes =
-                            await VolumeClient.name(libraryId, searchText, {
+                        newAuthors =
+                            await AuthorClient.name(libraryId, searchText, {
                                 limit: pageSize,
                                 offset: (pageSize * (currentPage - 1)),
                             });
                     } else {
-                        newVolumes =
-                            await VolumeClient.all(libraryId, {
+                        newAuthors =
+                            await AuthorClient.all(libraryId, {
                                 limit: pageSize,
                                 offset: (pageSize * (currentPage - 1)),
                             });
                     }
-                    setVolumes(newVolumes);
+                    setAuthors(newAuthors);
                 } catch (error) {
-                    setVolumes([]);
+                    setAuthors([]);
                     if (error.response && (error.response.status === 403)) {
                         logger.debug({
-                            context: "VolumeOptions.fetchVolumes",
+                            context: "AuthorOptions.fetchAuthors",
                             msg: "FORBIDDEN",
                         });
                     } else {
-                        ReportError("VolumeOptions.fetchVolumes", error);
+                        ReportError("VolumeGuideVolume.fetchVolumes", error);
                     }
 
                 }
             } else {
-                setVolumes([]);
+                setAuthors([]);
                 logger.debug({
-                    context: "VolumeOptions.fetchVolumes",
+                    context: "AuthorOptions.fetchAuthors",
                     msg: "SKIPPED",
                 });
             }
 
         }
 
-        fetchVolumes();
+        fetchAuthors();
 
     }, [libraryContext, loginContext, props,
         currentPage, libraryId, pageSize, searchText]);
@@ -109,22 +113,22 @@ const VolumeOptions = (props: Props) => {
     }
 
     return (
-        <Container fluid id="VolumeOptions">
+        <Container fluid id="AuthorOptions">
 
             <Row className="mb-3">
                 <Col className="col-10 mr-2">
                     <SearchBar
                         autoFocus
                         handleChange={handleChange}
-                        label="Search For Volumes:"
-                        placeholder="Search by all or part of name"
+                        label="Search For Authors:"
+                        placeholder="Search by all or part of either name"
                     />
                 </Col>
                 <Col>
                     <Pagination
                         currentPage={currentPage}
-                        lastPage={(volumes.length === 0) ||
-                        (volumes.length < pageSize)}
+                        lastPage={(authors.length === 0) ||
+                            (authors.length < pageSize)}
                         onNext={onNext}
                         onPrevious={onPrevious}
                     />
@@ -141,47 +145,56 @@ const VolumeOptions = (props: Props) => {
 
                     <thead>
                     <tr className="table-secondary">
-                        <th scope="col">Name</th>
+                        <th scope="col">First Name</th>
+                        <th scope="col">Last Name</th>
                         <th scope="col">Active</th>
-                        <th scope="col">Read</th>
-                        <th scope="col">Location</th>
+                        <th scope="col">Notes</th>
                         <th scope="col">Actions</th>
                     </tr>
                     </thead>
 
                     <tbody>
-                    {volumes.map((volume, rowIndex) => (
+                    {authors.map((author, rowIndex) => (
                         <tr
                             className="table-default"
                             key={1000 + (rowIndex * 100)}
                         >
                             <td key={1000 + (rowIndex * 100) + 1}>
-                                {volume.name}
+                                {author.first_name}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 2}>
-                                {listValue(volume.active)}
+                                {author.last_name}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 3}>
-                                {listValue(volume.read)}
+                                {listValue(author.active)}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 4}>
-                                {volume.location}
+                                {author.notes}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 99}>
                                 <Button
                                     className="mr-1"
-                                    onClick={() => props.handleEdit(volumes[rowIndex])}
+                                    onClick={() => props.handleEdit(authors[rowIndex])}
                                     size="sm"
                                     type="button"
                                     variant="secondary"
                                 >Edit</Button>
                                 <Button
                                     className="mr-1"
-                                    onClick={() => props.handleSelect(volumes[rowIndex])}
+                                    disabled={props.included(authors[rowIndex])}
+                                    onClick={() => props.handleInclude(authors[rowIndex])}
                                     size="sm"
                                     type="button"
                                     variant="primary"
-                                >Select</Button>
+                                >Include</Button>
+                                <Button
+                                    className="mr-1"
+                                    disabled={!props.included(authors[rowIndex])}
+                                    onClick={() => props.handleExclude(authors[rowIndex])}
+                                    size="sm"
+                                    type="button"
+                                    variant="primary"
+                                >Exclude</Button>
                             </td>
                         </tr>
                     ))}
@@ -195,4 +208,4 @@ const VolumeOptions = (props: Props) => {
 
 }
 
-export default VolumeOptions;
+export default AuthorOptions;

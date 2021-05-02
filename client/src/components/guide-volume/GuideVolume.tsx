@@ -11,6 +11,7 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
+import StageAuthors from "./StageAuthors";
 import StageVolume from "./StageVolume";
 import VolumeClient from "../../clients/VolumeClient";
 import LibraryContext from "../../contexts/LibraryContext";
@@ -138,11 +139,18 @@ const GuideVolume = () => {
             </Row>
             <hr/>
 
-            {/* TODO - see if this works as a Modal */}
             {(stage === Stage.VOLUME) ? (
                 <StageVolume
                     handleStage={handleStage}
                     handleVolume={handleVolume}
+                    volume={volume}
+                />
+            ) : null}
+
+            {(stage === Stage.AUTHORS) ? (
+                <StageAuthors
+                    authors={authors}
+                    handleStage={handleStage}
                     volume={volume}
                 />
             ) : null}
