@@ -16,11 +16,11 @@ export const validateLocation = (location: string): boolean => {
 }
 
 export const VALID_LOCATIONS: Map<string, string> = new Map();
-VALID_LOCATIONS.set("BOX",          "Book in a Box (see Notes");
-VALID_LOCATIONS.set("COMPUTER",     "Computer Downloads (PDF)");
-VALID_LOCATIONS.set("KINDLE",       "Kindle Download (Purchased)");
-VALID_LOCATIONS.set("KOBO",         "Kobo Download (Purchased)");
-VALID_LOCATIONS.set("OTHER",        "Other Location");
-VALID_LOCATIONS.set("RETURNED",     "Kindle Unlimited (Returned)");
-VALID_LOCATIONS.set("UNLIMITED",    "Kindle Unlimited (Checked Out)");
-VALID_LOCATIONS.set("WATCH",        "Not Yet Purchased or Downloaded");
+VALID_LOCATIONS.set("Box",          "Book in a Box (see Notes");
+VALID_LOCATIONS.set("Computer",     "Computer Downloads (PDF)");
+VALID_LOCATIONS.set("Kindle",       "Kindle Download (Purchased)");
+VALID_LOCATIONS.set("Kobo",         "Kobo Download (Purchased)");
+VALID_LOCATIONS.set("Other",        "Other Location (See Notes");
+VALID_LOCATIONS.set("Returned",     "Kindle Unlimited (Returned)");
+VALID_LOCATIONS.set("Unlimited",    "Kindle Unlimited (Checked Out)");
+VALID_LOCATIONS.set("Watch",        "Not Yet Purchased or Downloaded");

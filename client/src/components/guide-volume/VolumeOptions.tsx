@@ -40,7 +40,7 @@ const VolumeOptions = (props: Props) => {
     const loginContext = useContext(LoginContext);
 
     const [currentPage, setCurrentPage] = useState(1);
-    const [libraryId, setLibraryId] = useState<number>(-1);
+    const [libraryId] = useState<number>(libraryContext.state.library.id);
     const [pageSize] = useState<number>(25);
     const [searchText, setSearchText] = useState<string>("");
     const [volumes, setVolumes] = useState<Volume[]>([]);
@@ -49,10 +49,8 @@ const VolumeOptions = (props: Props) => {
 
         const fetchVolumes = async () => {
 
-            // Record current Library ID
-            setLibraryId(libraryContext.state.library.id);
-
             // Fetch matching or first N volumes
+            // TODO - deal with previously selected volume (but only the first time)
             if (loginContext.state.loggedIn && (libraryId > 0)) {
                 let newVolumes: Volume[] = [];
                 try {
@@ -95,7 +93,7 @@ const VolumeOptions = (props: Props) => {
         fetchVolumes();
 
     }, [libraryContext, loginContext, props,
-        currentPage, pageSize, searchText]);
+        currentPage, libraryId, pageSize, searchText]);
 
     const handleChange: HandleValue = (newSearchText) => {
         setSearchText(newSearchText);
@@ -147,6 +145,7 @@ const VolumeOptions = (props: Props) => {
                         <th scope="col">Name</th>
                         <th scope="col">Active</th>
                         <th scope="col">Read</th>
+                        <th scope="col">Location</th>
                         <th scope="col">Actions</th>
                     </tr>
                     </thead>
@@ -167,6 +166,9 @@ const VolumeOptions = (props: Props) => {
                                 {listValue(volume.read)}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 4}>
+                                {volume.location}
+                            </td>
+                            <td key={1000 + (rowIndex * 100) + 5}>
                                 <Button
                                     className="mr-1"
                                     onClick={() => props.handleEdit(volumes[rowIndex])}

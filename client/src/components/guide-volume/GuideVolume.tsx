@@ -11,11 +11,15 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
+import StageVolume from "./StageVolume";
+import VolumeClient from "../../clients/VolumeClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
 import Author from "../../models/Author";
 import Story from "../../models/Story";
 import Volume from "../../models/Volume";
+import logger from "../../util/client-logger";
+import ReportError from "../../util/ReportError";
 
 // Component Details ---------------------------------------------------------
 
@@ -24,14 +28,77 @@ const GuideVolume = () => {
     const libraryContext = useContext(LibraryContext);
     const loginContext = useContext(LoginContext);
 
+    const [authors, setAuthors] = useState<Author[]>([]);
+    const [pageSize] = useState<number>(25);
+    const [stories, setStories] = useState<Story[]>([]);
     const [volume, setVolume] = useState<Volume>(new Volume());
+
+    useEffect(() => {
+
+        logger.info({
+            context: "GuideVolume.useEffect",
+            volume: volume,
+        });
+        const libraryId = libraryContext.state.library.id;
+
+        const fetchChildren = async () => {
+
+            setAuthors([]);
+            setStories([]);
+
+            if (loginContext.state.loggedIn && (libraryId > 0) && (volume.id > 0)) {
+
+                try {
+                    setAuthors(await VolumeClient.authors(libraryId, volume.id, {
+                        limit: pageSize,
+                    }));
+                    setStories(await VolumeClient.stories(libraryId, volume.id, {
+                        limit: pageSize,
+                    }));
+                } catch (error) {
+                    ReportError("GuideVolume.fetchChildren", error);
+                }
+
+            }
+
+        }
+
+        fetchChildren();
+
+    }, [libraryContext, loginContext,
+            pageSize, volume]);
+
+    const calculateAuthorsKeys = (): string => {
+        const keys: string[] = [];
+        authors.forEach(author => {
+            keys.push(`${author.last_name}, ${author.first_name}`);
+        })
+        return keys.join("; ");
+
+    }
+
+    const calculateStoriesKeys = (): string => {
+        const keys: string[] = [];
+        stories.forEach(story => {
+            if (story.name.length > 20) {
+                keys.push(story.name.substr(0, 20) + "...");
+            } else {
+                keys.push(story.name);
+            }
+        });
+        return keys.join("; ");
+    }
+
+    const calculateVolumeKey = (): string => {
+        return (volume.id > 0) ? volume.name : "";
+    }
 
     const handleVolume = (newVolume: Volume): void => {
         setVolume(newVolume);
     }
 
     return (
-        <Container fluid id="VolumeGuide">
+        <Container fluid id="GuideVolume">
 
             {/* Header and Object Summary */}
             <Row className="ml-1 mr-1">
@@ -46,15 +113,24 @@ const GuideVolume = () => {
             <Row className="ml-1 mr-1">
                 <ol>
                     <li>
-                        Volume: {(volume.id > 0)
-                            ? <span className="text-info">{volume.name}</span>
-                            : null}
+                        Volume: <span className="text-info">{calculateVolumeKey()}</span>
+                    </li>
+                    <li>
+                        Authors: <span className="text-info">{calculateAuthorsKeys()}</span>
+                    </li>
+                    <li>
+                        Stories: <span className="text-info">{calculateStoriesKeys()}</span>
                     </li>
                 </ol>
             </Row>
             <hr/>
 
             {/* TODO - see if this works as a Modal */}
+            {/* TODO - need stage navigation options eventually */}
+            <StageVolume
+                handleSelect={handleVolume}
+                volume={(volume) ? volume : undefined}
+            />
 
         </Container>
     )
