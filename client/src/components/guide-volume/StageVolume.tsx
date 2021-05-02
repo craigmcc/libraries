@@ -13,6 +13,7 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
+import {HandleStage, Stage} from "./GuideVolume";
 import VolumeOptions from "./VolumeOptions";
 import {HandleVolume, OnAction, Scopes} from "../types";
 import VolumeForm from "../volumes/VolumeForm";
@@ -26,8 +27,9 @@ import ReportError from "../../util/ReportError";
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
-    handleSelect: HandleVolume;         // Handle request to select a Volume
-    volume?: Volume;                    // Currently selected Volume (if any)
+    handleStage: HandleStage;           // Handle changing guide stage
+    handleVolume: HandleVolume;         // Handle request to select a Volume
+    volume: Volume;                     // Currently selected Volume (if id>0)
 }
 
 // Component Details ---------------------------------------------------------
@@ -117,7 +119,7 @@ const StageVolume = (props: Props) => {
             context: "StageVolume.handleSelect",
             volume: newVolume,
         });
-        props.handleSelect(newVolume);
+        props.handleVolume(newVolume);
     }
 
     const handleUpdate: HandleVolume = async (newVolume) => {
@@ -137,7 +139,6 @@ const StageVolume = (props: Props) => {
         }
     }
 
-    // TODO - need stage navigation options eventually
     return (
         <Container fluid id="StageVolume">
 
@@ -146,11 +147,26 @@ const StageVolume = (props: Props) => {
                 <>
 
                     <Row className="mb-3 ml-1 mr-1">
+                        <Col className="text-left">
+                            <Button
+                                disabled={true}
+                                size="sm"
+                                variant="outline-success"
+                            >Previous</Button>
+                        </Col>
                         <Col className="text-center">
                             <span>Manage and Select Volume for Library:&nbsp;</span>
                             <span className="text-info">
                                 {libraryContext.state.library.name}
                             </span>
+                        </Col>
+                        <Col className="text-right">
+                            <Button
+                                disabled={props.volume.id <= 0}
+                                onClick={() => props.handleStage(Stage.AUTHORS)}
+                                size="sm"
+                                variant="outline-success"
+                            >Next</Button>
                         </Col>
                     </Row>
 

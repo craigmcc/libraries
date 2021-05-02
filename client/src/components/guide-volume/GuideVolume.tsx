@@ -23,6 +23,14 @@ import ReportError from "../../util/ReportError";
 
 // Component Details ---------------------------------------------------------
 
+export enum Stage {
+    VOLUME,
+    AUTHORS,
+    STORIES,
+}
+
+export type HandleStage = (newStage: Stage) => void;
+
 const GuideVolume = () => {
 
     const libraryContext = useContext(LibraryContext);
@@ -30,6 +38,7 @@ const GuideVolume = () => {
 
     const [authors, setAuthors] = useState<Author[]>([]);
     const [pageSize] = useState<number>(25);
+    const [stage, setStage] = useState<Stage>(Stage.VOLUME);
     const [stories, setStories] = useState<Story[]>([]);
     const [volume, setVolume] = useState<Volume>(new Volume());
 
@@ -66,14 +75,14 @@ const GuideVolume = () => {
         fetchChildren();
 
     }, [libraryContext, loginContext,
-            pageSize, volume]);
+            pageSize, stage, volume]);
 
     const calculateAuthorsKeys = (): string => {
         const keys: string[] = [];
         authors.forEach(author => {
             keys.push(`${author.last_name}, ${author.first_name}`);
         })
-        return keys.join("; ");
+        return keys.join(" | ");
 
     }
 
@@ -86,11 +95,15 @@ const GuideVolume = () => {
                 keys.push(story.name);
             }
         });
-        return keys.join("; ");
+        return keys.join(" | ");
     }
 
     const calculateVolumeKey = (): string => {
         return (volume.id > 0) ? volume.name : "";
+    }
+
+    const handleStage = (newStage: Stage): void => {
+        setStage(newStage);
     }
 
     const handleVolume = (newVolume: Volume): void => {
@@ -126,11 +139,13 @@ const GuideVolume = () => {
             <hr/>
 
             {/* TODO - see if this works as a Modal */}
-            {/* TODO - need stage navigation options eventually */}
-            <StageVolume
-                handleSelect={handleVolume}
-                volume={(volume) ? volume : undefined}
-            />
+            {(stage === Stage.VOLUME) ? (
+                <StageVolume
+                    handleStage={handleStage}
+                    handleVolume={handleVolume}
+                    volume={volume}
+                />
+            ) : null}
 
         </Container>
     )
