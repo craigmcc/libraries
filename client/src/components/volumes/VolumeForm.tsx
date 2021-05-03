@@ -19,6 +19,7 @@ import * as Yup from "yup";
 import {HandleVolume} from "../types";
 import Volume from "../../models/Volume";
 import {toVolume} from "../../util/to-model-types";
+import {VALID_LOCATIONS, VALID_VOLUME_TYPES} from "../../util/application-validators";
 import {toEmptyStrings, toNullValues} from "../../util/transformations";
 
 // Property Details ----------------------------------------------------------
@@ -61,6 +62,30 @@ const VolumeForm = (props: Props) => {
     const onConfirmPositive = (): void => {
         setShowConfirm(false);
         props.handleRemove(props.volume)
+    }
+
+    type ValidLocation = {
+        key: string,
+        value: string,
+    }
+    const validLocations = (): ValidLocation[] => {
+        const results: ValidLocation[] = [];
+        for (let [key, value] of VALID_LOCATIONS) {
+            results.push({key: key, value: value});
+        }
+        return results;
+    }
+
+    type ValidType = {
+        key: string,
+        value: string,
+    }
+    const validTypes = (): ValidType[] => {
+        const results: ValidType[] = [];
+        for (let [key, value] of VALID_VOLUME_TYPES) {
+            results.push({key: key, value: value});
+        }
+        return results;
     }
 
     const validationSchema = () => {
@@ -200,16 +225,19 @@ const VolumeForm = (props: Props) => {
                                             controlId="location" id="locationGroup">
                                     <Form.Label>Volume Location:</Form.Label>
                                     <Form.Control
-                                        htmlSize={8}
-                                        isInvalid={touched.location && !!errors.location}
-                                        isValid={!errors.location}
+                                        as="select"
                                         name="location"
                                         onBlur={handleBlur}
                                         onChange={handleChange}
                                         size="sm"
-                                        type="text"
                                         value={values.location}
-                                    />
+                                    >
+                                        {validLocations().map((validLocation, index) => (
+                                            <option key={index} value={validLocation.key}>
+                                                {validLocation.value}
+                                            </option>
+                                        ))}
+                                    </Form.Control>
                                     <Form.Control.Feedback type="valid">
                                         Physical location of this volume.
                                     </Form.Control.Feedback>
@@ -245,16 +273,19 @@ const VolumeForm = (props: Props) => {
                                             controlId="type" id="typeGroup">
                                     <Form.Label>Volume Type:</Form.Label>
                                     <Form.Control
-                                        htmlSize={25}
-                                        isInvalid={touched.type && !!errors.type}
-                                        isValid={!errors.type}
+                                        as="select"
                                         name="type"
                                         onBlur={handleBlur}
                                         onChange={handleChange}
                                         size="sm"
-                                        type="text"
                                         value={values.type}
-                                    />
+                                    >
+                                        {validTypes().map((validType, index) => (
+                                            <option key={index} value={validType.key}>
+                                                {validType.value}
+                                            </option>
+                                        ))}
+                                    </Form.Control>
                                     <Form.Control.Feedback type="valid">
                                         Type of content in this Volume.
                                     </Form.Control.Feedback>

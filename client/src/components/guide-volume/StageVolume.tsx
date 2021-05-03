@@ -57,7 +57,11 @@ const StageVolume = (props: Props) => {
         libraryId, volume, props.volume]);
 
     const handleAdd: OnAction = () => {
-        const newVolume = new Volume({library_id: libraryId});
+        const newVolume = new Volume({
+            library_id: libraryId,
+            location: "Kindle",
+            type: "Single",
+        });
         logger.trace({
             context: "StageVolume.handleAdd",
             volume: newVolume,

@@ -308,10 +308,10 @@ const fields: string[] = [
     "isbn",
     "library_id",
     "location",
-    "media",
     "name",
     "notes",
     "read",
+    "type",
 ];
 
 const fieldsWithId: string[] = [

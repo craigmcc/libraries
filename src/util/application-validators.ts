@@ -7,7 +7,7 @@
 
 // Public Objects -----------------------------------------------------------
 
-export const validateLocation = (location: string): boolean => {
+export const validateLocation = (location: string | null | undefined): boolean => {
     if (!location) {
         return true;
     } else {
@@ -16,7 +16,7 @@ export const validateLocation = (location: string): boolean => {
 }
 
 export const VALID_LOCATIONS: Map<string, string> = new Map();
-VALID_LOCATIONS.set("Box",          "Book in a Box (see Notes");
+VALID_LOCATIONS.set("Box",          "Book in a Box (see Notes)");
 VALID_LOCATIONS.set("Computer",     "Computer Downloads (PDF)");
 VALID_LOCATIONS.set("Kindle",       "Kindle Download (Purchased)");
 VALID_LOCATIONS.set("Kobo",         "Kobo Download (Purchased)");
@@ -25,7 +25,7 @@ VALID_LOCATIONS.set("Returned",     "Kindle Unlimited (Returned)");
 VALID_LOCATIONS.set("Unlimited",    "Kindle Unlimited (Checked Out)");
 VALID_LOCATIONS.set("Watch",        "Not Yet Purchased or Downloaded");
 
-export const validateVolumeType = (type: string): boolean => {
+export const validateVolumeType = (type: string | null | undefined): boolean => {
     if (!type) {
         return true;
     } else {

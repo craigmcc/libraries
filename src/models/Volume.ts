@@ -30,6 +30,16 @@ import {BadRequest} from "../util/http-errors";
                 (`library_id: Invalid library_id ${this.library_id}`);
             }
         },
+        isValidLocation: function(this: Volume): void {
+            if (!validateLocation(this.location)) {
+                throw new BadRequest(`location: Invalid location '${this.location}'`);
+            }
+        },
+        isValidVolumeType: function(this: Volume): void {
+            if (!validateVolumeType(this.type)) {
+                throw new BadRequest(`type: Invalid volume type '${this.type}'`);
+            }
+        }
     },
 })
 export class Volume extends AbstractModel<Volume> {
@@ -92,13 +102,6 @@ export class Volume extends AbstractModel<Volume> {
         allowNull: true,
         field: "location",
         type: DataType.STRING,
-        validate: {
-            isValidLocation: function(value: string): void {
-                if (!validateLocation(value)) {
-                    throw new BadRequest(`location: Invalid location '${value}'`);
-                }
-            }
-        }
     })
     location?: string;
 
@@ -143,13 +146,6 @@ export class Volume extends AbstractModel<Volume> {
         defaultValue: "Single",
         field: "type",
         type: DataType.STRING,
-        validate: {
-            isValidVolumeType: function(value: string): void {
-                if (!validateVolumeType(value)) {
-                    throw new BadRequest(`type: Invalid volume type '${value}'`);
-                }
-            }
-        }
     })
     type!: string;
 
