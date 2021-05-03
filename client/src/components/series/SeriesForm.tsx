@@ -106,7 +106,7 @@ const SeriesForm = (props: Props) => {
                         >
 
                             <Form.Row id="nameRow">
-                                <Form.Group as={Row} className="mr-4"
+                                <Form.Group as={Col} className="mr-4"
                                             controlId="name" id="nameGroup">
                                     <Form.Label>Name:</Form.Label>
                                     <Form.Control
@@ -130,7 +130,7 @@ const SeriesForm = (props: Props) => {
                             </Form.Row>
 
                             <Form.Row id="copyrightRow">
-                                <Form.Group as={Row} className="mr-4"
+                                <Form.Group as={Col} className="mr-4"
                                             controlId="copyright" id="copyrightGroup">
                                     <Form.Label>Copyright Year:</Form.Label>
                                     <Form.Control
@@ -154,7 +154,7 @@ const SeriesForm = (props: Props) => {
                             </Form.Row>
 
                             <Form.Row id="notesRow">
-                                <Form.Group as={Row} className="mr-4"
+                                <Form.Group as={Col} className="mr-4"
                                             controlId="notes" id="notesGroup">
                                     <Form.Label>Notes:</Form.Label>
                                     <Form.Control
@@ -178,7 +178,7 @@ const SeriesForm = (props: Props) => {
                             </Form.Row>
 
                             <Form.Row id="activeRow">
-                                <Form.Group as={Row} controlId="active" id="activeGroup">
+                                <Form.Group as={Col} controlId="active" id="activeGroup">
                                     <Form.Check
                                         feedback={errors.active}
                                         defaultChecked={values.active}

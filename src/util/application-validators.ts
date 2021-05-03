@@ -24,3 +24,16 @@ VALID_LOCATIONS.set("Other",        "Other Location (See Notes");
 VALID_LOCATIONS.set("Returned",     "Kindle Unlimited (Returned)");
 VALID_LOCATIONS.set("Unlimited",    "Kindle Unlimited (Checked Out)");
 VALID_LOCATIONS.set("Watch",        "Not Yet Purchased or Downloaded");
+
+export const validateVolumeType = (type: string): boolean => {
+    if (!type) {
+        return true;
+    } else {
+        return VALID_VOLUME_TYPES.has(type);
+    }
+}
+
+export const VALID_VOLUME_TYPES: Map<string, string> = new Map();
+VALID_VOLUME_TYPES.set("Single",        "Single Story by Volume Author(s)");
+VALID_VOLUME_TYPES.set("Collection",    "Collection by Volume Authors(s)");
+VALID_VOLUME_TYPES.set("Anthology",     "Anthology by different Author(s)");

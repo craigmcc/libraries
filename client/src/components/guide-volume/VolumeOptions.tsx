@@ -145,6 +145,7 @@ const VolumeOptions = (props: Props) => {
                         <th scope="col">Active</th>
                         <th scope="col">Read</th>
                         <th scope="col">Location</th>
+                        <th scope="col">Type</th>
                         <th scope="col">Actions</th>
                     </tr>
                     </thead>
@@ -166,6 +167,9 @@ const VolumeOptions = (props: Props) => {
                             </td>
                             <td key={1000 + (rowIndex * 100) + 4}>
                                 {volume.location}
+                            </td>
+                            <td key={1000 + (rowIndex * 100) + 5}>
+                                {volume.type}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 99}>
                                 <Button

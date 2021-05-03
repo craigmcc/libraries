@@ -597,11 +597,11 @@ CREATE TABLE public.volumes (
     isbn text,
     library_id integer NOT NULL,
     location text,
-    media text,
     name text NOT NULL,
     notes text,
     read boolean DEFAULT false NOT NULL,
-    google_id text
+    google_id text,
+    type text DEFAULT 'Single'::text NOT NULL
 );
 
 

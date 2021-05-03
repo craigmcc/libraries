@@ -114,7 +114,7 @@ const AuthorForm = (props: Props) => {
                         >
 
                             <Form.Row id="nameRow">
-                                <Form.Group as={Row} className="mr-4"
+                                <Form.Group as={Col} className="mr-4"
                                             controlId="first_name" id="firstNameGroup">
                                     <Form.Label>First Name:</Form.Label>
                                     <Form.Control
@@ -135,7 +135,7 @@ const AuthorForm = (props: Props) => {
                                         {errors.first_name}
                                     </Form.Control.Feedback>
                                 </Form.Group>
-                                <Form.Group as={Row} className="mr-4"
+                                <Form.Group as={Col} className="mr-4"
                                             controlId="last_name" id="lastNameGroup">
                                     <Form.Label>Last Name:</Form.Label>
                                     <Form.Control
@@ -159,7 +159,7 @@ const AuthorForm = (props: Props) => {
                             </Form.Row>
 
                             <Form.Row id="notesRow">
-                                <Form.Group as={Row} className="mr-4"
+                                <Form.Group as={Col} className="mr-4"
                                             controlId="notes" id="notesGroup">
                                     <Form.Label>Notes:</Form.Label>
                                     <Form.Control
@@ -183,7 +183,7 @@ const AuthorForm = (props: Props) => {
                             </Form.Row>
 
                             <Form.Row id="activeRow">
-                                <Form.Group as={Row} controlId="active" id="activeGroup">
+                                <Form.Group as={Col} controlId="active" id="activeGroup">
                                     <Form.Check
                                         feedback={errors.active}
                                         defaultChecked={values.active}

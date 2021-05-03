@@ -19,10 +19,10 @@ class Volume {
         this.isbn = data.isbn;
         this.library_id = data.library_id;
         this.location = data.location;
-        this.media = data.media;
         this.name = data.name;
         this.notes = data.notes;
         this.read = (data.active !== undefined) ? data.read : false;
+        this.type = data.type;
     }
 
     active: boolean;
@@ -32,10 +32,10 @@ class Volume {
     isbn: string;
     library_id: number;
     location: string;
-    media: string;
     name: string;
     notes: string;
     read: boolean;
+    type: string;
 }
 
 export default Volume;

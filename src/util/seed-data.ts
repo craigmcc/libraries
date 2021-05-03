@@ -144,12 +144,15 @@ export const STORIES_LIBRARY1: Partial<Story>[] = [
 export const VOLUMES_LIBRARY0: Partial<Volume>[] = [
     {
         "name": "Fred Volume",
+        "type": "Single",
     },
     {
         "name": "Wilma Volume",
+        "type": "Single",
     },
     {
         "name": "Flintstone Volume",
+        "type": "Anthology",
     }
 ];
 
@@ -157,12 +160,15 @@ export const VOLUMES_LIBRARY0: Partial<Volume>[] = [
 export const VOLUMES_LIBRARY1: Partial<Volume>[] = [
     {
         "name": "Barney Volume",
+        "type": "Single",
     },
     {
         "name": "Betty Volume",
+        "type": "Single",
     },
     {
         "name": "Rubble Volume",
+        "type": "Anthology",
     }
 ];
 

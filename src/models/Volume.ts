@@ -15,7 +15,7 @@ import AuthorVolume from "./AuthorVolume";
 import Library from "./Library";
 import Story from "./Story";
 import VolumeStory from "./VolumeStory";
-import {validateLocation} from "../util/application-validators";
+import {validateLocation, validateVolumeType} from "../util/application-validators";
 import {validateLibraryId} from "../util/async-validators";
 import {BadRequest} from "../util/http-errors";
 
@@ -102,13 +102,6 @@ export class Volume extends AbstractModel<Volume> {
     })
     location?: string;
 
-    @Column({
-        allowNull: true,
-        field: "media",
-        type: DataType.STRING
-    })
-    media?: string;
-
     @Index("ix_volumes_library_id_name")
     @Column({
         allowNull: false,
@@ -144,6 +137,21 @@ export class Volume extends AbstractModel<Volume> {
 
     @BelongsToMany(() => Story, () => VolumeStory)
     stories!: Array<Story & {VolumeStory: VolumeStory}>;
+
+    @Column({
+        allowNull: false,
+        defaultValue: "Single",
+        field: "type",
+        type: DataType.STRING,
+        validate: {
+            isValidVolumeType: function(value: string): void {
+                if (!validateVolumeType(value)) {
+                    throw new BadRequest(`type: Invalid volume type '${value}'`);
+                }
+            }
+        }
+    })
+    type!: string;
 
 }
 

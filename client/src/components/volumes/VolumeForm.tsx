@@ -106,7 +106,7 @@ const VolumeForm = (props: Props) => {
                         >
 
                             <Form.Row id="nameRow">
-                                <Form.Group as={Row} className="mr-4"
+                                <Form.Group as={Col} className="mr-4"
                                             controlId="name" id="nameGroup">
                                     <Form.Label>Name:</Form.Label>
                                     <Form.Control
@@ -219,8 +219,8 @@ const VolumeForm = (props: Props) => {
                                 </Form.Group>
                             </Form.Row>
 
-                            <Form.Row id="notesRow">
-                                <Form.Group as={Row} className="mr-4"
+                            <Form.Row id="notesTypeRow">
+                                <Form.Group as={Col} className="mr-4"
                                             controlId="notes" id="notesGroup">
                                     <Form.Label>Notes:</Form.Label>
                                     <Form.Control
@@ -241,10 +241,31 @@ const VolumeForm = (props: Props) => {
                                         {errors.notes}
                                     </Form.Control.Feedback>
                                 </Form.Group>
+                                <Form.Group as={Col} className="mr-4"
+                                            controlId="type" id="typeGroup">
+                                    <Form.Label>Volume Type:</Form.Label>
+                                    <Form.Control
+                                        htmlSize={25}
+                                        isInvalid={touched.type && !!errors.type}
+                                        isValid={!errors.type}
+                                        name="type"
+                                        onBlur={handleBlur}
+                                        onChange={handleChange}
+                                        size="sm"
+                                        type="text"
+                                        value={values.type}
+                                    />
+                                    <Form.Control.Feedback type="valid">
+                                        Type of content in this Volume.
+                                    </Form.Control.Feedback>
+                                    <Form.Control.Feedback type="invalid">
+                                        {errors.type}
+                                    </Form.Control.Feedback>
+                                </Form.Group>
                             </Form.Row>
 
-                            <Form.Row id="readRow">
-                                <Form.Group as={Row} controlId="read" id="readGroup">
+                            <Form.Row id="readActiveRow">
+                                <Form.Group as={Col} controlId="read" id="readGroup">
                                     <Form.Check
                                         feedback={errors.read}
                                         defaultChecked={values.read}
@@ -255,10 +276,7 @@ const VolumeForm = (props: Props) => {
                                         onChange={handleChange}
                                     />
                                 </Form.Group>
-                            </Form.Row>
-
-                            <Form.Row id="activeRow">
-                                <Form.Group as={Row} controlId="active" id="activeGroup">
+                                <Form.Group as={Col} controlId="active" id="activeGroup">
                                     <Form.Check
                                         feedback={errors.active}
                                         defaultChecked={values.active}
@@ -269,6 +287,9 @@ const VolumeForm = (props: Props) => {
                                         onChange={handleChange}
                                     />
                                 </Form.Group>
+                            </Form.Row>
+
+                            <Form.Row id="activeRow">
                             </Form.Row>
 
                             <Row className="mb-3">
