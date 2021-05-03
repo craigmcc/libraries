@@ -39,6 +39,7 @@ const GuideVolume = () => {
 
     const [authors, setAuthors] = useState<Author[]>([]);
     const [pageSize] = useState<number>(25);
+    const [refresh, setRefresh] = useState<boolean>(false);
     const [stage, setStage] = useState<Stage>(Stage.VOLUME);
     const [stories, setStories] = useState<Story[]>([]);
     const [volume, setVolume] = useState<Volume>(new Volume());
@@ -74,9 +75,10 @@ const GuideVolume = () => {
         }
 
         fetchChildren();
+        setRefresh(false);
 
     }, [libraryContext, loginContext,
-            pageSize, stage, volume]);
+            pageSize, refresh, stage, volume]);
 
     const calculateAuthorsKeys = (): string => {
         const keys: string[] = [];
@@ -150,6 +152,7 @@ const GuideVolume = () => {
             {(stage === Stage.AUTHORS) ? (
                 <StageAuthors
                     authors={authors}
+                    doRefresh={() => setRefresh(true)}
                     handleStage={handleStage}
                     volume={volume}
                 />

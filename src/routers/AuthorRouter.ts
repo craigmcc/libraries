@@ -146,3 +146,25 @@ AuthorRouter.get("/:libraryId/:authorId/volumes",
         ));
     });
 
+// DELETE /:libraryId/:authorId/volumes/:volumeId - Disassociate Author and Volume
+AuthorRouter.delete("/:libraryId/:authorId/volumes/:volumeId",
+    requireRegular,
+    async (req: Request, res: Response) => {
+        res.send(await AuthorServices.volumesExclude(
+            parseInt(req.params.libraryId, 10),
+            parseInt(req.params.authorId, 10),
+            parseInt(req.params.volumeId, 10)
+        ));
+    });
+
+// POST /:libraryId/:authorId/volumes/:volumeId - Associate Author and Volume
+AuthorRouter.post("/:libraryId/:authorId/volumes/:volumeId",
+    requireRegular,
+    async (req: Request, res: Response) => {
+        res.send(await AuthorServices.volumesInclude(
+            parseInt(req.params.libraryId, 10),
+            parseInt(req.params.authorId, 10),
+            parseInt(req.params.volumeId, 10)
+        ));
+    });
+

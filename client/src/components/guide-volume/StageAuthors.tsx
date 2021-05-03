@@ -15,7 +15,7 @@ import Row from "react-bootstrap/Row";
 
 import AuthorOptions from "./AuthorOptions";
 import {HandleStage, Stage} from "./GuideVolume";
-import {HandleAuthor, OnAction, Scopes} from "../types";
+import {HandleAction, HandleAuthor, OnAction, Scopes} from "../types";
 import AuthorForm from "../authors/AuthorForm";
 import AuthorClient from "../../clients/AuthorClient";
 import LibraryContext from "../../contexts/LibraryContext";
@@ -29,6 +29,7 @@ import ReportError from "../../util/ReportError";
 
 export interface Props {
     authors: Author[];                  // Currently included Authors
+    doRefresh: HandleAction;            // Trigger a UI refresh
     handleStage: HandleStage;           // Handle changing guide stage
     volume: Volume;                     // Currently selected volume
 }
@@ -78,16 +79,40 @@ const StageAuthors = (props: Props) => {
         logger.info({
             context: "StageAuthors.handleExclude",
             author: newAuthor,
+            volume: props.volume,
         });
-        // TODO -- disassociate volume and author
+        try {
+            const disassociated = await AuthorClient.volumesAuthorExclude
+               (libraryId, newAuthor.id, props.volume.id);
+            logger.trace({
+                context: "StageAuthors.handleExclude",
+                author: newAuthor,
+                disassociated: disassociated,
+            });
+        } catch (error) {
+            ReportError("StageAuthors.handleExclude", error);
+        }
+        props.doRefresh();
     }
 
     const handleInclude: HandleAuthor = async (newAuthor) => {
         logger.info({
             context: "StageAuthors.handleInclude",
             author: newAuthor,
+            volume: props.volume,
         });
-        // TODO -- associate volume and author
+        try {
+            const associated = await AuthorClient.volumesAuthorInclude
+                (libraryId, newAuthor.id, props.volume.id);
+            logger.trace({
+                context: "StageAuthors.handleInclude",
+                author: newAuthor,
+                associated: associated,
+            });
+        } catch (error) {
+            ReportError("StageAuthors.handleInclude", error);
+        }
+        props.doRefresh();
     }
 
     const handleInsert: HandleAuthor = async (newAuthor) => {
@@ -102,10 +127,12 @@ const StageAuthors = (props: Props) => {
                 context: "StageAuthors.handleInsert",
                 inserted: inserted,
             });
-            // TODO -- also associate volume and new author
+            // Assume a newly added Author should be associated with our Volume
+            await handleInclude(inserted);
         } catch (error) {
             ReportError("StageAuthors.handleInsert", error);
         }
+        props.doRefresh();
     }
 
     const handleRemove: HandleAuthor = async (newAuthor) => {
@@ -123,6 +150,7 @@ const StageAuthors = (props: Props) => {
         } catch (error) {
             ReportError("StageAuthors.handleRemove", error);
         }
+        props.doRefresh();
     }
 
     const handleUpdate: HandleAuthor = async (newAuthor) => {
@@ -140,6 +168,7 @@ const StageAuthors = (props: Props) => {
         } catch (error) {
             ReportError("StageAuthors.handleUpdate", error);
         }
+        props.doRefresh();
     }
 
     // Is the specified Author currently included for this Volume?

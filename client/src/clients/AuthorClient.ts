@@ -15,6 +15,7 @@ import {
     toAuthors,
     toSerieses,
     toStories,
+    toVolume,
     toVolumes,
 } from "../util/to-model-types";
 
@@ -90,6 +91,18 @@ export class AuthorClient {
         const values = (await ApiBase.get<Volume[]>(AUTHORS_BASE
             + `/${libraryId}/${authorId}/volumes${queryParameters(params)}`)).data;
         return toVolumes(values);
+    }
+
+    async volumesAuthorExclude(libraryId: number, authorId: number, volumeId: number): Promise<Volume> {
+        const value = await ApiBase.delete(AUTHORS_BASE
+            + `/${libraryId}/${authorId}/volumes/${volumeId}`);
+        return toVolume(value);
+    }
+
+    async volumesAuthorInclude(libraryId: number, authorId: number, volumeId: number): Promise<Volume> {
+        const value = await ApiBase.post(AUTHORS_BASE
+            + `/${libraryId}/${authorId}/volumes/${volumeId}`);
+        return toVolume(value);
     }
 
 }

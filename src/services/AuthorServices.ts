@@ -9,6 +9,7 @@ import {FindOptions, Op} from "sequelize";
 // Internal Modules ----------------------------------------------------------
 
 import Author from "../models/Author";
+import AuthorVolume from "../models/AuthorVolume";
 import Database from "../models/Database";
 import Library from "../models/Library";
 import Series from "../models/Series";
@@ -311,6 +312,86 @@ export class AuthorServices {
             order: SortOrder.VOLUMES,
         }, query);
         return await author.$get("volumes", options);
+    }
+
+    public async volumesExclude(libraryId: number, authorId: number, volumeId: number): Promise<Volume> {
+        const library = await Library.findByPk(libraryId);
+        if (!library) {
+            throw new NotFound(
+                `libraryId: Missing Library ${libraryId}`,
+                "AuthorServices.volumesExclude"
+            );
+        }
+        const author = await Author.findOne({
+            where: {
+                id: authorId,
+                library_id: libraryId
+            }
+        })
+        if (!author) {
+            throw new NotFound(
+                `authorId: Missing Author ${authorId}`,
+                "AuthorServices.volumesExclude"
+            );
+        }
+        const volume = await Volume.findOne({
+            where: {
+                id: volumeId,
+                library_id: libraryId
+            }
+        })
+        if (!volume) {
+            throw new NotFound(
+                `volumeId: Missing Volume ${volumeId}`,
+                "AuthorServices.volumesExclude"
+            );
+        }
+        await AuthorVolume.destroy({
+            where: {
+                author_id: authorId,
+                volume_id: volumeId
+            }
+        });
+        return volume;
+    }
+
+    public async volumesInclude(libraryId: number, authorId: number, volumeId: number): Promise<Volume> {
+        const library = await Library.findByPk(libraryId);
+        if (!library) {
+            throw new NotFound(
+                `libraryId: Missing Library ${libraryId}`,
+                "AuthorServices.volumesInclude"
+            );
+        }
+        const author = await Author.findOne({
+            where: {
+                id: authorId,
+                library_id: libraryId
+            }
+        })
+        if (!author) {
+            throw new NotFound(
+                `authorId: Missing Author ${authorId}`,
+                "AuthorServices.volumesInclude"
+            );
+        }
+        const volume = await Volume.findOne({
+            where: {
+                id: volumeId,
+                library_id: libraryId
+            }
+        })
+        if (!volume) {
+            throw new NotFound(
+                `volumeId: Missing Volume ${volumeId}`,
+                "AuthorServices.volumesInclude"
+            );
+        }
+        await AuthorVolume.create({
+            author_id: authorId,
+            volume_id: volumeId
+        });
+        return volume;
     }
 
 }
