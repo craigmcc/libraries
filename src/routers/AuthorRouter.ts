@@ -135,6 +135,28 @@ AuthorRouter.get("/:libraryId/:authorId/stories",
         ));
     });
 
+// DELETE /:libraryId/:authorId/stories/:storyId - Disassociate Author and Story
+AuthorRouter.delete("/:libraryId/:authorId/stories/:storyId",
+    requireRegular,
+    async (req: Request, res: Response) => {
+        res.send(await AuthorServices.storiesExclude(
+            parseInt(req.params.libraryId, 10),
+            parseInt(req.params.authorId, 10),
+            parseInt(req.params.storyId, 10)
+        ));
+    });
+
+// POST /:libraryId/:authorId/stories/:storyId - Associate Author and Story
+AuthorRouter.post("/:libraryId/:authorId/volumes/:volumeId",
+    requireRegular,
+    async (req: Request, res: Response) => {
+        res.send(await AuthorServices.storiesInclude(
+            parseInt(req.params.libraryId, 10),
+            parseInt(req.params.authorId, 10),
+            parseInt(req.params.storyId, 10)
+        ));
+    });
+
 // GET /:libraryId/:authorId/volumes - Find Volumes for this Author
 AuthorRouter.get("/:libraryId/:authorId/volumes",
     requireRegular,

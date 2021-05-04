@@ -12,6 +12,7 @@ import Row from "react-bootstrap/Row";
 // Internal Modules ----------------------------------------------------------
 
 import StageAuthors from "./StageAuthors";
+import StageStories from "./StageStories";
 import StageVolume from "./StageVolume";
 import VolumeClient from "../../clients/VolumeClient";
 import LibraryContext from "../../contexts/LibraryContext";
@@ -154,6 +155,15 @@ const GuideVolume = () => {
                     authors={authors}
                     doRefresh={() => setRefresh(true)}
                     handleStage={handleStage}
+                    volume={volume}
+                />
+            ) : null}
+
+            {(stage === Stage.STORIES) ? (
+                <StageStories
+                    doRefresh={() => setRefresh(true)}
+                    handleStage={handleStage}
+                    stories={stories}
                     volume={volume}
                 />
             ) : null}

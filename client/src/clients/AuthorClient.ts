@@ -15,6 +15,7 @@ import {
     toAuthors,
     toSerieses,
     toStories,
+    toStory,
     toVolume,
     toVolumes,
 } from "../util/to-model-types";
@@ -81,6 +82,18 @@ export class AuthorClient {
         return toStories(values);
     }
 
+    async storiesExclude(libraryId: number, authorId: number, storyId: number): Promise<Story> {
+        const value = await ApiBase.delete(AUTHORS_BASE
+            + `/${libraryId}/${authorId}/stories/${storyId}`);
+        return toStory(value);
+    }
+
+    async storiesInclude(libraryId: number, authorId: number, storyId: number): Promise<Story> {
+        const value = await ApiBase.post(AUTHORS_BASE
+            + `/${libraryId}/${authorId}/stories/${storyId}`);
+        return toStory(value);
+    }
+
     async update(libraryId: number, authorId: number, author: Author): Promise<Author> {
         const value = (await ApiBase.put<Author>(AUTHORS_BASE
             + `/${libraryId}/${authorId}`, author)).data;
@@ -93,13 +106,13 @@ export class AuthorClient {
         return toVolumes(values);
     }
 
-    async volumesAuthorExclude(libraryId: number, authorId: number, volumeId: number): Promise<Volume> {
+    async volumesExclude(libraryId: number, authorId: number, volumeId: number): Promise<Volume> {
         const value = await ApiBase.delete(AUTHORS_BASE
             + `/${libraryId}/${authorId}/volumes/${volumeId}`);
         return toVolume(value);
     }
 
-    async volumesAuthorInclude(libraryId: number, authorId: number, volumeId: number): Promise<Volume> {
+    async volumesInclude(libraryId: number, authorId: number, volumeId: number): Promise<Volume> {
         const value = await ApiBase.post(AUTHORS_BASE
             + `/${libraryId}/${authorId}/volumes/${volumeId}`);
         return toVolume(value);

@@ -134,3 +134,25 @@ VolumeRouter.get("/:libraryId/:volumeId/stories",
         ));
     });
 
+// DELETE /:libraryId/:volumeId/stories/:storyId - Disassociate Volume and Story
+VolumeRouter.delete("/:libraryId/:volumeId/stories/:storyId",
+    requireRegular,
+    async (req: Request, res: Response) => {
+        res.send(await VolumeServices.storiesExclude(
+            parseInt(req.params.libraryId, 10),
+            parseInt(req.params.volumeId, 10),
+            parseInt(req.params.storyId, 10)
+        ));
+    });
+
+// POST /:libraryId/:volumeId/stories/:storyId - Associate Volume and Story
+VolumeRouter.post("/:libraryId/:volumeId/volumes/:volumeId",
+    requireRegular,
+    async (req: Request, res: Response) => {
+        res.send(await VolumeServices.storiesInclude(
+            parseInt(req.params.libraryId, 10),
+            parseInt(req.params.volumeId, 10),
+            parseInt(req.params.storyId, 10)
+        ));
+    });
+

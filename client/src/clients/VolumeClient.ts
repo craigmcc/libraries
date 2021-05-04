@@ -9,7 +9,7 @@ import {queryParameters} from "../util/query-parameters";
 import Author from "../models/Author";
 import Story from "../models/Story";
 import Volume from "../models/Volume";
-import {toAuthors, toStories, toVolume, toVolumes} from "../util/to-model-types";
+import {toAuthors, toStories, toStory, toVolume, toVolumes} from "../util/to-model-types";
 
 const VOLUMES_BASE = "/volumes";
 
@@ -70,6 +70,18 @@ export class VolumeClient {
         const values = (await ApiBase.get<Story[]>(VOLUMES_BASE
             + `/${libraryId}/${volumeId}/stories${queryParameters(params)}`)).data;
         return toStories(values);
+    }
+
+    async storiesExclude(libraryId: number, volumeId: number, storyId: number): Promise<Story> {
+        const value = await ApiBase.delete(VOLUMES_BASE
+            + `/${libraryId}/${volumeId}/stories/${storyId}`);
+        return toStory(value);
+    }
+
+    async storiesInclude(libraryId: number, volumeId: number, storyId: number): Promise<Story> {
+        const value = await ApiBase.post(VOLUMES_BASE
+            + `/${libraryId}/${volumeId}/stories/${storyId}`);
+        return toStory(value);
     }
 
     async update(libraryId: number, volumeId: number, volume: Volume): Promise<Volume> {

@@ -13,6 +13,7 @@ import Database from "../models/Database";
 import Library from "../models/Library";
 import Story from "../models/Story";
 import Volume from "../models/Volume";
+import VolumeStory from "../models/VolumeStory";
 import * as SortOrder from "../models/SortOrder";
 import {NotFound} from "../util/http-errors";
 import {appendPagination} from "../util/query-parameters";
@@ -268,6 +269,86 @@ export class VolumeServices {
             order: SortOrder.STORIES,
         }, query);
         return await volume.$get("stories", options);
+    }
+
+    public async storiesExclude(libraryId: number, volumeId: number, storyId: number): Promise<Story> {
+        const library = await Library.findByPk(libraryId);
+        if (!library) {
+            throw new NotFound(
+                `libraryId: Missing Library ${libraryId}`,
+                "VolumeServices.storiesExclude"
+            );
+        }
+        const volume = await Volume.findOne({
+            where: {
+                id: volumeId,
+                library_id: libraryId
+            }
+        })
+        if (!volume) {
+            throw new NotFound(
+                `volumeId: Missing Volume ${volumeId}`,
+                "VolumeServices.storiesExclude"
+            );
+        }
+        const story = await Story.findOne({
+            where: {
+                id: storyId,
+                library_id: libraryId
+            }
+        })
+        if (!story) {
+            throw new NotFound(
+                `storyId: Missing Story ${storyId}`,
+                "AuthorServices.storiesExclude"
+            );
+        }
+        await VolumeStory.destroy({
+            where: {
+                story_id: storyId,
+                volume_id: volumeId,
+            }
+        });
+        return story;
+    }
+
+    public async storiesInclude(libraryId: number, volumeId: number, storyId: number): Promise<Story> {
+        const library = await Library.findByPk(libraryId);
+        if (!library) {
+            throw new NotFound(
+                `libraryId: Missing Library ${libraryId}`,
+                "AuthorServices.storiesInclude"
+            );
+        }
+        const volume = await Volume.findOne({
+            where: {
+                id: volumeId,
+                library_id: libraryId
+            }
+        })
+        if (!volume) {
+            throw new NotFound(
+                `volumeId: Missing Volume ${volumeId}`,
+                "VolumeServices.storiesInclude"
+            );
+        }
+        const story = await Story.findOne({
+            where: {
+                id: storyId,
+                library_id: libraryId
+            }
+        })
+        if (!story) {
+            throw new NotFound(
+                `storyId: Missing Story ${storyId}`,
+                "AuthorServices.storiesInclude"
+            );
+        }
+        await VolumeStory.create({
+            story_id: storyId,
+            volume_id: volumeId,
+        });
+        return story;
     }
 
 }

@@ -1,8 +1,10 @@
-// AuthorOptions -------------------------------------------------------------
+// StoryOptions --------------------------------------------------------------
 
-// List Authors that match search criteria, offering callbacks for adding,
-// editing, including (marking this Author as creator of this Volume),
-// or excluding (marking this Author as not a creator of this Volume).
+// List Stories that match search criteria, offering callbacks for adding,
+// editing, including (marking this Story as part of this Volume), or
+// excluding (marking this Story s not part of this Volume).
+//
+// TODO: special handling for Volumes of type "Single" or "Collection".
 
 // External Modules ----------------------------------------------------------
 
@@ -17,11 +19,12 @@ import Table from "react-bootstrap/Table";
 
 import Pagination from "../Pagination";
 import SearchBar from "../SearchBar";
-import {HandleAuthor, HandleValue, OnAction} from "../types";
-import AuthorClient from "../../clients/AuthorClient";
+import {HandleStory, HandleValue, OnAction} from "../types";
+import StoryClient from "../../clients/StoryClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
-import Author from "../../models/Author";
+import Story from "../../models/Story";
+import Volume from "../../models/Volume";
 import logger from "../../util/client-logger";
 import ReportError from "../../util/ReportError";
 import {listValue} from "../../util/transformations";
@@ -29,71 +32,73 @@ import {listValue} from "../../util/transformations";
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
-    handleEdit: HandleAuthor;           // Handle request to edit an Author
-    handleExclude: HandleAuthor;        // Handle request to exclude an Author
-    handleInclude: HandleAuthor;        // Handle request to include an Author
-    included: (author: Author) => boolean;
-                                        // Is the specified Author included?
+    handleEdit: HandleStory;            // Handle request to edit this Story
+    handleExclude: HandleStory;         // Handle request to exclude a Story
+    handleInclude: HandleStory;         // Handle request to include a Story
+    included: (story: Story) => boolean;
+                                        // Is the specified Story included?
+    stories: Story[];                   // Currently included stories
+    volume: Volume;                     // Volume that stories are included in
 }
 
 // Component Details ---------------------------------------------------------
 
-const AuthorOptions = (props: Props) => {
+const StoryOptions = (props: Props) => {
 
     const libraryContext = useContext(LibraryContext);
     const loginContext = useContext(LoginContext);
 
-    const [authors, setAuthors] = useState<Author[]>([]);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [libraryId] = useState<number>(libraryContext.state.library.id);
     const [pageSize] = useState<number>(25);
     const [searchText, setSearchText] = useState<string>("");
+    const [stories, setStories] = useState<Story[]>([]);
 
     useEffect(() => {
 
-        const fetchAuthors = async () => {
+        const fetchStories = async () => {
 
             // Fetch matching or first N volumes
             if (loginContext.state.loggedIn && (libraryId > 0)) {
-                let newAuthors: Author[] = [];
+                let newStories: Story[] = [];
                 try {
                     if (searchText.length > 0) {
-                        newAuthors =
-                            await AuthorClient.name(libraryId, searchText, {
+                        newStories =
+                            await StoryClient.name(libraryId, searchText, {
                                 limit: pageSize,
                                 offset: (pageSize * (currentPage - 1)),
                             });
                     } else {
-                        newAuthors =
-                            await AuthorClient.all(libraryId, {
+                        newStories =
+                            await StoryClient.all(libraryId, {
                                 limit: pageSize,
                                 offset: (pageSize * (currentPage - 1)),
                             });
                     }
-                    setAuthors(newAuthors);
+                    setStories(newStories);
                 } catch (error) {
-                    setAuthors([]);
+                    setStories([]);
                     if (error.response && (error.response.status === 403)) {
                         logger.debug({
-                            context: "AuthorOptions.fetchAuthors",
+                            context: "StoryOptions.fetchStory",
                             msg: "FORBIDDEN",
                         });
                     } else {
-                        ReportError("AuthorOptions.fetchAuthors", error);
+                        ReportError("StoryOptions.fetchStories", error);
                     }
 
                 }
             } else {
-                setAuthors([]);
+                setStories([]);
                 logger.debug({
-                    context: "AuthorOptions.fetchAuthors",
+                    context: "StoryOptions.fetchStories",
                     msg: "SKIPPED",
                 });
             }
 
         }
 
-        fetchAuthors();
+        fetchStories();
 
     }, [libraryContext, loginContext, props,
         currentPage, libraryId, pageSize, searchText]);
@@ -113,22 +118,22 @@ const AuthorOptions = (props: Props) => {
     }
 
     return (
-        <Container fluid id="AuthorOptions">
+        <Container fluid id="StoryOptions">
 
             <Row className="mb-3">
                 <Col className="col-10 mr-2">
                     <SearchBar
                         autoFocus
                         handleChange={handleChange}
-                        label="Search For Authors:"
-                        placeholder="Search by all or part of either name"
+                        label="Search For Stories:"
+                        placeholder="Search by all or part of name"
                     />
                 </Col>
                 <Col>
                     <Pagination
                         currentPage={currentPage}
-                        lastPage={(authors.length === 0) ||
-                            (authors.length < pageSize)}
+                        lastPage={(stories.length === 0) ||
+                            (stories.length < pageSize)}
                         onNext={onNext}
                         onPrevious={onPrevious}
                     />
@@ -145,8 +150,7 @@ const AuthorOptions = (props: Props) => {
 
                     <thead>
                     <tr className="table-secondary">
-                        <th scope="col">First Name</th>
-                        <th scope="col">Last Name</th>
+                        <th scope="col">Name</th>
                         <th scope="col">Active</th>
                         <th scope="col">Notes</th>
                         <th scope="col">Actions</th>
@@ -154,43 +158,40 @@ const AuthorOptions = (props: Props) => {
                     </thead>
 
                     <tbody>
-                    {authors.map((author, rowIndex) => (
+                    {stories.map((story, rowIndex) => (
                         <tr
                             className="table-default"
                             key={1000 + (rowIndex * 100)}
                         >
                             <td key={1000 + (rowIndex * 100) + 1}>
-                                {author.first_name}
+                                {story.name}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 2}>
-                                {author.last_name}
+                                {listValue(story.active)}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 3}>
-                                {listValue(author.active)}
-                            </td>
-                            <td key={1000 + (rowIndex * 100) + 4}>
-                                {author.notes}
+                                {story.notes}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 99}>
                                 <Button
                                     className="mr-1"
-                                    onClick={() => props.handleEdit(authors[rowIndex])}
+                                    onClick={() => props.handleEdit(stories[rowIndex])}
                                     size="sm"
                                     type="button"
                                     variant="secondary"
                                 >Edit</Button>
                                 <Button
                                     className="mr-1"
-                                    disabled={props.included(authors[rowIndex])}
-                                    onClick={() => props.handleInclude(authors[rowIndex])}
+                                    disabled={props.included(stories[rowIndex])}
+                                    onClick={() => props.handleInclude(stories[rowIndex])}
                                     size="sm"
                                     type="button"
                                     variant="primary"
                                 >Include</Button>
                                 <Button
                                     className="mr-1"
-                                    disabled={!props.included(authors[rowIndex])}
-                                    onClick={() => props.handleExclude(authors[rowIndex])}
+                                    disabled={!props.included(stories[rowIndex])}
+                                    onClick={() => props.handleExclude(stories[rowIndex])}
                                     size="sm"
                                     type="button"
                                     variant="primary"
@@ -208,4 +209,4 @@ const AuthorOptions = (props: Props) => {
 
 }
 
-export default AuthorOptions;
+export default StoryOptions;
