@@ -14,6 +14,7 @@ import Row from "react-bootstrap/Row";
 import StageAuthors from "./StageAuthors";
 import StageStories from "./StageStories";
 import StageVolume from "./StageVolume";
+import VolumeSummary from "./VolumeSummary";
 import VolumeClient from "../../clients/VolumeClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
@@ -117,30 +118,12 @@ const GuideVolume = () => {
     return (
         <Container fluid id="GuideVolume">
 
-            {/* Header and Object Summary */}
-            <Row className="ml-1 mr-1">
-                <Col className="text-center">
-                    <span>
-                        Step-by-step guide to managing library information,
-                        starting from a <strong>Volume</strong>.
-                    </span>
-                </Col>
-            </Row>
-            <hr/>
-            <Row className="ml-1 mr-1">
-                <ol>
-                    <li>
-                        Volume: <span className="text-info">{calculateVolumeKey()}</span>
-                    </li>
-                    <li>
-                        Authors: <span className="text-info">{calculateAuthorsKeys()}</span>
-                    </li>
-                    <li>
-                        Stories: <span className="text-info">{calculateStoriesKeys()}</span>
-                    </li>
-                </ol>
-            </Row>
-            <hr/>
+            <VolumeSummary
+                authors={authors}
+                stories={stories}
+                volume={volume}
+            />
+            <hr color="cyan"/>
 
             {(stage === Stage.VOLUME) ? (
                 <StageVolume
