@@ -152,7 +152,7 @@ const StageVolume = (props: Props) => {
                             >Previous</Button>
                         </Col>
                         <Col className="text-center">
-                            <span>Manage and Select Volume for Library:&nbsp;</span>
+                            <span>Select or Create Volume for Library:&nbsp;</span>
                             <span className="text-info">
                                 {libraryContext.state.library.name}
                             </span>
