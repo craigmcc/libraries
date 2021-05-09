@@ -118,6 +118,7 @@ const GuideVolume = () => {
 
             {(stage === Stage.STORIES) ? (
                 <StageStories
+                    authors={authors}
                     doRefresh={() => setRefresh(true)}
                     handleStage={handleStage}
                     stories={stories}

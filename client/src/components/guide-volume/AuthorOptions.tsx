@@ -19,9 +19,11 @@ import Pagination from "../Pagination";
 import SearchBar from "../SearchBar";
 import {HandleAuthor, HandleValue, OnAction} from "../types";
 import AuthorClient from "../../clients/AuthorClient";
+import VolumeClient from "../../clients/VolumeClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
 import Author from "../../models/Author";
+import Volume from "../../models/Volume";
 import logger from "../../util/client-logger";
 import ReportError from "../../util/ReportError";
 import {listValue} from "../../util/transformations";
@@ -34,6 +36,7 @@ export interface Props {
     handleInclude: HandleAuthor;        // Handle request to include an Author
     included: (author: Author) => boolean;
                                         // Is the specified Author included?
+    volume: Volume;                     // Currently selected Volume
 }
 
 // Component Details ---------------------------------------------------------
@@ -53,7 +56,7 @@ const AuthorOptions = (props: Props) => {
 
         const fetchAuthors = async () => {
 
-            // Fetch matching or first N volumes
+            // Fetch matching (search text) or included (no search text) Authors
             if (loginContext.state.loggedIn && (libraryId > 0)) {
                 let newAuthors: Author[] = [];
                 try {
@@ -65,10 +68,7 @@ const AuthorOptions = (props: Props) => {
                             });
                     } else {
                         newAuthors =
-                            await AuthorClient.all(libraryId, {
-                                limit: pageSize,
-                                offset: (pageSize * (currentPage - 1)),
-                            });
+                            await VolumeClient.authors(libraryId, props.volume.id);
                     }
                     setAuthors(newAuthors);
                 } catch (error) {
@@ -102,6 +102,16 @@ const AuthorOptions = (props: Props) => {
         setSearchText(newSearchText);
     }
 
+    const handleExclude: HandleAuthor = (author) => {
+        setSearchText("");
+        props.handleExclude(author);
+    }
+
+    const handleInclude: HandleAuthor = (author) => {
+        setSearchText("");
+        props.handleInclude(author);
+    }
+
     const onNext: OnAction = () => {
         const newCurrentPage = currentPage + 1;
         setCurrentPage(newCurrentPage);
@@ -120,6 +130,7 @@ const AuthorOptions = (props: Props) => {
                     <SearchBar
                         autoFocus
                         handleChange={handleChange}
+                        initialValue={searchText}
                         label="Search For Authors:"
                         placeholder="Search by all or part of either name"
                     />
@@ -182,7 +193,7 @@ const AuthorOptions = (props: Props) => {
                                 <Button
                                     className="mr-1"
                                     disabled={props.included(authors[rowIndex])}
-                                    onClick={() => props.handleInclude(authors[rowIndex])}
+                                    onClick={() => handleInclude(authors[rowIndex])}
                                     size="sm"
                                     type="button"
                                     variant="primary"
@@ -190,7 +201,7 @@ const AuthorOptions = (props: Props) => {
                                 <Button
                                     className="mr-1"
                                     disabled={!props.included(authors[rowIndex])}
-                                    onClick={() => props.handleExclude(authors[rowIndex])}
+                                    onClick={() => handleExclude(authors[rowIndex])}
                                     size="sm"
                                     type="button"
                                     variant="primary"

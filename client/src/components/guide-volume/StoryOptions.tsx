@@ -21,6 +21,7 @@ import Pagination from "../Pagination";
 import SearchBar from "../SearchBar";
 import {HandleStory, HandleValue, OnAction} from "../types";
 import StoryClient from "../../clients/StoryClient";
+import VolumeClient from "../../clients/VolumeClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
 import Story from "../../models/Story";
@@ -58,7 +59,7 @@ const StoryOptions = (props: Props) => {
 
         const fetchStories = async () => {
 
-            // Fetch matching or first N volumes
+            // Fetch matching (search text) or included (no search text) Stories
             if (loginContext.state.loggedIn && (libraryId > 0)) {
                 let newStories: Story[] = [];
                 try {
@@ -70,10 +71,7 @@ const StoryOptions = (props: Props) => {
                             });
                     } else {
                         newStories =
-                            await StoryClient.all(libraryId, {
-                                limit: pageSize,
-                                offset: (pageSize * (currentPage - 1)),
-                            });
+                            await VolumeClient.stories(libraryId, props.volume.id);
                     }
                     setStories(newStories);
                 } catch (error) {
@@ -107,6 +105,16 @@ const StoryOptions = (props: Props) => {
         setSearchText(newSearchText);
     }
 
+    const handleExclude: HandleStory = (story) => {
+        setSearchText("");
+        props.handleExclude(story);
+    }
+
+    const handleInclude: HandleStory = (story) => {
+        setSearchText("");
+        props.handleInclude(story);
+    }
+
     const onNext: OnAction = () => {
         const newCurrentPage = currentPage + 1;
         setCurrentPage(newCurrentPage);
@@ -125,6 +133,7 @@ const StoryOptions = (props: Props) => {
                     <SearchBar
                         autoFocus
                         handleChange={handleChange}
+                        initialValue={searchText}
                         label="Search For Stories:"
                         placeholder="Search by all or part of name"
                     />
@@ -183,7 +192,7 @@ const StoryOptions = (props: Props) => {
                                 <Button
                                     className="mr-1"
                                     disabled={props.included(stories[rowIndex])}
-                                    onClick={() => props.handleInclude(stories[rowIndex])}
+                                    onClick={() => handleInclude(stories[rowIndex])}
                                     size="sm"
                                     type="button"
                                     variant="primary"
@@ -191,7 +200,7 @@ const StoryOptions = (props: Props) => {
                                 <Button
                                     className="mr-1"
                                     disabled={!props.included(stories[rowIndex])}
-                                    onClick={() => props.handleExclude(stories[rowIndex])}
+                                    onClick={() => handleExclude(stories[rowIndex])}
                                     size="sm"
                                     type="button"
                                     variant="primary"

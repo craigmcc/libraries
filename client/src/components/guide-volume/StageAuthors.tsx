@@ -220,6 +220,7 @@ const StageAuthors = (props: Props) => {
                         handleExclude={handleExclude}
                         handleInclude={handleInclude}
                         included={included}
+                        volume={props.volume}
                     />
                     <Button
                         className="mt-3 ml-1"
@@ -242,21 +243,10 @@ const StageAuthors = (props: Props) => {
                             ) : (
                                 <span>Add New&nbsp;</span>
                             )}
-                            {(included(author)) ? (
-                                <>
-                                    <span>Author for Volume:&nbsp;</span>
-                                    <span className="text-info">
-                                        {props.volume.name}
-                                    </span>
-                                </>
-                            ) : (
-                                <>
-                                    <span>Author for Library:&nbsp;</span>
-                                    <span className="text-info">
-                                        {libraryContext.state.library.name}
-                                    </span>
-                                </>
-                            )}
+                            <span>Author for Volume:&nbsp;</span>
+                            <span className="text-info">
+                                {props.volume.name}
+                            </span>
                         </Col>
                         <Col className="text-right">
                             <Button

@@ -17,6 +17,7 @@ import {HandleStage, Stage} from "./GuideVolume";
 import StoryOptions from "./StoryOptions";
 import {HandleAction, HandleStory, OnAction, Scopes} from "../types";
 import StoryForm from "../stories/StoryForm";
+import AuthorClient from "../../clients/AuthorClient";
 import StoryClient from "../../clients/StoryClient";
 import VolumeClient from "../../clients/VolumeClient";
 import LibraryContext from "../../contexts/LibraryContext";
@@ -25,12 +26,14 @@ import Story from "../../models/Story";
 import Volume from "../../models/Volume";
 import logger from "../../util/client-logger";
 import ReportError from "../../util/ReportError";
+import Author from "../../models/Author";
 
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
     doRefresh: HandleAction;            // Trigger a UI refresh
     handleStage: HandleStage;           // Handle changing guide stage
+    authors: Author[];                  // Current Authors for this Volume
     stories: Story[];                   // Currently included Stories
     volume: Volume;                     // Currently selected Volume
 }
@@ -122,15 +125,26 @@ const StageStories = (props: Props) => {
             volume: newStory,
         });
         try {
+
+            // Persist the new Story
             const inserted = await StoryClient.insert(libraryId, newStory);
             setStory(null);
             logger.trace({
                 context: "StageStories.handleInsert",
                 inserted: inserted,
             });
-            // Assume a newly added Story should be associated with our Volume
+
+            // Assume the new Story is included in the current Volume
             await handleInclude(inserted);
-            // TODO - associate with Author(s)?  If so, who
+
+            // For Volumes of type "Single" or "Collection", assume
+            // that the Author(s) for this Volume wrote this Story as well.
+            if ((props.volume.type === "Single") || (props.volume.type === "Collection")) {
+                for (const author of props.authors) {
+                    await AuthorClient.storiesInclude(libraryId, author.id, inserted.id);
+                }
+            }
+
         } catch (error) {
             ReportError("StageStories.handleInsert", error);
         }
@@ -245,21 +259,10 @@ const StageStories = (props: Props) => {
                             ) : (
                                 <span>Add New&nbsp;</span>
                             )}
-                            {(included(story)) ? (
-                                <>
-                                    <span>Story for Volume:&nbsp;</span>
-                                    <span className="text-info">
-                                        {props.volume.name}
-                                    </span>
-                                </>
-                            ) : (
-                                <>
-                                    <span>Story for Library:&nbsp;</span>
-                                    <span className="text-info">
-                                        {libraryContext.state.library.name}
-                                    </span>
-                                </>
-                            )}
+                            <span>Story for Volume:&nbsp;</span>
+                            <span className="text-info">
+                                {props.volume.name}
+                            </span>
                         </Col>
                         <Col className="text-right">
                             <Button
