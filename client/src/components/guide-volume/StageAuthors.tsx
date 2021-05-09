@@ -29,7 +29,7 @@ import ReportError from "../../util/ReportError";
 
 export interface Props {
     authors: Author[];                  // Included Authors for this Volume
-    doRefresh: HandleAction;            // Trigger a UI refresh
+    handleRefresh: HandleAction;        // Trigger a UI refresh
     handleStage: HandleStage;           // Handle changing guide stage
     volume: Volume;                     // Currently selected volume
 }
@@ -92,7 +92,7 @@ const StageAuthors = (props: Props) => {
         } catch (error) {
             ReportError("StageAuthors.handleExclude", error);
         }
-        props.doRefresh();
+        props.handleRefresh();
     }
 
     const handleInclude: HandleAuthor = async (newAuthor) => {
@@ -112,7 +112,7 @@ const StageAuthors = (props: Props) => {
         } catch (error) {
             ReportError("StageAuthors.handleInclude", error);
         }
-        props.doRefresh();
+        props.handleRefresh();
     }
 
     const handleInsert: HandleAuthor = async (newAuthor) => {
@@ -128,7 +128,7 @@ const StageAuthors = (props: Props) => {
         } catch (error) {
             ReportError("StageAuthors.handleInsert", error);
         }
-        props.doRefresh();
+        props.handleRefresh();
     }
 
     const handleRemove: HandleAuthor = async (newAuthor) => {
@@ -142,7 +142,7 @@ const StageAuthors = (props: Props) => {
         } catch (error) {
             ReportError("StageAuthors.handleRemove", error);
         }
-        props.doRefresh();
+        props.handleRefresh();
     }
 
     const handleUpdate: HandleAuthor = async (newAuthor) => {
@@ -156,7 +156,7 @@ const StageAuthors = (props: Props) => {
         } catch (error) {
             ReportError("StageAuthors.handleUpdate", error);
         }
-        props.doRefresh();
+        props.handleRefresh();
     }
 
     // Is the specified Author currently included for this Volume?

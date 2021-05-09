@@ -31,7 +31,7 @@ import ReportError from "../../util/ReportError";
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
-    doRefresh: HandleAction;            // Trigger a UI refresh
+    handleRefresh: HandleAction;        // Trigger a UI refresh
     handleStage: HandleStage;           // Handle changing guide stage
     authors: Author[];                  // Included Authors for this Volume
     stories: Story[];                   // Included Stories for this Volume
@@ -92,7 +92,7 @@ const StageStories = (props: Props) => {
         } catch (error) {
             ReportError("StageStories.handleExclude", error);
         }
-        props.doRefresh();
+        props.handleRefresh();
     }
 
     // Include this Story in the current Volume, no effect on current Author
@@ -108,11 +108,11 @@ const StageStories = (props: Props) => {
         } catch (error) {
             ReportError("StageStories.handleInclude", error);
         }
-        props.doRefresh();
+        props.handleRefresh();
     }
 
     const handleInsert: HandleStory = async (newStory) => {
-        logger.info({
+        logger.debug({
             context: "StageStories.handleInsert",
             story: newStory,
         });
@@ -136,7 +136,7 @@ const StageStories = (props: Props) => {
         } catch (error) {
             ReportError("StageStories.handleInsert", error);
         }
-        props.doRefresh();
+        props.handleRefresh();
     }
 
     const handleRemove: HandleStory = async (newStory) => {
@@ -151,7 +151,7 @@ const StageStories = (props: Props) => {
         } catch (error) {
             ReportError("StageStories.handleRemove", error);
         }
-        props.doRefresh();
+        props.handleRefresh();
     }
 
     const handleUpdate: HandleStory = async (newStory) => {
@@ -165,7 +165,7 @@ const StageStories = (props: Props) => {
         } catch (error) {
             ReportError("StageAuthors.handleUpdate", error);
         }
-        props.doRefresh();
+        props.handleRefresh();
     }
 
     // Is the specified Story currently included for this Volume?

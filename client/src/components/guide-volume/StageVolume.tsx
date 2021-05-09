@@ -15,7 +15,7 @@ import Row from "react-bootstrap/Row";
 
 import {HandleStage, Stage} from "./GuideVolume";
 import VolumeOptions from "./VolumeOptions";
-import {HandleVolume, OnAction, Scopes} from "../types";
+import {HandleAction, HandleVolume, OnAction, Scopes} from "../types";
 import VolumeForm from "../volumes/VolumeForm";
 import VolumeClient from "../../clients/VolumeClient";
 import LibraryContext from "../../contexts/LibraryContext";
@@ -27,6 +27,7 @@ import ReportError from "../../util/ReportError";
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
+    handleRefresh: HandleAction;        // Trigger a UI refresh
     handleStage: HandleStage;           // Handle changing guide stage
     handleVolume: HandleVolume;         // Handle request to select a Volume
     volume: Volume;                     // Currently selected Volume (if id>0)
@@ -89,6 +90,7 @@ const StageVolume = (props: Props) => {
         } catch (error) {
             ReportError("StageVolume.handleInsert", error);
         }
+        props.handleRefresh();
     }
 
     const handleRemove: HandleVolume = async (newVolume) => {
@@ -102,6 +104,7 @@ const StageVolume = (props: Props) => {
         } catch (error) {
             ReportError("StageVolume.handleRemove", error);
         }
+        props.handleRefresh();
     }
 
     const handleSelect: HandleVolume = (newVolume) => {
@@ -123,6 +126,7 @@ const StageVolume = (props: Props) => {
         } catch (error) {
             ReportError("StageVolume.handleUpdate", error);
         }
+        props.handleRefresh();
     }
 
     return (

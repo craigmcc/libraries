@@ -83,6 +83,11 @@ const StoryOptions = (props: Props) => {
                         if ((props.volume.type === "Single") && (newStories.length === 0)) {
 
                             // Create and insert the new Story
+                            logger.info({
+                                context: "StoryOptions.fetchStories",
+                                msg: "Creating a courtesy story",
+                                volume: props.volume,
+                            });
                             const added = new Story({
                                 active: true,
                                 copyright: props.volume.copyright ? props.volume.copyright : undefined,

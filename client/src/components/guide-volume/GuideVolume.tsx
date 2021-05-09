@@ -80,6 +80,10 @@ const GuideVolume = () => {
     }, [libraryContext, loginContext,
             pageSize, refresh, stage, volume]);
 
+    const handleRefresh = (): void => {
+        setRefresh(true);
+    }
+
     const handleStage = (newStage: Stage): void => {
         setStage(newStage);
     }
@@ -101,6 +105,7 @@ const GuideVolume = () => {
 
             {(stage === Stage.VOLUME) ? (
                 <StageVolume
+                    handleRefresh={handleRefresh}
                     handleStage={handleStage}
                     handleVolume={handleVolume}
                     volume={volume}
@@ -110,7 +115,7 @@ const GuideVolume = () => {
             {(stage === Stage.AUTHORS) ? (
                 <StageAuthors
                     authors={authors}
-                    doRefresh={() => setRefresh(true)}
+                    handleRefresh={handleRefresh}
                     handleStage={handleStage}
                     volume={volume}
                 />
@@ -119,7 +124,7 @@ const GuideVolume = () => {
             {(stage === Stage.STORIES) ? (
                 <StageStories
                     authors={authors}
-                    doRefresh={() => setRefresh(true)}
+                    handleRefresh={handleRefresh}
                     handleStage={handleStage}
                     stories={stories}
                     volume={volume}
