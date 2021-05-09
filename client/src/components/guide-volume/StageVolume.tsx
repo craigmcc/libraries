@@ -89,6 +89,7 @@ const StageVolume = (props: Props) => {
                 context: "StageVolume.handleInsert",
                 inserted: inserted,
             });
+            props.handleVolume(newVolume); // Implicitly select the new Volume
         } catch (error) {
             ReportError("StageVolume.handleInsert", error);
         }

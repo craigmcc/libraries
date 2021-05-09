@@ -6,8 +6,6 @@
 
 import {useContext, useEffect, useState} from "react";
 import Container from "react-bootstrap/Container";
-import Col from "react-bootstrap/Col";
-import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
@@ -82,37 +80,13 @@ const GuideVolume = () => {
     }, [libraryContext, loginContext,
             pageSize, refresh, stage, volume]);
 
-    const calculateAuthorsKeys = (): string => {
-        const keys: string[] = [];
-        authors.forEach(author => {
-            keys.push(`${author.last_name}, ${author.first_name}`);
-        })
-        return keys.join(" | ");
-
-    }
-
-    const calculateStoriesKeys = (): string => {
-        const keys: string[] = [];
-        stories.forEach(story => {
-            if (story.name.length > 20) {
-                keys.push(story.name.substr(0, 20) + "...");
-            } else {
-                keys.push(story.name);
-            }
-        });
-        return keys.join(" | ");
-    }
-
-    const calculateVolumeKey = (): string => {
-        return (volume.id > 0) ? volume.name : "";
-    }
-
     const handleStage = (newStage: Stage): void => {
         setStage(newStage);
     }
 
     const handleVolume = (newVolume: Volume): void => {
         setVolume(newVolume);
+        setStage(Stage.AUTHORS);    // Implicitly advance after Volume selected
     }
 
     return (

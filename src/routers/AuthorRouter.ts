@@ -147,7 +147,7 @@ AuthorRouter.delete("/:libraryId/:authorId/stories/:storyId",
     });
 
 // POST /:libraryId/:authorId/stories/:storyId - Associate Author and Story
-AuthorRouter.post("/:libraryId/:authorId/volumes/:volumeId",
+AuthorRouter.post("/:libraryId/:authorId/stories/:storyId",
     requireRegular,
     async (req: Request, res: Response) => {
         res.send(await AuthorServices.storiesInclude(

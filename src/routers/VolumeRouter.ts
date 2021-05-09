@@ -146,7 +146,7 @@ VolumeRouter.delete("/:libraryId/:volumeId/stories/:storyId",
     });
 
 // POST /:libraryId/:volumeId/stories/:storyId - Associate Volume and Story
-VolumeRouter.post("/:libraryId/:volumeId/volumes/:volumeId",
+VolumeRouter.post("/:libraryId/:volumeId/stories/:storyId",
     requireRegular,
     async (req: Request, res: Response) => {
         res.send(await VolumeServices.storiesInclude(
