@@ -2,9 +2,7 @@
 
 // List Stories that match search criteria, offering callbacks for adding,
 // editing, including (marking this Story as part of this Volume), or
-// excluding (marking this Story s not part of this Volume).
-//
-// TODO: special handling for Volumes of type "Single" or "Collection".
+// excluding (marking this Story as not part of this Volume).
 
 // External Modules ----------------------------------------------------------
 
@@ -36,10 +34,11 @@ export interface Props {
     handleEdit: HandleStory;            // Handle request to edit this Story
     handleExclude: HandleStory;         // Handle request to exclude a Story
     handleInclude: HandleStory;         // Handle request to include a Story
+    handleInsert: HandleStory;          // Handle request to insert a Story
     included: (story: Story) => boolean;
                                         // Is the specified Story included?
-    stories: Story[];                   // Currently included stories
-    volume: Volume;                     // Volume that stories are included in
+    stories: Story[];                   // Included Stories for this Volume
+    volume: Volume;                     // Currently selected Volume
 }
 
 // Component Details ---------------------------------------------------------
@@ -64,14 +63,40 @@ const StoryOptions = (props: Props) => {
                 let newStories: Story[] = [];
                 try {
                     if (searchText.length > 0) {
+
+                        // Find matching Stories
                         newStories =
                             await StoryClient.name(libraryId, searchText, {
                                 limit: pageSize,
                                 offset: (pageSize * (currentPage - 1)),
                             });
+
                     } else {
+
+                        // Find currently included Stories
                         newStories =
                             await VolumeClient.stories(libraryId, props.volume.id);
+
+                        // If there are no included Stories for a Volume
+                        // of type "Single", create one based on the
+                        // name and Authors of the owning Volume
+                        if ((props.volume.type === "Single") && (newStories.length === 0)) {
+
+                            // Create and insert the new Story
+                            const added = new Story({
+                                active: true,
+                                copyright: props.volume.copyright ? props.volume.copyright : undefined,
+                                library_id: props.volume.library_id,
+                                name: props.volume.name,
+                            })
+                            await props.handleInsert(added);
+
+                            // Reselect to pick up the newly added story
+                            newStories =
+                                await VolumeClient.stories(libraryId, props.volume.id);
+
+                        }
+
                     }
                     setStories(newStories);
                 } catch (error) {
@@ -84,7 +109,6 @@ const StoryOptions = (props: Props) => {
                     } else {
                         ReportError("StoryOptions.fetchStories", error);
                     }
-
                 }
             } else {
                 setStories([]);

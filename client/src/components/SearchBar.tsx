@@ -4,7 +4,7 @@
 
 // External Modules ----------------------------------------------------------
 
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import Form from "react-bootstrap/Form";
 
 // Internal Modules ----------------------------------------------------------
@@ -30,6 +30,10 @@ const SearchBar = (props: Props) => {
 
     const [currentValue, setCurrentValue]
         = useState<string>(props.initialValue ? props.initialValue : "");
+
+    useEffect(() => {
+        // Force rerender if initialValue changes
+    }, [currentValue, props.initialValue]);
 
     const onChange: OnChangeInput = (event): void => {
         const newValue: string = event.target.value;

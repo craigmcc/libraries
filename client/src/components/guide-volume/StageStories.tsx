@@ -112,7 +112,7 @@ const StageStories = (props: Props) => {
     }
 
     const handleInsert: HandleStory = async (newStory) => {
-        logger.debug({
+        logger.info({
             context: "StageStories.handleInsert",
             story: newStory,
         });
@@ -214,6 +214,7 @@ const StageStories = (props: Props) => {
                         handleEdit={handleEdit}
                         handleExclude={handleExclude}
                         handleInclude={handleInclude}
+                        handleInsert={handleInsert}
                         included={included}
                         stories={props.stories}
                         volume={props.volume}
