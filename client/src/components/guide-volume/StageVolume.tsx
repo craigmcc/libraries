@@ -62,7 +62,7 @@ const StageVolume = (props: Props) => {
             location: "Kindle",
             type: "Single",
         });
-        logger.trace({
+        logger.debug({
             context: "StageVolume.handleAdd",
             volume: newVolume,
         });
@@ -70,7 +70,7 @@ const StageVolume = (props: Props) => {
     }
 
     const handleEdit: HandleVolume = (newVolume) => {
-        logger.info({
+        logger.debug({
             context: "StageVolume.handleEdit",
             volume: newVolume,
         });
@@ -78,17 +78,13 @@ const StageVolume = (props: Props) => {
     }
 
     const handleInsert: HandleVolume = async (newVolume) => {
-        logger.info({
+        logger.debug({
             context: "StageVolume.handleInsert",
             volume: newVolume,
         });
         try {
             const inserted = await VolumeClient.insert(libraryId, newVolume);
             setVolume(null);
-            logger.trace({
-                context: "StageVolume.handleInsert",
-                inserted: inserted,
-            });
             props.handleVolume(inserted); // Implicitly select the new Volume
         } catch (error) {
             ReportError("StageVolume.handleInsert", error);
@@ -96,24 +92,20 @@ const StageVolume = (props: Props) => {
     }
 
     const handleRemove: HandleVolume = async (newVolume) => {
-        logger.info({
+        logger.debug({
             context: "StageVolume.handleRemove",
             volume: newVolume,
         });
         try {
-            const removed = VolumeClient.remove(libraryId, newVolume.id);
+            await VolumeClient.remove(libraryId, newVolume.id);
             setVolume(null);
-            logger.trace({
-                context: "StageVolume.handleRemove",
-                removed: removed,
-            });
         } catch (error) {
             ReportError("StageVolume.handleRemove", error);
         }
     }
 
     const handleSelect: HandleVolume = (newVolume) => {
-        logger.info({
+        logger.debug({
             context: "StageVolume.handleSelect",
             volume: newVolume,
         });
@@ -121,17 +113,13 @@ const StageVolume = (props: Props) => {
     }
 
     const handleUpdate: HandleVolume = async (newVolume) => {
-        logger.info({
+        logger.debug({
             context: "StageVolume.handleUpdate",
             volume: newVolume,
         });
         try {
-            const updated = await VolumeClient.update(libraryId, newVolume.id, newVolume);
+            await VolumeClient.update(libraryId, newVolume.id, newVolume);
             setVolume(null);
-            logger.trace({
-                context: "StageVolume.handleUpdate",
-                updated: updated,
-            });
         } catch (error) {
             ReportError("StageVolume.handleUpdate", error);
         }

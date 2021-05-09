@@ -22,19 +22,19 @@ import StoryClient from "../../clients/StoryClient";
 import VolumeClient from "../../clients/VolumeClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
+import Author from "../../models/Author";
 import Story from "../../models/Story";
 import Volume from "../../models/Volume";
 import logger from "../../util/client-logger";
 import ReportError from "../../util/ReportError";
-import Author from "../../models/Author";
 
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
     doRefresh: HandleAction;            // Trigger a UI refresh
     handleStage: HandleStage;           // Handle changing guide stage
-    authors: Author[];                  // Current Authors for this Volume
-    stories: Story[];                   // Currently included Stories
+    authors: Author[];                  // Included Authors for this Volume
+    stories: Story[];                   // Included Stories for this Volume
     volume: Volume;                     // Currently selected Volume
 }
 
@@ -64,7 +64,7 @@ const StageStories = (props: Props) => {
 
     const handleAdd: OnAction = () => {
         const newStory = new Story({library_id: libraryId});
-        logger.trace({
+        logger.debug({
             context: "StageStories.handleAdd",
             story: newStory,
         });
@@ -72,7 +72,7 @@ const StageStories = (props: Props) => {
     }
 
     const handleEdit: HandleStory = async (newStory) => {
-        logger.trace({
+        logger.debug({
             context: "StageStories.handleEdit",
             story: newStory,
         });
@@ -81,18 +81,14 @@ const StageStories = (props: Props) => {
 
     // Exclude this Story from the current Volume, but not the current Author
     const handleExclude: HandleStory = async (newStory) => {
-        logger.info({
+        logger.debug({
             context: "StageStories.handleExclude",
             story: newStory,
             volume: props.volume,
         });
         try {
-            const disassociated = await VolumeClient.storiesExclude
+            await VolumeClient.storiesExclude
                 (libraryId, props.volume.id, newStory.id);
-            logger.trace({
-                context: "StageStories.handleExclude",
-                disassociated: disassociated,
-            });
         } catch (error) {
             ReportError("StageStories.handleExclude", error);
         }
@@ -101,18 +97,14 @@ const StageStories = (props: Props) => {
 
     // Include this Story in the current Volume, no effect on current Author
     const handleInclude: HandleStory = async (newStory) => {
-        logger.info({
+        logger.debug({
             context: "StageStories.handleInclude",
             story: newStory,
             volume: props.volume,
         });
         try {
-            const associated = await VolumeClient.storiesInclude
+            await VolumeClient.storiesInclude
                 (libraryId, props.volume.id, newStory.id);
-            logger.trace({
-                context: "StageStories.handleInclude",
-                associated: associated,
-            });
         } catch (error) {
             ReportError("StageStories.handleInclude", error);
         }
@@ -120,19 +112,15 @@ const StageStories = (props: Props) => {
     }
 
     const handleInsert: HandleStory = async (newStory) => {
-        logger.info({
+        logger.debug({
             context: "StageStories.handleInsert",
-            volume: newStory,
+            story: newStory,
         });
         try {
 
             // Persist the new Story
             const inserted = await StoryClient.insert(libraryId, newStory);
             setStory(null);
-            logger.trace({
-                context: "StageStories.handleInsert",
-                inserted: inserted,
-            });
 
             // Assume the new Story is included in the current Volume
             await handleInclude(inserted);
@@ -152,17 +140,13 @@ const StageStories = (props: Props) => {
     }
 
     const handleRemove: HandleStory = async (newStory) => {
-        logger.info({
+        logger.debug({
             context: "StageStories.handleRemove",
             story: newStory,
         });
         try {
-            const removed = StoryClient.remove(libraryId, newStory.id);
+            StoryClient.remove(libraryId, newStory.id);
             setStory(null);
-            logger.trace({
-                context: "StageStories.handleRemove",
-                removed: removed,
-            });
             // Database cascades will take care of joins
         } catch (error) {
             ReportError("StageStories.handleRemove", error);
@@ -171,17 +155,13 @@ const StageStories = (props: Props) => {
     }
 
     const handleUpdate: HandleStory = async (newStory) => {
-        logger.info({
+        logger.debug({
             context: "StageStories.handleUpdate",
             story: newStory,
         });
         try {
-            const updated = await StoryClient.update(libraryId, newStory.id, newStory);
+            await StoryClient.update(libraryId, newStory.id, newStory);
             setStory(null);
-            logger.trace({
-                context: "StageStories.handleUpdate",
-                updated: updated,
-            });
         } catch (error) {
             ReportError("StageAuthors.handleUpdate", error);
         }

@@ -28,7 +28,7 @@ import ReportError from "../../util/ReportError";
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
-    authors: Author[];                  // Currently included Authors
+    authors: Author[];                  // Included Authors for this Volume
     doRefresh: HandleAction;            // Trigger a UI refresh
     handleStage: HandleStage;           // Handle changing guide stage
     volume: Volume;                     // Currently selected volume
@@ -60,7 +60,7 @@ const StageAuthors = (props: Props) => {
 
     const handleAdd: OnAction = () => {
         const newAuthor = new Author({library_id: libraryId});
-        logger.trace({
+        logger.debug({
             context: "StageAuthors.handleAdd",
             author: newAuthor,
         });
@@ -68,7 +68,7 @@ const StageAuthors = (props: Props) => {
     }
 
     const handleEdit: HandleAuthor = async (newAuthor) => {
-        logger.trace({
+        logger.debug({
             context: "StageAuthors.handleEdit",
             author: newAuthor,
         });
@@ -76,7 +76,7 @@ const StageAuthors = (props: Props) => {
     }
 
     const handleExclude: HandleAuthor = async (newAuthor) => {
-        logger.info({
+        logger.debug({
             context: "StageAuthors.handleExclude",
             author: newAuthor,
             volume: props.volume,
@@ -84,7 +84,7 @@ const StageAuthors = (props: Props) => {
         try {
             const disassociated = await AuthorClient.volumesExclude
                (libraryId, newAuthor.id, props.volume.id);
-            logger.trace({
+            logger.debug({
                 context: "StageAuthors.handleExclude",
                 author: newAuthor,
                 disassociated: disassociated,
@@ -96,7 +96,7 @@ const StageAuthors = (props: Props) => {
     }
 
     const handleInclude: HandleAuthor = async (newAuthor) => {
-        logger.info({
+        logger.debug({
             context: "StageAuthors.handleInclude",
             author: newAuthor,
             volume: props.volume,
@@ -104,7 +104,7 @@ const StageAuthors = (props: Props) => {
         try {
             const associated = await AuthorClient.volumesInclude
                 (libraryId, newAuthor.id, props.volume.id);
-            logger.trace({
+            logger.debug({
                 context: "StageAuthors.handleInclude",
                 author: newAuthor,
                 associated: associated,
@@ -116,17 +116,13 @@ const StageAuthors = (props: Props) => {
     }
 
     const handleInsert: HandleAuthor = async (newAuthor) => {
-        logger.info({
+        logger.debug({
             context: "StageAuthors.handleInsert",
             volume: newAuthor,
         });
         try {
             const inserted = await AuthorClient.insert(libraryId, newAuthor);
             setAuthor(null);
-            logger.trace({
-                context: "StageAuthors.handleInsert",
-                inserted: inserted,
-            });
             // Assume a newly added Author should be associated with our Volume
             await handleInclude(inserted);
         } catch (error) {
@@ -136,17 +132,13 @@ const StageAuthors = (props: Props) => {
     }
 
     const handleRemove: HandleAuthor = async (newAuthor) => {
-        logger.info({
+        logger.debug({
             context: "StageAuthors.handleRemove",
             author: newAuthor,
         });
         try {
-            const removed = AuthorClient.remove(libraryId, newAuthor.id);
+            AuthorClient.remove(libraryId, newAuthor.id);
             setAuthor(null);
-            logger.trace({
-                context: "StageAuthors.handleRemove",
-                removed: removed,
-            });
         } catch (error) {
             ReportError("StageAuthors.handleRemove", error);
         }
@@ -154,17 +146,13 @@ const StageAuthors = (props: Props) => {
     }
 
     const handleUpdate: HandleAuthor = async (newAuthor) => {
-        logger.info({
+        logger.debug({
             context: "StageAuthors.handleUpdate",
             author: newAuthor,
         });
         try {
-            const updated = await AuthorClient.update(libraryId, newAuthor.id, newAuthor);
+            await AuthorClient.update(libraryId, newAuthor.id, newAuthor);
             setAuthor(null);
-            logger.trace({
-                context: "StageAuthors.handleUpdate",
-                updated: updated,
-            });
         } catch (error) {
             ReportError("StageAuthors.handleUpdate", error);
         }
