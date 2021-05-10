@@ -93,8 +93,14 @@ const StoryOptions = (props: Props) => {
                                 copyright: props.volume.copyright ? props.volume.copyright : undefined,
                                 library_id: props.volume.library_id,
                                 name: props.volume.name,
-                            })
-                            await props.handleInsert(added);
+                            });
+                            const inserted = await props.handleInsert(added);
+                            logger.info({
+                                context: "StoryOptions.fetchStories",
+                                msg: "Added a courtesy story",
+                                volume: props.volume,
+                                story: inserted,
+                            });
 
                             // Reselect to pick up the newly added story
                             newStories =

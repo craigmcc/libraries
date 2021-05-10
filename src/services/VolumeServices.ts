@@ -17,6 +17,7 @@ import VolumeStory from "../models/VolumeStory";
 import * as SortOrder from "../models/SortOrder";
 import {NotFound} from "../util/http-errors";
 import {appendPagination} from "../util/query-parameters";
+import logger from "../util/server-logger";
 
 // Public Objects ------------------------------------------------------------
 
@@ -272,6 +273,12 @@ export class VolumeServices {
     }
 
     public async storiesExclude(libraryId: number, volumeId: number, storyId: number): Promise<Story> {
+        logger.info({
+            context: "VolumeServices.storiesExclude",
+            libraryId: libraryId,
+            volumeId: volumeId,
+            storyId: storyId,
+        });
         const library = await Library.findByPk(libraryId);
         if (!library) {
             throw new NotFound(
@@ -300,7 +307,7 @@ export class VolumeServices {
         if (!story) {
             throw new NotFound(
                 `storyId: Missing Story ${storyId}`,
-                "AuthorServices.storiesExclude"
+                "VolumeServices.storiesExclude"
             );
         }
         await VolumeStory.destroy({
@@ -313,11 +320,17 @@ export class VolumeServices {
     }
 
     public async storiesInclude(libraryId: number, volumeId: number, storyId: number): Promise<Story> {
+        logger.info({
+            context: "VolumeServices.storiesInclude",
+            libraryId: libraryId,
+            volumeId: volumeId,
+            storyId: storyId,
+        });
         const library = await Library.findByPk(libraryId);
         if (!library) {
             throw new NotFound(
                 `libraryId: Missing Library ${libraryId}`,
-                "AuthorServices.storiesInclude"
+                "VolumeServices.storiesInclude"
             );
         }
         const volume = await Volume.findOne({
@@ -341,7 +354,7 @@ export class VolumeServices {
         if (!story) {
             throw new NotFound(
                 `storyId: Missing Story ${storyId}`,
-                "AuthorServices.storiesInclude"
+                "VolumeServices.storiesInclude"
             );
         }
         await VolumeStory.create({

@@ -81,8 +81,9 @@ const StageStories = (props: Props) => {
 
     // Exclude this Story from the current Volume, but not the current Author
     const handleExclude: HandleStory = async (newStory) => {
-        logger.debug({
+        logger.info({
             context: "StageStories.handleExclude",
+            msg: "Excluding Story for Volume",
             story: newStory,
             volume: props.volume,
         });
@@ -95,10 +96,11 @@ const StageStories = (props: Props) => {
         props.handleRefresh();
     }
 
-    // Include this Story in the current Volume, no effect on current Author
+    // Include this Story in the current Volume, no effect on Author(s)
     const handleInclude: HandleStory = async (newStory) => {
-        logger.debug({
+        logger.info({
             context: "StageStories.handleInclude",
+            msg: "Including Story for Volume",
             story: newStory,
             volume: props.volume,
         });
@@ -112,8 +114,9 @@ const StageStories = (props: Props) => {
     }
 
     const handleInsert: HandleStory = async (newStory) => {
-        logger.debug({
+        logger.info({
             context: "StageStories.handleInsert",
+            msg: "Inserting new Story",
             story: newStory,
         });
         try {
@@ -128,7 +131,19 @@ const StageStories = (props: Props) => {
             // For Volumes of type "Single" or "Collection", assume
             // that the Author(s) for this Volume wrote this Story as well.
             if ((props.volume.type === "Single") || (props.volume.type === "Collection")) {
+                logger.info({
+                    context: "StageStories.handleInsert",
+                    msg: "About to add Story Authors",
+                    story: inserted,
+                    authors: props.authors,
+                });
                 for (const author of props.authors) {
+                    logger.info({
+                        context: "StageStories.handleInsert",
+                        msg: "Adding Story Author",
+                        story: inserted,
+                        author: author,
+                    });
                     await AuthorClient.storiesInclude(libraryId, author.id, inserted.id);
                 }
             }

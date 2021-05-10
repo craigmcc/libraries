@@ -19,6 +19,7 @@ import Story from "../models/Story";
 import Volume from "../models/Volume";
 import {NotFound} from "../util/http-errors";
 import {appendPagination} from "../util/query-parameters";
+import logger from "../util/server-logger";
 
 // Public Objects ------------------------------------------------------------
 
@@ -290,6 +291,12 @@ export class AuthorServices {
     }
 
     public async storiesExclude(libraryId: number, authorId: number, storyId: number): Promise<Story> {
+        logger.info({
+            context: "AuthorServices.storiesExclude",
+            libraryId: libraryId,
+            authorId: authorId,
+            storyId: storyId,
+        });
         const library = await Library.findByPk(libraryId);
         if (!library) {
             throw new NotFound(
@@ -331,6 +338,12 @@ export class AuthorServices {
     }
 
     public async storiesInclude(libraryId: number, authorId: number, storyId: number): Promise<Story> {
+        logger.info({
+            context: "AuthorServices.storiesInclude",
+            libraryId: libraryId,
+            authorId: authorId,
+            storyId: storyId,
+        });
         const library = await Library.findByPk(libraryId);
         if (!library) {
             throw new NotFound(
