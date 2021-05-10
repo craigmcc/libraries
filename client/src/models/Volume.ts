@@ -7,12 +7,16 @@
 
 // Internal Modules ----------------------------------------------------------
 
+import Author from "./Author";
+import Story from "./Story";
+
 // Public Objects ------------------------------------------------------------
 
 class Volume {
 
     constructor(data: any = {}) {
         this.active = (data.active !== undefined) ? data.active : true;
+        this.authors = data.authors ? data.authors : undefined;
         this.copyright = data.copyright;
         this.google_id = data.google_id;
         this.id = data.id || -1;
@@ -22,10 +26,12 @@ class Volume {
         this.name = data.name;
         this.notes = data.notes;
         this.read = (data.active !== undefined) ? data.read : false;
+        this.stories = data.stories ? data.stories : undefined;
         this.type = data.type;
     }
 
     active: boolean;
+    authors: Author[] | undefined;
     copyright: string;
     google_id: string;
     id: number;
@@ -35,6 +41,7 @@ class Volume {
     name: string;
     notes: string;
     read: boolean;
+    stories: Story[] | undefined;
     type: string;
 }
 

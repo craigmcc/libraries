@@ -108,7 +108,7 @@ const StageVolume = (props: Props) => {
     }
 
     const handleSelect: HandleVolume = (newVolume) => {
-        logger.debug({
+        logger.info({
             context: "StageVolume.handleSelect",
             volume: newVolume,
         });

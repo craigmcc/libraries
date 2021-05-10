@@ -88,9 +88,30 @@ const GuideVolume = () => {
         setStage(newStage);
     }
 
-    const handleVolume = (newVolume: Volume): void => {
-        setVolume(newVolume);
-        setStage(Stage.AUTHORS);    // Implicitly advance after Volume selected
+    const handleVolume = async (newVolume: Volume): Promise<void> => {
+        if (newVolume.id > 0) {
+            const updatedVolume = await VolumeClient.find
+                (newVolume.library_id, newVolume.id, {
+                    withAuthors: "",
+                    withStories: "",
+                });
+            logger.info({
+                context: "GuideVolume.handleVolume",
+                msg: "Flesh out with authors and stories",
+                volume: updatedVolume, // Should have nested values
+                authors: updatedVolume.authors,
+                stories: updatedVolume.stories,
+            });
+            setVolume(updatedVolume);
+            setStage(Stage.AUTHORS); // Implicitly advance after Volume selected
+        } else {
+            logger.info({
+                context: "GuideVolume.handleVolume",
+                msg: "Reset to unselected state",
+                volume: newVolume,
+            });
+            setVolume(newVolume);
+        }
     }
 
     return (
