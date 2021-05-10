@@ -9,6 +9,7 @@
 
 import Author from "./Author";
 import Story from "./Story";
+import {toAuthors, toStories} from "../util/to-model-types";
 
 // Public Objects ------------------------------------------------------------
 
@@ -16,7 +17,7 @@ class Volume {
 
     constructor(data: any = {}) {
         this.active = (data.active !== undefined) ? data.active : true;
-        this.authors = data.authors ? data.authors : undefined;
+        this.authors = data.authors ? toAuthors(data.authors) : undefined;
         this.copyright = data.copyright;
         this.google_id = data.google_id;
         this.id = data.id || -1;
@@ -26,7 +27,7 @@ class Volume {
         this.name = data.name;
         this.notes = data.notes;
         this.read = (data.active !== undefined) ? data.read : false;
-        this.stories = data.stories ? data.stories : undefined;
+        this.stories = data.stories ? toStories(data.stories) : undefined;
         this.type = data.type;
     }
 

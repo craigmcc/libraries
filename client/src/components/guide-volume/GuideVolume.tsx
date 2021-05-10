@@ -97,10 +97,8 @@ const GuideVolume = () => {
                 });
             logger.info({
                 context: "GuideVolume.handleVolume",
-                msg: "Flesh out with authors and stories",
+                msg: "Set expanded current Volume",
                 volume: updatedVolume, // Should have nested values
-                authors: updatedVolume.authors,
-                stories: updatedVolume.stories,
             });
             setVolume(updatedVolume);
             setStage(Stage.AUTHORS); // Implicitly advance after Volume selected
