@@ -37,7 +37,6 @@ export interface Props {
     handleInsert: HandleStory;          // Handle request to insert a Story
     included: (story: Story) => boolean;
                                         // Is the specified Story included?
-    stories: Story[];                   // Included Stories for this Volume
     volume: Volume;                     // Currently selected Volume
 }
 
@@ -74,8 +73,7 @@ const StoryOptions = (props: Props) => {
                     } else {
 
                         // Find currently included Stories
-                        newStories =
-                            await VolumeClient.stories(libraryId, props.volume.id);
+                        newStories = props.volume.stories;
 
                         // If there are no included Stories for a Volume
                         // of type "Single", create one based on the
@@ -114,7 +112,7 @@ const StoryOptions = (props: Props) => {
                     setStories([]);
                     if (error.response && (error.response.status === 403)) {
                         logger.debug({
-                            context: "StoryOptions.fetchStory",
+                            context: "StoryOptions.fetchStories",
                             msg: "FORBIDDEN",
                         });
                     } else {

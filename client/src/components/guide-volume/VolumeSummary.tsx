@@ -15,7 +15,6 @@ import Table from "react-bootstrap/Table";
 
 import StoryClient from "../../clients/StoryClient";
 import Author from "../../models/Author";
-import Story from "../../models/Story";
 import Volume from "../../models/Volume";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
@@ -24,8 +23,6 @@ import {HandleAction} from "../types";
 // Incoming Properties ------------------------------------------------------
 
 export interface Props {
-    authors: Author[];                  // Currently included Authors
-    stories: Story[];                   // Currently included Stories
     volume: Volume;                     // Currently selected Volume
 }
 
@@ -45,12 +42,12 @@ const VolumeSummary = (props: Props) => {
         const fetchStoriesAuthors = async () => {
                 if (loginContext.state.loggedIn && (libraryId > 0)) {
                     // For each Story, select the corresponding Authors
-                    const newStoriesAuthors: string[] = [];
-                    for (const story of props.stories) {
+                    const storiesAuthors: string[] = [];
+                    for (const story of props.volume.stories) {
                         const storyAuthors: Author[] = await StoryClient.authors(libraryId, story.id);
-                        newStoriesAuthors.push(calculateAuthorsKeys(storyAuthors));
+                        storiesAuthors.push(calculateAuthorsKeys(storyAuthors));
                     }
-                    setStoriesAuthors(newStoriesAuthors);
+                    setStoriesAuthors(storiesAuthors);
                 } else {
                     setStoriesAuthors([]);
                 }
@@ -58,8 +55,7 @@ const VolumeSummary = (props: Props) => {
 
         fetchStoriesAuthors();
 
-    }, [libraryContext, loginContext, libraryId,
-        props.authors, props.stories, props.volume]);
+    }, [libraryContext, loginContext, libraryId, props.volume]);
 
     const calculateAuthorsKeys = (authors: Author[]): string => {
         const keys: string[] = [];
@@ -109,7 +105,7 @@ const VolumeSummary = (props: Props) => {
                         <Col className="text-center">
                             <span>Volume Authors:&nbsp;</span>
                             <span className="text-info">
-                        {calculateAuthorsKeys(props.authors)}
+                        {calculateAuthorsKeys(props.volume.authors)}
                     </span>
                         </Col>
                     </Row>
@@ -130,7 +126,7 @@ const VolumeSummary = (props: Props) => {
                             </thead>
 
                             <tbody>
-                            {props.stories.map((story, rowIndex) => (
+                            {props.volume.stories.map((story, rowIndex) => (
                                 <tr key={1000 + (rowIndex * 100)}>
                                     <td key={1000 + (rowIndex * 100) + 1}>
                                         {story.name}

@@ -48,7 +48,7 @@ const StageVolume = (props: Props) => {
 
         logger.info({
             context: "StageVolume.useEffect",
-            volume: props.volume ? props.volume : undefined,
+            volume: props.volume,
         });
 
         // Record current permissions

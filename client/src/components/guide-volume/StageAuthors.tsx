@@ -28,7 +28,6 @@ import ReportError from "../../util/ReportError";
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
-    authors: Author[];                  // Included Authors for this Volume
     handleRefresh: HandleAction;        // Trigger a UI refresh
     handleStage: HandleStage;           // Handle changing guide stage
     volume: Volume;                     // Currently selected volume
@@ -49,14 +48,14 @@ const StageAuthors = (props: Props) => {
 
         logger.info({
             context: "StageAuthors.useEffect",
-            volume: props.volume ? props.volume : undefined,
+            volume: props.volume,
         });
 
         // Record current permissions
         setCanRemove(loginContext.validateScope(Scopes.SUPERUSER));
 
     }, [libraryContext, loginContext,
-        libraryId, props.authors, props.volume]);
+        libraryId, props.volume]);
 
     const handleAdd: OnAction = () => {
         const newAuthor = new Author({library_id: libraryId});
@@ -162,7 +161,7 @@ const StageAuthors = (props: Props) => {
     // Is the specified Author currently included for this Volume?
     const included = (author: Author): boolean => {
         let result = false;
-        props.authors.forEach(includedAuthor => {
+        props.volume.authors.forEach(includedAuthor => {
             if (author.id === includedAuthor.id) {
                 result = true;
             }
@@ -195,10 +194,10 @@ const StageAuthors = (props: Props) => {
                         <Col className="text-right">
                             <Button
                                 // TODO - when is this disabled?
-                                disabled={props.authors.length < 1}
+                                disabled={props.volume.authors.length < 1}
                                 onClick={() => props.handleStage(Stage.STORIES)}
                                 size="sm"
-                                variant={(props.authors.length < 1) ? "outline-success" : "success"}
+                                variant={(props.volume.authors.length < 1) ? "outline-success" : "success"}
                             >Next</Button>
                         </Col>
                     </Row>

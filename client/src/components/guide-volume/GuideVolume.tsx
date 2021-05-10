@@ -16,11 +16,8 @@ import VolumeSummary from "./VolumeSummary";
 import VolumeClient from "../../clients/VolumeClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
-import Author from "../../models/Author";
-import Story from "../../models/Story";
 import Volume from "../../models/Volume";
 import logger from "../../util/client-logger";
-import ReportError from "../../util/ReportError";
 
 // Component Details ---------------------------------------------------------
 
@@ -37,44 +34,16 @@ const GuideVolume = () => {
     const libraryContext = useContext(LibraryContext);
     const loginContext = useContext(LoginContext);
 
-    const [authors, setAuthors] = useState<Author[]>([]);
     const [pageSize] = useState<number>(25);
     const [refresh, setRefresh] = useState<boolean>(false);
     const [stage, setStage] = useState<Stage>(Stage.VOLUME);
-    const [stories, setStories] = useState<Story[]>([]);
     const [volume, setVolume] = useState<Volume>(new Volume());
 
     useEffect(() => {
 
         logger.info({
             context: "GuideVolume.useEffect",
-            volume: volume,
         });
-        const libraryId = libraryContext.state.library.id;
-
-        const fetchChildren = async () => {
-
-            setAuthors([]);
-            setStories([]);
-
-            if (loginContext.state.loggedIn && (libraryId > 0) && (volume.id > 0)) {
-
-                try {
-                    setAuthors(await VolumeClient.authors(libraryId, volume.id, {
-                        limit: pageSize,
-                    }));
-                    setStories(await VolumeClient.stories(libraryId, volume.id, {
-                        limit: pageSize,
-                    }));
-                } catch (error) {
-                    ReportError("GuideVolume.fetchChildren", error);
-                }
-
-            }
-
-        }
-
-        fetchChildren();
         setRefresh(false);
 
     }, [libraryContext, loginContext,
@@ -97,17 +66,12 @@ const GuideVolume = () => {
                 });
             logger.info({
                 context: "GuideVolume.handleVolume",
-                msg: "Set expanded current Volume",
-                volume: updatedVolume, // Should have nested values
+                msg: "Switch to new expanded Volume",
+                volume: updatedVolume,
             });
             setVolume(updatedVolume);
             setStage(Stage.AUTHORS); // Implicitly advance after Volume selected
         } else {
-            logger.info({
-                context: "GuideVolume.handleVolume",
-                msg: "Reset to unselected state",
-                volume: newVolume,
-            });
             setVolume(newVolume);
         }
     }
@@ -116,8 +80,6 @@ const GuideVolume = () => {
         <Container fluid id="GuideVolume">
 
             <VolumeSummary
-                authors={authors}
-                stories={stories}
                 volume={volume}
             />
             <hr color="cyan"/>
@@ -133,7 +95,6 @@ const GuideVolume = () => {
 
             {(stage === Stage.AUTHORS) ? (
                 <StageAuthors
-                    authors={authors}
                     handleRefresh={handleRefresh}
                     handleStage={handleStage}
                     volume={volume}
@@ -142,10 +103,8 @@ const GuideVolume = () => {
 
             {(stage === Stage.STORIES) ? (
                 <StageStories
-                    authors={authors}
                     handleRefresh={handleRefresh}
                     handleStage={handleStage}
-                    stories={stories}
                     volume={volume}
                 />
             ) : null}

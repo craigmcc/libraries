@@ -22,7 +22,6 @@ import StoryClient from "../../clients/StoryClient";
 import VolumeClient from "../../clients/VolumeClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
-import Author from "../../models/Author";
 import Story from "../../models/Story";
 import Volume from "../../models/Volume";
 import logger from "../../util/client-logger";
@@ -33,8 +32,6 @@ import ReportError from "../../util/ReportError";
 export interface Props {
     handleRefresh: HandleAction;        // Trigger a UI refresh
     handleStage: HandleStage;           // Handle changing guide stage
-    authors: Author[];                  // Included Authors for this Volume
-    stories: Story[];                   // Included Stories for this Volume
     volume: Volume;                     // Currently selected Volume
 }
 
@@ -53,14 +50,14 @@ const StageStories = (props: Props) => {
 
         logger.info({
             context: "StageStories.useEffect",
-            volume: props.volume ? props.volume : undefined,
+            volume: props.volume,
         });
 
         // Record current permissions
         setCanRemove(loginContext.validateScope(Scopes.SUPERUSER));
 
     }, [libraryContext, loginContext,
-        libraryId, props.stories, props.volume]);
+        libraryId, props.volume]);
 
     const handleAdd: OnAction = () => {
         const newStory = new Story({library_id: libraryId});
@@ -135,9 +132,9 @@ const StageStories = (props: Props) => {
                     context: "StageStories.handleInsert",
                     msg: "About to add Story Authors",
                     story: inserted,
-                    authors: props.authors,
+                    authors: props.volume.authors,
                 });
-                for (const author of props.authors) {
+                for (const author of props.volume.authors) {
                     logger.info({
                         context: "StageStories.handleInsert",
                         msg: "Adding Story Author",
@@ -186,7 +183,7 @@ const StageStories = (props: Props) => {
     // Is the specified Story currently included for this Volume?
     const included = (story: Story): boolean => {
         let result = false;
-        props.stories.forEach(includedStory => {
+        props.volume.stories.forEach(includedStory => {
             if (story.id === includedStory.id) {
                 result = true;
             }
@@ -231,7 +228,6 @@ const StageStories = (props: Props) => {
                         handleInclude={handleInclude}
                         handleInsert={handleInsert}
                         included={included}
-                        stories={props.stories}
                         volume={props.volume}
                     />
                     <Button
