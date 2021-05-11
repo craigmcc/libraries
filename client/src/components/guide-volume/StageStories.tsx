@@ -60,7 +60,12 @@ const StageStories = (props: Props) => {
         libraryId, props.volume]);
 
     const handleAdd: OnAction = () => {
-        const newStory = new Story({library_id: libraryId});
+        const newStory = new Story({
+            copyright: null,
+            library_id: libraryId,
+            name: null,
+            notes: null,
+        });
         logger.debug({
             context: "StageStories.handleAdd",
             story: newStory,

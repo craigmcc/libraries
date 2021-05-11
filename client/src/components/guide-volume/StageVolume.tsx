@@ -59,8 +59,12 @@ const StageVolume = (props: Props) => {
 
     const handleAdd: OnAction = () => {
         const newVolume = new Volume({
+            copyright: null,
+            isbn: null,
             library_id: libraryId,
             location: "Kindle",
+            name: null,
+            notes: null,
             type: "Single",
         });
         logger.debug({

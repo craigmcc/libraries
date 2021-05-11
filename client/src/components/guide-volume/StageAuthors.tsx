@@ -58,7 +58,12 @@ const StageAuthors = (props: Props) => {
         libraryId, props.volume]);
 
     const handleAdd: OnAction = () => {
-        const newAuthor = new Author({library_id: libraryId});
+        const newAuthor = new Author({
+            first_name: null,
+            last_name: null,
+            library_id: libraryId,
+            notes: null,
+        });
         logger.debug({
             context: "StageAuthors.handleAdd",
             author: newAuthor,
