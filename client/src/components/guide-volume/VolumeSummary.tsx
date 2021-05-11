@@ -55,7 +55,7 @@ const VolumeSummary = (props: Props) => {
 
         fetchStoriesAuthors();
 
-    }, [libraryContext, loginContext, libraryId, props.volume]);
+    }, [libraryContext, loginContext, libraryId, props, props.volume]);
 
     const calculateAuthorsKeys = (authors: Author[]): string => {
         const keys: string[] = [];

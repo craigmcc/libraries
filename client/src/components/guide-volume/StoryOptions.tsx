@@ -131,7 +131,7 @@ const StoryOptions = (props: Props) => {
 
         fetchStories();
 
-    }, [libraryContext, loginContext, props,
+    }, [libraryContext, loginContext, props, props.volume,
         currentPage, libraryId, pageSize, searchText]);
 
     const handleChange: HandleValue = (newSearchText) => {

@@ -85,8 +85,13 @@ const StageStories = (props: Props) => {
             volume: props.volume,
         });
         try {
-            await VolumeClient.storiesExclude
+            const disassociated = await VolumeClient.storiesExclude
                 (libraryId, props.volume.id, newStory.id);
+            logger.info({
+                context: "StageStories.handleExclude",
+                story: newStory,
+                disassociated: disassociated,
+            });
         } catch (error) {
             ReportError("StageStories.handleExclude", error);
         }
@@ -102,8 +107,13 @@ const StageStories = (props: Props) => {
             volume: props.volume,
         });
         try {
-            await VolumeClient.storiesInclude
+            const associated = await VolumeClient.storiesInclude
                 (libraryId, props.volume.id, newStory.id);
+            logger.info({
+                context: "StageStories.handleInclude",
+                story: newStory,
+                associated: associated,
+            });
         } catch (error) {
             ReportError("StageStories.handleInclude", error);
         }
@@ -152,7 +162,7 @@ const StageStories = (props: Props) => {
     }
 
     const handleRemove: HandleStory = async (newStory) => {
-        logger.debug({
+        logger.info({
             context: "StageStories.handleRemove",
             story: newStory,
         });
@@ -167,7 +177,7 @@ const StageStories = (props: Props) => {
     }
 
     const handleUpdate: HandleStory = async (newStory) => {
-        logger.debug({
+        logger.info({
             context: "StageStories.handleUpdate",
             story: newStory,
         });

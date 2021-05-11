@@ -50,6 +50,9 @@ const GuideVolume = () => {
             pageSize, refresh, stage, volume]);
 
     const handleRefresh = (): void => {
+        logger.info({
+            context: "GuideVolume.handleRefresh",
+        });
         setRefresh(true);
     }
 

@@ -79,7 +79,7 @@ const StageVolume = (props: Props) => {
     }
 
     const handleInsert: HandleVolume = async (newVolume) => {
-        logger.debug({
+        logger.info({
             context: "StageVolume.handleInsert",
             volume: newVolume,
         });
@@ -94,13 +94,14 @@ const StageVolume = (props: Props) => {
     }
 
     const handleRemove: HandleVolume = async (newVolume) => {
-        logger.debug({
+        logger.info({
             context: "StageVolume.handleRemove",
             volume: newVolume,
         });
         try {
             await VolumeClient.remove(libraryId, newVolume.id);
             setVolume(null);
+            props.handleVolume(new Volume());
         } catch (error) {
             ReportError("StageVolume.handleRemove", error);
         }
@@ -113,10 +114,11 @@ const StageVolume = (props: Props) => {
             volume: newVolume,
         });
         props.handleVolume(newVolume);
+        props.handleRefresh();
     }
 
     const handleUpdate: HandleVolume = async (newVolume) => {
-        logger.debug({
+        logger.info({
             context: "StageVolume.handleUpdate",
             volume: newVolume,
         });

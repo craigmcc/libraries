@@ -75,15 +75,16 @@ const StageAuthors = (props: Props) => {
     }
 
     const handleExclude: HandleAuthor = async (newAuthor) => {
-        logger.debug({
+        logger.info({
             context: "StageAuthors.handleExclude",
+            msg: "Excluding Author for Volume",
             author: newAuthor,
             volume: props.volume,
         });
         try {
             const disassociated = await AuthorClient.volumesExclude
                (libraryId, newAuthor.id, props.volume.id);
-            logger.debug({
+            logger.info({
                 context: "StageAuthors.handleExclude",
                 author: newAuthor,
                 disassociated: disassociated,
@@ -95,15 +96,16 @@ const StageAuthors = (props: Props) => {
     }
 
     const handleInclude: HandleAuthor = async (newAuthor) => {
-        logger.debug({
+        logger.info({
             context: "StageAuthors.handleInclude",
+            msg: "Including Author for Volume",
             author: newAuthor,
             volume: props.volume,
         });
         try {
             const associated = await AuthorClient.volumesInclude
                 (libraryId, newAuthor.id, props.volume.id);
-            logger.debug({
+            logger.info({
                 context: "StageAuthors.handleInclude",
                 author: newAuthor,
                 associated: associated,
@@ -115,15 +117,19 @@ const StageAuthors = (props: Props) => {
     }
 
     const handleInsert: HandleAuthor = async (newAuthor) => {
-        logger.debug({
+        logger.info({
             context: "StageAuthors.handleInsert",
             volume: newAuthor,
         });
         try {
+
+            // Persist the new Author
             const inserted = await AuthorClient.insert(libraryId, newAuthor);
             setAuthor(null);
-            // Assume a newly added Author should be associated with our Volume
+
+            // Assume a new Author is included in the current Volume
             await handleInclude(inserted);
+
         } catch (error) {
             ReportError("StageAuthors.handleInsert", error);
         }
@@ -131,7 +137,7 @@ const StageAuthors = (props: Props) => {
     }
 
     const handleRemove: HandleAuthor = async (newAuthor) => {
-        logger.debug({
+        logger.info({
             context: "StageAuthors.handleRemove",
             author: newAuthor,
         });
@@ -145,7 +151,7 @@ const StageAuthors = (props: Props) => {
     }
 
     const handleUpdate: HandleAuthor = async (newAuthor) => {
-        logger.debug({
+        logger.info({
             context: "StageAuthors.handleUpdate",
             author: newAuthor,
         });
