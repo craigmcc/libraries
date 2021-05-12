@@ -57,7 +57,7 @@ const AuthorOptions = (props: Props) => {
         const fetchAuthors = async () => {
 
             // Fetch matching (search text) or included (no search text) Authors
-            if (loginContext.state.loggedIn && (libraryId > 0)) {
+            if (loginContext.state.loggedIn && (libraryId > 0) && (props.volume.id > 0)) {
                 let newAuthors: Author[] = [];
                 try {
                     if (searchText.length > 0) {
