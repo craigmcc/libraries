@@ -40,7 +40,7 @@ const VolumeSummary = (props: Props) => {
     useEffect(() => {
 
         const fetchStoriesAuthors = async () => {
-                if (loginContext.state.loggedIn && (libraryId > 0)) {
+                if (loginContext.state.loggedIn && (libraryId > 0) && (props.volume.id > 0)) {
                     // For each Story, select the corresponding Authors
                     const storiesAuthors: string[] = [];
                     for (const story of props.volume.stories) {
