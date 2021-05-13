@@ -132,6 +132,10 @@ const StageVolume = (props: Props) => {
         } catch (error) {
             ReportError("StageVolume.handleUpdate", error);
         }
+        // If we updated the currently selected volume, propagate to summary
+        if (newVolume.id === props.volume.id) {
+            props.handleVolume(newVolume);
+        }
         props.handleRefresh();
     }
 
