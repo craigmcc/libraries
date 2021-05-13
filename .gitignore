@@ -4,6 +4,7 @@
 build/
 config/config.json
 dist/
+log/
 node_modules/
 personal.csv
 test/database.sqlite

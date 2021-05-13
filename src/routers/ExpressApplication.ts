@@ -9,6 +9,7 @@ import cors from "cors";
 import express from "express";
 import morgan from "morgan";
 import path from "path";
+const rfs = require("rotating-file-stream");
 
 // Internal Modules ----------------------------------------------------------
 
@@ -21,6 +22,7 @@ import {
     handleValidationError
 } from "../util/middleware";
 import logger from "../util/server-logger";
+import { toLocalISO } from "../util/timestamps";
 
 // Public Objects ------------------------------------------------------------
 
@@ -30,7 +32,16 @@ const app = express();
 app.use(cors({
     origin: "*"
 }));
-app.use(morgan("combined"));
+
+// Configure access log management
+morgan.token("timestamp",(req, res): string => {
+    return toLocalISO(new Date());
+})
+app.use(morgan("combined", {
+    skip: function (req, res) {
+        return req.path === "/clientLog";
+    }
+}));
 
 // Configure body handling middleware
 app.use(bodyParser.json({
