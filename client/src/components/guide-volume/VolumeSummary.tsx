@@ -18,6 +18,7 @@ import Author from "../../models/Author";
 import Volume from "../../models/Volume";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
+import logger from "../../util/client-logger";
 import {HandleAction} from "../types";
 
 // Incoming Properties ------------------------------------------------------
@@ -40,7 +41,11 @@ const VolumeSummary = (props: Props) => {
     useEffect(() => {
 
         const fetchStoriesAuthors = async () => {
-                if (loginContext.state.loggedIn && (libraryId > 0) && (props.volume.id > 0)) {
+            logger.info({
+                context: "VolumeSummary.useEffect",
+                volume: props.volume,
+            });
+            if (loginContext.state.loggedIn && (libraryId > 0) && (props.volume.id > 0)) {
                     // For each Story, select the corresponding Authors
                     const storiesAuthors: string[] = [];
                     for (const story of props.volume.stories) {

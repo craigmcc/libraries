@@ -18,6 +18,7 @@ import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
 import Volume from "../../models/Volume";
 import logger from "../../util/client-logger";
+import ReportError from "../../util/ReportError";
 
 // Component Details ---------------------------------------------------------
 
@@ -34,24 +35,63 @@ const GuideVolume = () => {
     const libraryContext = useContext(LibraryContext);
     const loginContext = useContext(LoginContext);
 
-    const [pageSize] = useState<number>(25);
+    const [libraryId] = useState<number>(libraryContext.state.library.id);
     const [refresh, setRefresh] = useState<boolean>(false);
     const [stage, setStage] = useState<Stage>(Stage.VOLUME);
     const [volume, setVolume] = useState<Volume>(new Volume());
+    const [volumeId, setVolumeId] = useState<number>(-1);
 
     useEffect(() => {
 
-        logger.info({
-            context: "GuideVolume.useEffect",
-        });
-        setRefresh(false);
+        const fetchVolume = async () => {
+
+            logger.info({
+                context: "GuideVolume.fetchVolume",
+                msg: "Input conditions",
+                refresh: refresh,
+                volumeId: volumeId,
+                volume: volume,
+            });
+
+            if (loginContext.state.loggedIn && (libraryId > 0) && (volumeId > 0) && refresh) {
+                try {
+                    const newVolume = await VolumeClient.find(libraryContext.state.library.id, volumeId, {
+                        withAuthors: "",
+                        withStories: "",
+                    });
+                    logger.info({
+                        context: "GuideVolume.fetchVolume",
+                        msg: "Retrieve updated Volume",
+                        volume: newVolume,
+                    });
+                    setVolume(newVolume);
+                    if (stage === Stage.VOLUME) {
+                        setStage(Stage.AUTHORS); // Implicitly advance after Volume selected
+                    }
+                } catch (error) {
+                    ReportError("GuideVolume.fetchVolume", error);
+                }
+            } else {
+                logger.info({
+                    context: "GuideVolume.fetchVolume",
+                    msg: "Remain on empty Volume",
+                    volume: volume,
+                })
+            }
+            setRefresh(false);
+
+        }
+
+        fetchVolume();
 
     }, [libraryContext, loginContext,
-            pageSize, refresh, stage, volume]);
+              libraryId, refresh, stage, volume, volumeId]);
 
     const handleRefresh = (): void => {
         logger.info({
             context: "GuideVolume.handleRefresh",
+            volumeId: volume.id,
+            volume: volume,
         });
         setRefresh(true);
     }
@@ -61,22 +101,12 @@ const GuideVolume = () => {
     }
 
     const handleVolume = async (newVolume: Volume): Promise<void> => {
-        if (newVolume.id > 0) {
-            const updatedVolume = await VolumeClient.find
-                (newVolume.library_id, newVolume.id, {
-                    withAuthors: "",
-                    withStories: "",
-                });
-            logger.info({
-                context: "GuideVolume.handleVolume",
-                msg: "Switch to new expanded Volume",
-                volume: updatedVolume,
-            });
-            setVolume(updatedVolume);
-            setStage(Stage.AUTHORS); // Implicitly advance after Volume selected
-        } else {
-            setVolume(newVolume);
-        }
+        logger.info({
+            context: "GuideVolume.handleVolume",
+            volume: newVolume,
+        });
+//        setRefresh(true);
+        setVolumeId(newVolume.id);  // Trigger (re)fetch of the specified Volume
     }
 
     return (
