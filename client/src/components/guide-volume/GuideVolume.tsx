@@ -53,32 +53,54 @@ const GuideVolume = () => {
                 volume: volume,
             });
 
-            if (loginContext.state.loggedIn && (libraryId > 0) && (volumeId > 0) && refresh) {
-                try {
-                    const newVolume = await VolumeClient.find(libraryContext.state.library.id, volumeId, {
-                        withAuthors: "",
-                        withStories: "",
-                    });
+            if (loginContext.state.loggedIn) {
+                if ((libraryId > 0) && (volumeId > 0)) {
+                    if ((volumeId !== volume.id) || refresh) {
+                        try {
+                            const newVolume = await VolumeClient.find(libraryId, volumeId, {
+                                withAuthors: "",
+                                withStories: "",
+                            });
+                            logger.info({
+                                context: "GuideVolume.fetchVolume",
+                                msg: "Fetch updated Volume",
+                                volume: newVolume,
+                            });
+                            setVolume(newVolume);
+                            if (stage === Stage.VOLUME) {
+                                setStage(Stage.AUTHORS); // Implicitly advance after Volume selected
+                            }
+                        } catch (error) {
+                            ReportError("GuideVolume.fetchVolume", error);
+                        }
+                    } else {
+                        logger.info({
+                            context: "GuideVolume.fetchVolume",
+                            msg: "Logged in, same Volume or not refresh - skip"
+                        });
+                    }
+                } else {
                     logger.info({
                         context: "GuideVolume.fetchVolume",
-                        msg: "Retrieve updated Volume",
-                        volume: newVolume,
+                        msg: "Logged in, not refresh, missing libraryId/volumeId - skip",
                     });
-                    setVolume(newVolume);
-                    if (stage === Stage.VOLUME) {
-                        setStage(Stage.AUTHORS); // Implicitly advance after Volume selected
-                    }
-                } catch (error) {
-                    ReportError("GuideVolume.fetchVolume", error);
                 }
             } else {
                 logger.info({
                     context: "GuideVolume.fetchVolume",
-                    msg: "Remain on empty Volume",
-                    volume: volume,
-                })
+                    msg: "Not logged in, revert",
+                });
+                if (volume.id > 0) {
+                    setVolume(new Volume());
+                }
+                if (volumeId > 0) {
+                    setVolumeId(-1);
+                }
             }
-            setRefresh(false);
+
+            if (refresh) {
+                setRefresh(false);
+            }
 
         }
 
