@@ -66,9 +66,21 @@ const AuthorOptions = (props: Props) => {
                                 limit: pageSize,
                                 offset: (pageSize * (currentPage - 1)),
                             });
+                        logger.info({
+                            context: "AuthorOptions.fetchAuthors",
+                            msg: "Select by searchText",
+                            searchText: searchText,
+                            authors: newAuthors,
+                        });
                     } else {
                         newAuthors =
                             await VolumeClient.authors(libraryId, props.volume.id);
+                        logger.info({
+                            context: "AuthorOptions.fetchAuthors",
+                            msg: "Select by included",
+                            searchText: searchText,
+                            authors: newAuthors,
+                        });
                     }
                     setAuthors(newAuthors);
                 } catch (error) {
@@ -103,12 +115,10 @@ const AuthorOptions = (props: Props) => {
     }
 
     const handleExclude: HandleAuthor = (author) => {
-        setSearchText("");
         props.handleExclude(author);
     }
 
     const handleInclude: HandleAuthor = (author) => {
-        setSearchText("");
         props.handleInclude(author);
     }
 

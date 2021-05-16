@@ -69,6 +69,12 @@ const StoryOptions = (props: Props) => {
                                 limit: pageSize,
                                 offset: (pageSize * (currentPage - 1)),
                             });
+                        logger.info({
+                            context: "StoryOptions.fetchStories",
+                            msg: "Select by searchText",
+                            searchText: searchText,
+                            stories: newStories,
+                        });
 
                     } else {
 
@@ -92,17 +98,22 @@ const StoryOptions = (props: Props) => {
                                 library_id: props.volume.library_id,
                                 name: props.volume.name,
                             });
-                            const inserted = await props.handleInsert(added);
+                            await props.handleInsert(added);
                             logger.info({
                                 context: "StoryOptions.fetchStories",
                                 msg: "Added a courtesy story",
                                 volume: props.volume,
-                                story: inserted,
+                                story: added,
                             });
 
                             // Reselect to pick up the newly added story
                             newStories =
                                 await VolumeClient.stories(libraryId, props.volume.id);
+                            logger.info({
+                                context: "StoryOptions.fetchStories",
+                                msg: "Select by included",
+                                stories: newStories,
+                            });
 
                         }
 
@@ -139,12 +150,10 @@ const StoryOptions = (props: Props) => {
     }
 
     const handleExclude: HandleStory = (story) => {
-        setSearchText("");
         props.handleExclude(story);
     }
 
     const handleInclude: HandleStory = (story) => {
-        setSearchText("");
         props.handleInclude(story);
     }
 

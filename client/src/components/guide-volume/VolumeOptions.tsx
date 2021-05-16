@@ -59,12 +59,23 @@ const VolumeOptions = (props: Props) => {
                                 limit: pageSize,
                                 offset: (pageSize * (currentPage - 1)),
                             });
+                        logger.info({
+                            context: "VolumeOptions.fetchVolumes",
+                            msg: "Select by searchText",
+                            searchText: searchText,
+                            volumes: newVolumes,
+                        })
                     } else {
                         newVolumes =
                             await VolumeClient.all(libraryId, {
                                 limit: pageSize,
                                 offset: (pageSize * (currentPage - 1)),
                             });
+                        logger.info({
+                            context: "VolumeOptions.fetchVolumes",
+                            msg: "Select by library",
+                            volumes: newVolumes,
+                        })
                     }
                     setVolumes(newVolumes);
                 } catch (error) {

@@ -160,10 +160,12 @@ const StageStories = (props: Props) => {
                 }
             }
 
+            props.handleRefresh();
+
         } catch (error) {
             ReportError("StageStories.handleInsert", error);
+            props.handleRefresh();
         }
-        props.handleRefresh();
     }
 
     const handleRemove: HandleStory = async (newStory) => {
