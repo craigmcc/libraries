@@ -126,15 +126,15 @@ const StageStories = (props: Props) => {
     }
 
     const handleInsert: HandleStory = async (newStory) => {
-        logger.info({
-            context: "StageStories.handleInsert",
-            msg: "Inserting new Story",
-            story: newStory,
-        });
         try {
 
             // Persist the new Story
             const inserted = await StoryClient.insert(libraryId, newStory);
+            logger.info({
+                context: "StageStories.handleInsert",
+                msg: "Inserting new Story",
+                story: inserted,
+            });
             setStory(null);
 
             // Assume the new Story is included in the current Volume

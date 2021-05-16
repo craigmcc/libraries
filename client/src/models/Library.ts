@@ -11,8 +11,8 @@
 class Library {
 
     constructor(data: any = {}) {
-        this.active = (data.active !== undefined) ? data.active : true;
         this.id = data.id || -1;
+        this.active = (data.active !== undefined) ? data.active : true;
         this.name = data.name;
         this.notes = data.notes || null;
         this.scope = data.scope;
