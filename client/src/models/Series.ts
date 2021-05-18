@@ -19,9 +19,9 @@ class Series {
         this.notes = data.notes;
     }
 
+    id: number;
     active: boolean;
     copyright: string;
-    id: number;
     library_id: number;
     name: string;
     notes: string;

@@ -48,6 +48,7 @@ const GuideVolume = () => {
             logger.info({
                 context: "GuideVolume.fetchVolume",
                 msg: "Input conditions",
+                libraryId: libraryId,
                 refresh: refresh,
                 volumeId: volumeId,
                 volume: volume,

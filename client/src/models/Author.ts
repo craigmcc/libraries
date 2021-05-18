@@ -19,13 +19,13 @@ class Author {
         this.notes = data.notes;
     }
 
-
+    id: number;
     active: boolean;
     first_name: string;
-    id: number;
     last_name: string;
     library_id: number;
     notes: string;
+
 }
 
 export default Author;

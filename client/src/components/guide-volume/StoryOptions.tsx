@@ -19,7 +19,6 @@ import Pagination from "../Pagination";
 import SearchBar from "../SearchBar";
 import {HandleStory, HandleValue, OnAction} from "../types";
 import StoryClient from "../../clients/StoryClient";
-import VolumeClient from "../../clients/VolumeClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
 import Story from "../../models/Story";
@@ -63,7 +62,7 @@ const StoryOptions = (props: Props) => {
                 try {
                     if (searchText.length > 0) {
 
-                        // Find matching Stories
+                        // Fetch matching Stories
                         newStories =
                             await StoryClient.name(libraryId, searchText, {
                                 limit: pageSize,
@@ -78,44 +77,8 @@ const StoryOptions = (props: Props) => {
 
                     } else {
 
-                        // Find currently included Stories
+                        // Fetch currently included Stories
                         newStories = props.volume.stories;
-
-                        // If there are no included Stories for a Volume
-                        // of type "Single", create one based on the
-                        // name and Authors of the owning Volume
-                        if ((props.volume.type === "Single") && (newStories.length === 0)) {
-
-                            // Create and insert the new Story
-                            logger.info({
-                                context: "StoryOptions.fetchStories",
-                                msg: "Creating a courtesy story",
-                                volume: props.volume,
-                            });
-                            const added = new Story({
-                                active: true,
-                                copyright: props.volume.copyright ? props.volume.copyright : undefined,
-                                library_id: props.volume.library_id,
-                                name: props.volume.name,
-                            });
-                            await props.handleInsert(added);
-                            logger.info({
-                                context: "StoryOptions.fetchStories",
-                                msg: "Added a courtesy story",
-                                volume: props.volume,
-                                story: added,
-                            });
-
-                            // Reselect to pick up the newly added story
-                            newStories =
-                                await VolumeClient.stories(libraryId, props.volume.id);
-                            logger.info({
-                                context: "StoryOptions.fetchStories",
-                                msg: "Select by included",
-                                stories: newStories,
-                            });
-
-                        }
 
                     }
                     setStories(newStories);

@@ -61,6 +61,7 @@ const AuthorOptions = (props: Props) => {
                 let newAuthors: Author[] = [];
                 try {
                     if (searchText.length > 0) {
+                        // Fetch all Library Authors matching searchText
                         newAuthors =
                             await AuthorClient.name(libraryId, searchText, {
                                 limit: pageSize,
@@ -73,6 +74,7 @@ const AuthorOptions = (props: Props) => {
                             authors: newAuthors,
                         });
                     } else {
+                        // Fetch only Authors included in the current Volume
                         newAuthors =
                             await VolumeClient.authors(libraryId, props.volume.id);
                         logger.info({

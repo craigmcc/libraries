@@ -87,6 +87,8 @@ const StageAuthors = (props: Props) => {
             volume: props.volume,
         });
         try {
+
+            // Exclude this Author for the current Volume
             const disassociated = await AuthorClient.volumesExclude
                (libraryId, newAuthor.id, props.volume.id);
             logger.info({
@@ -94,6 +96,17 @@ const StageAuthors = (props: Props) => {
                 author: newAuthor,
                 disassociated: disassociated,
             });
+
+            // For any Story in this Volume, exclude this Author
+            for (const story of props.volume.stories) {
+                try {
+                    await AuthorClient.storiesExclude(libraryId, newAuthor.id, story.id);
+                } catch (error) {
+                    // Ignore errors if already excluded
+
+                }
+            }
+
         } catch (error) {
             ReportError("StageAuthors.handleExclude", error);
         }
@@ -108,6 +121,8 @@ const StageAuthors = (props: Props) => {
             volume: props.volume,
         });
         try {
+
+            // Include this Author for the current Volume
             const associated = await AuthorClient.volumesInclude
                 (libraryId, newAuthor.id, props.volume.id);
             logger.info({
@@ -115,6 +130,19 @@ const StageAuthors = (props: Props) => {
                 author: newAuthor,
                 associated: associated,
             });
+
+            // For "Single" or "Collection" Volume, add to Authors for each Story
+            if ((props.volume.type === "Single") || (props.volume.type === "Collection")) {
+                logger.info({
+                    context: "StageAuthors.handleInclude",
+                    msg: `Adding Author to ${props.volume.stories.length} Stories`,
+                });
+                for (const story of props.volume.stories) {
+                    await AuthorClient.storiesInclude(libraryId, newAuthor.id, story.id);
+                }
+            }
+
+
         } catch (error) {
             ReportError("StageAuthors.handleInclude", error);
         }

@@ -18,8 +18,8 @@ class Library {
         this.scope = data.scope;
     }
 
-    active!: boolean;
     id!: number;
+    active!: boolean;
     name!: string;
     notes?: string;
     scope!: string;

@@ -17,12 +17,14 @@ import {HandleStage, Stage} from "./GuideVolume";
 import VolumeOptions from "./VolumeOptions";
 import {HandleAction, HandleVolume, OnAction, Scopes} from "../types";
 import VolumeForm from "../volumes/VolumeForm";
+import StoryClient from "../../clients/StoryClient";
 import VolumeClient from "../../clients/VolumeClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
 import Volume from "../../models/Volume";
 import logger from "../../util/client-logger";
 import ReportError from "../../util/ReportError";
+import Story from "../../models/Story";
 
 // Incoming Properties -------------------------------------------------------
 
@@ -88,9 +90,33 @@ const StageVolume = (props: Props) => {
             volume: newVolume,
         });
         try {
+
+            // Persist the requested Volume
             const inserted = await VolumeClient.insert(libraryId, newVolume);
             setVolume(null);
-            props.handleVolume(inserted); // Implicitly select the new Volume
+
+            // If the Volume is of type "Single", create a Story with the same name
+            // and associate it with this Volume
+            if (inserted.type === "Single") {
+                const newStory = new Story({
+                    copyright: inserted.copyright ? inserted.copyright : undefined,
+                    library_id: inserted.library_id,
+                    name: inserted.name,
+                });
+                const addedStory = await StoryClient.insert(libraryId, newStory);
+                await VolumeClient.storiesInclude(libraryId, inserted.id, addedStory.id);
+                logger.info({
+                    context: "StageVolume.handleInsert",
+                    msg: "Added Story for Volume of type Single",
+                    volume: inserted,
+                    story: addedStory,
+                })
+            }
+
+            // Select the inserted Volume, and switch to Authors stage
+            props.handleVolume(inserted);     // Implicitly select the new Volume
+            props.handleStage(Stage.AUTHORS); // and switch to Authors stage
+
         } catch (error) {
             ReportError("StageVolume.handleInsert", error);
         }
@@ -105,7 +131,9 @@ const StageVolume = (props: Props) => {
         try {
             await VolumeClient.remove(libraryId, newVolume.id);
             setVolume(null);
-            props.handleVolume(new Volume());
+            if (newVolume.id === props.volume.id) {
+                props.handleVolume(new Volume());   // Unselect if we were current
+            }
         } catch (error) {
             ReportError("StageVolume.handleRemove", error);
         }

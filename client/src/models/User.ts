@@ -15,8 +15,8 @@ class User {
         this.username = data.username;
     }
 
-    active!: boolean;
     id!: number;
+    active!: boolean;
     level?: string;
     password?: string;
     scope!: string;

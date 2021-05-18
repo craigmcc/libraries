@@ -26,24 +26,24 @@ class Volume {
         this.name = data.name;
         this.notes = data.notes;
         this.read = (data.active !== undefined) ? data.read : false;
-        this.type = data.type;
+        this.type = data.type ? data.type : "Single";
         this.authors = data.authors ? toAuthors(data.authors) : [];
         this.stories = data.stories ? toStories(data.stories) : [];
     }
 
+    id: number;
     active: boolean;
-    authors: Author[];
     copyright: string;
     google_id: string;
-    id: number;
     isbn: string;
     library_id: number;
     location: string;
     name: string;
     notes: string;
     read: boolean;
-    stories: Story[];
     type: string;
+    authors: Author[];
+    stories: Story[];
 }
 
 export default Volume;
