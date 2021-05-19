@@ -32,6 +32,7 @@ import ReportError from "../../util/ReportError";
 export interface Props {
     handleRefresh: HandleAction;        // Trigger a UI refresh
     handleStage: HandleStage;           // Handle changing guide stage
+    handleStory: HandleStory;           // Handle selecting a Story
     volume: Volume;                     // Currently selected Volume
 }
 
@@ -183,6 +184,15 @@ const StageStories = (props: Props) => {
         props.handleRefresh();
     }
 
+    const handleSelect: HandleStory = async (newStory) => {
+        logger.info({
+            context: "StageStories.handleSelect",
+            story: newStory,
+        });
+        props.handleStory(newStory);
+        props.handleRefresh();
+    }
+
     const handleUpdate: HandleStory = async (newStory) => {
         logger.info({
             context: "StageStories.handleUpdate",
@@ -244,6 +254,7 @@ const StageStories = (props: Props) => {
                         handleExclude={handleExclude}
                         handleInclude={handleInclude}
                         handleInsert={handleInsert}
+                        handleSelect={handleSelect}
                         included={included}
                         volume={props.volume}
                     />

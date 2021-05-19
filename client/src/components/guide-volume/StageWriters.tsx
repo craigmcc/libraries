@@ -1,7 +1,7 @@
 // StageAuthors --------------------------------------------------------------
 
-// Select Author(s) for the currently selected Volume, while offering the
-// option to edit existing Authors or create a new one.
+// Select Writer(s) (Author(s)) for the currently selected Story, while
+// offering the option to edit existing Authors or create a new one.
 
 // External Modules ----------------------------------------------------------
 
@@ -13,15 +13,15 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
-import AuthorOptions from "./AuthorOptions";
 import {HandleStage, Stage} from "./GuideVolume";
+import WriterOptions from "./WriterOptions";
 import {HandleAction, HandleAuthor, OnAction, Scopes} from "../types";
 import AuthorForm from "../authors/AuthorForm";
 import AuthorClient from "../../clients/AuthorClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
 import Author from "../../models/Author";
-import Volume from "../../models/Volume";
+import Story from "../../models/Story";
 import logger from "../../util/client-logger";
 import ReportError from "../../util/ReportError";
 
@@ -30,178 +30,156 @@ import ReportError from "../../util/ReportError";
 export interface Props {
     handleRefresh: HandleAction;        // Trigger a UI refresh
     handleStage: HandleStage;           // Handle changing guide stage
-    volume: Volume;                     // Currently selected volume
+    story: Story;                       // Currently selected volume
 }
 
 // Component Details ---------------------------------------------------------
 
-const StageAuthors = (props: Props) => {
+const StageWriters = (props: Props) => {
 
     const libraryContext = useContext(LibraryContext);
     const loginContext = useContext(LoginContext);
 
-    const [author, setAuthor] = useState<Author | null>(null);
     const [canRemove, setCanRemove] = useState<boolean>(false);
     const [libraryId] = useState<number>(libraryContext.state.library.id);
+    const [writer, setWriter] = useState<Author | null>(null);
 
     useEffect(() => {
 
         logger.info({
-            context: "StageAuthors.useEffect",
-            volume: props.volume,
+            context: "StageWriters.useEffect",
+            story: props.story,
         });
 
         // Record current permissions
         setCanRemove(loginContext.validateScope(Scopes.SUPERUSER));
 
     }, [libraryContext, loginContext,
-        libraryId, props.volume]);
+        libraryId, props.story]);
 
     const handleAdd: OnAction = () => {
-        const newAuthor = new Author({
+        const newWriter = new Author({
             first_name: null,
             last_name: null,
             library_id: libraryId,
             notes: null,
         });
         logger.debug({
-            context: "StageAuthors.handleAdd",
-            author: newAuthor,
+            context: "StageWriters.handleAdd",
+            writer: newWriter,
         });
-        setAuthor(newAuthor);
+        setWriter(newWriter);
     }
 
-    const handleEdit: HandleAuthor = async (newAuthor) => {
+    const handleEdit: HandleAuthor = async (newWriter) => {
         logger.debug({
-            context: "StageAuthors.handleEdit",
-            author: newAuthor,
+            context: "StageWriters.handleEdit",
+            writer: newWriter,
         });
-        setAuthor(newAuthor);
+        setWriter(newWriter);
     }
 
-    const handleExclude: HandleAuthor = async (newAuthor) => {
+    const handleExclude: HandleAuthor = async (newWriter) => {
         logger.info({
-            context: "StageAuthors.handleExclude",
-            msg: "Excluding Author for Volume",
-            author: newAuthor,
-            volume: props.volume,
+            context: "StageWriters.handleExclude",
+            msg: "Excluding Writer for Story",
+            writer: newWriter,
+            story: props.story,
         });
         try {
 
-            // Exclude this Author for the current Volume
-            const disassociated = await AuthorClient.volumesExclude
-               (libraryId, newAuthor.id, props.volume.id);
+            // Exclude this Writer for the current Story
+            const disassociated = await AuthorClient.storiesExclude
+                (libraryId, newWriter.id, props.story.id);
             logger.info({
-                context: "StageAuthors.handleExclude",
-                author: newAuthor,
+                context: "StageWriters.handleExclude",
+                writer: newWriter,
                 disassociated: disassociated,
             });
 
-            // For any Story in this Volume, exclude this Author
-            for (const story of props.volume.stories) {
-                try {
-                    await AuthorClient.storiesExclude(libraryId, newAuthor.id, story.id);
-                } catch (error) {
-                    // Ignore errors if already excluded
-
-                }
-            }
-
         } catch (error) {
-            ReportError("StageAuthors.handleExclude", error);
+            ReportError("StageWriters.handleExclude", error);
         }
         props.handleRefresh();
     }
 
-    const handleInclude: HandleAuthor = async (newAuthor) => {
+    const handleInclude: HandleAuthor = async (newWriter) => {
         logger.info({
-            context: "StageAuthors.handleInclude",
-            msg: "Including Author for Volume",
-            author: newAuthor,
-            volume: props.volume,
+            context: "StageWriters.handleInclude",
+            msg: "Including Author for Story",
+            writer: newWriter,
+            story: props.story,
         });
         try {
 
-            // Include this Author for the current Volume
-            const associated = await AuthorClient.volumesInclude
-                (libraryId, newAuthor.id, props.volume.id);
+            // Include this Writer for the current Story
+            const associated = await AuthorClient.storiesInclude
+                (libraryId, newWriter.id, props.story.id);
             logger.info({
-                context: "StageAuthors.handleInclude",
-                author: newAuthor,
+                context: "StageWriters.handleInclude",
+                writer: newWriter,
                 associated: associated,
             });
 
-            // For "Single" or "Collection" Volume, add to Authors for each Story
-            if ((props.volume.type === "Single") || (props.volume.type === "Collection")) {
-                logger.info({
-                    context: "StageAuthors.handleInclude",
-                    msg: `Adding Author to ${props.volume.stories.length} Stories`,
-                });
-                for (const story of props.volume.stories) {
-                    await AuthorClient.storiesInclude(libraryId, newAuthor.id, story.id);
-                }
-            }
-
-
         } catch (error) {
-            ReportError("StageAuthors.handleInclude", error);
+            ReportError("StageWriters.handleInclude", error);
         }
         props.handleRefresh();
     }
 
-    const handleInsert: HandleAuthor = async (newAuthor) => {
+    const handleInsert: HandleAuthor = async (newWriter) => {
         logger.info({
-            context: "StageAuthors.handleInsert",
-            author: newAuthor,
+            context: "StageWriters.handleInsert",
+            writer: newWriter,
         });
         try {
 
-            // Persist the new Author
-            const inserted = await AuthorClient.insert(libraryId, newAuthor);
-            setAuthor(null);
+            // Persist the new Writer
+            const inserted = await AuthorClient.insert(libraryId, newWriter);
+            setWriter(null);
 
-            // Assume a new Author is included in the current Volume
+            // Assume a new Author is included in the current Story
             await handleInclude(inserted);
 
         } catch (error) {
-            ReportError("StageAuthors.handleInsert", error);
+            ReportError("StageWriters.handleInsert", error);
         }
         props.handleRefresh();
     }
 
-    const handleRemove: HandleAuthor = async (newAuthor) => {
+    const handleRemove: HandleAuthor = async (newWriter) => {
         logger.info({
-            context: "StageAuthors.handleRemove",
-            author: newAuthor,
+            context: "StageWriters.handleRemove",
+            writer: newWriter,
         });
         try {
-            AuthorClient.remove(libraryId, newAuthor.id);
-            setAuthor(null);
+            AuthorClient.remove(libraryId, newWriter.id);
+            setWriter(null);
         } catch (error) {
-            ReportError("StageAuthors.handleRemove", error);
+            ReportError("StageWriters.handleRemove", error);
         }
         props.handleRefresh();
     }
 
-    const handleUpdate: HandleAuthor = async (newAuthor) => {
+    const handleUpdate: HandleAuthor = async (newWriter) => {
         logger.info({
-            context: "StageAuthors.handleUpdate",
-            author: newAuthor,
+            context: "StageWriters.handleUpdate",
+            author: newWriter,
         });
         try {
-            await AuthorClient.update(libraryId, newAuthor.id, newAuthor);
-            setAuthor(null);
+            await AuthorClient.update(libraryId, newWriter.id, newWriter);
+            setWriter(null);
         } catch (error) {
-            ReportError("StageAuthors.handleUpdate", error);
+            ReportError("StageWriters.handleUpdate", error);
         }
         props.handleRefresh();
     }
 
-    // Is the specified Author currently included for this Volume?
-    const included = (author: Author): boolean => {
+    // Is the specified Author currently included for this Story?
+    const included = (writer: Author): boolean => {
         let result = false;
-        props.volume.authors.forEach(includedAuthor => {
-            if (author.id === includedAuthor.id) {
+        props.story.authors.forEach(includedWriter => {
+            if (writer.id === includedWriter.id) {
                 result = true;
             }
         });
@@ -209,44 +187,43 @@ const StageAuthors = (props: Props) => {
     }
 
     return (
-        <Container fluid id="StageAuthors">
+        <Container fluid id="StageWriters">
 
             {/* List View */}
-            {(!author) ? (
+            {(!writer) ? (
                 <>
 
                     <Row className="mb-3 ml-1 mr-1">
                         <Col className="text-left">
                             <Button
                                 disabled={false}
-                                onClick={() => props.handleStage(Stage.VOLUME)}
+                                onClick={() => props.handleStage(Stage.STORIES)}
                                 size="sm"
                                 variant="success"
                             >Previous</Button>
                         </Col>
                         <Col className="text-center">
-                            <span>Manage Authors for Volume:&nbsp;</span>
+                            <span>Manage Writers for Story:&nbsp;</span>
                             <span className="text-info">
-                                {props.volume.name}
+                                {props.story.name}
                             </span>
                         </Col>
                         <Col className="text-right">
                             <Button
-                                // TODO - when is this disabled?
-                                disabled={props.volume.authors.length < 1}
+                                disabled={true}
                                 onClick={() => props.handleStage(Stage.STORIES)}
                                 size="sm"
-                                variant={(props.volume.authors.length < 1) ? "outline-success" : "success"}
+                                variant={(props.story.authors.length < 1) ? "outline-success" : "success"}
                             >Next</Button>
                         </Col>
                     </Row>
 
-                    <AuthorOptions
+                    <WriterOptions
                         handleEdit={handleEdit}
                         handleExclude={handleExclude}
                         handleInclude={handleInclude}
                         included={included}
-                        volume={props.volume}
+                        story={props.story}
                     />
                     <Button
                         className="mt-3 ml-1"
@@ -259,24 +236,24 @@ const StageAuthors = (props: Props) => {
             ) : null}
 
             {/* Detail View */}
-            {(author) ? (
+            {(writer) ? (
                 <>
 
                     <Row className="mb-3 ml-1 mr-1">
                         <Col className="text-center">
-                            {(author.id > 0) ? (
+                            {(writer.id > 0) ? (
                                 <span>Edit Existing&nbsp;</span>
                             ) : (
                                 <span>Add New&nbsp;</span>
                             )}
-                            <span>Author for Volume:&nbsp;</span>
+                            <span>Writer for Story:&nbsp;</span>
                             <span className="text-info">
-                                {props.volume.name}
+                                {props.story.name}
                             </span>
                         </Col>
                         <Col className="text-right">
                             <Button
-                                onClick={() => setAuthor(null)}
+                                onClick={() => setWriter(null)}
                                 size="sm"
                                 type="button"
                                 variant="secondary"
@@ -285,7 +262,7 @@ const StageAuthors = (props: Props) => {
                     </Row>
 
                     <AuthorForm
-                        author={author}
+                        author={writer}
                         autoFocus
                         canRemove={canRemove}
                         handleInsert={handleInsert}
@@ -301,4 +278,4 @@ const StageAuthors = (props: Props) => {
 
 }
 
-export default StageAuthors;
+export default StageWriters;

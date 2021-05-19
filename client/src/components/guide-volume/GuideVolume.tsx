@@ -12,10 +12,13 @@ import Container from "react-bootstrap/Container";
 import StageAuthors from "./StageAuthors";
 import StageStories from "./StageStories";
 import StageVolume from "./StageVolume";
+import StageWriters from "./StageWriters";
 import VolumeSummary from "./VolumeSummary";
+import StoryClient from "../../clients/StoryClient";
 import VolumeClient from "../../clients/VolumeClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
+import Story from "../../models/Story";
 import Volume from "../../models/Volume";
 import logger from "../../util/client-logger";
 import ReportError from "../../util/ReportError";
@@ -26,6 +29,7 @@ export enum Stage {
     VOLUME,
     AUTHORS,
     STORIES,
+    WRITERS,
 }
 
 export type HandleStage = (newStage: Stage) => void;
@@ -38,6 +42,8 @@ const GuideVolume = () => {
     const [libraryId] = useState<number>(libraryContext.state.library.id);
     const [refresh, setRefresh] = useState<boolean>(false);
     const [stage, setStage] = useState<Stage>(Stage.VOLUME);
+    const [story, setStory] = useState<Story>(new Story());
+    const [storyId, setStoryId] = useState<number>(-1);
     const [volume, setVolume] = useState<Volume>(new Volume());
     const [volumeId, setVolumeId] = useState<number>(-1);
 
@@ -110,6 +116,74 @@ const GuideVolume = () => {
     }, [libraryContext, loginContext,
               libraryId, refresh, stage, volume, volumeId]);
 
+    useEffect(() => {
+
+        const fetchStory = async () => {
+
+            logger.info({
+                context: "GuideVolume.fetchStory",
+                msg: "Input conditions",
+                libraryId: libraryId,
+                refresh: refresh,
+                storyId: storyId,
+                story: story,
+            });
+
+            if (loginContext.state.loggedIn) {
+                if ((libraryId > 0) && (storyId > 0)) {
+                    if ((storyId !== story.id) || refresh) {
+                        try {
+                            const newStory = await StoryClient.find(libraryId, storyId, {
+                                withAuthors: "",
+                            });
+                            logger.info({
+                                context: "GuideVolume.fetchStory",
+                                msg: "Fetch updated Story",
+                                story: newStory,
+                            });
+                            setStory(newStory);
+                            if (stage === Stage.STORIES) {
+                                setStage(Stage.WRITERS); // Implicitly advance after Story selected
+                            }
+                        } catch (error) {
+                            ReportError("GuideVolume.fetchStory", error);
+                        }
+                    } else {
+                        logger.info({
+                            context: "GuideVolume.fetchStory",
+                            msg: "Logged in, same Story or not refresh - skip"
+                        });
+                    }
+                } else {
+                    logger.info({
+                        context: "GuideVolume.fetchStory",
+                        msg: "Logged in, not refresh, missing libraryId/storyId - skip",
+                    });
+                }
+            } else {
+                logger.info({
+                    context: "GuideVolume.fetchStory",
+                    msg: "Not logged in, revert",
+                });
+                if (story.id > 0) {
+                    setStory(new Story());
+                }
+                if (storyId > 0) {
+                    setStoryId(-1);
+                }
+            }
+
+            if (refresh) {
+                setRefresh(false);
+            }
+
+        }
+
+        fetchStory();
+
+    }, [libraryContext, loginContext,
+        libraryId, refresh, stage, story, storyId]);
+
     const handleRefresh = (): void => {
         logger.info({
             context: "GuideVolume.handleRefresh",
@@ -123,12 +197,19 @@ const GuideVolume = () => {
         setStage(newStage);
     }
 
+    const handleStory = (newStory: Story): void => {
+        logger.info({
+            context: "GuideVolume.handleStory",
+            story: newStory,
+        });
+        setStoryId(newStory.id);
+    }
+
     const handleVolume = async (newVolume: Volume): Promise<void> => {
         logger.info({
             context: "GuideVolume.handleVolume",
             volume: newVolume,
         });
-//        setRefresh(true);
         setVolumeId(newVolume.id);  // Trigger (re)fetch of the specified Volume
     }
 
@@ -161,7 +242,16 @@ const GuideVolume = () => {
                 <StageStories
                     handleRefresh={handleRefresh}
                     handleStage={handleStage}
+                    handleStory={handleStory}
                     volume={volume}
+                />
+            ) : null}
+
+            {(stage === Stage.WRITERS) ? (
+                <StageWriters
+                    handleRefresh={handleRefresh}
+                    handleStage={handleStage}
+                    story={story}
                 />
             ) : null}
 
