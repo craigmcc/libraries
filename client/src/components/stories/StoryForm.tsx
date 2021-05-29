@@ -110,6 +110,7 @@ const StoryForm = (props: Props) => {
                                             controlId="name" id="nameGroup">
                                     <Form.Label>Name:</Form.Label>
                                     <Form.Control
+                                        autoFocus={props.autoFocus ? props.autoFocus : false}
                                         htmlSize={25}
                                         isInvalid={touched.name && !!errors.name}
                                         isValid={!errors.name}

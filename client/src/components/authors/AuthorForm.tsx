@@ -118,6 +118,7 @@ const AuthorForm = (props: Props) => {
                                             controlId="first_name" id="firstNameGroup">
                                     <Form.Label>First Name:</Form.Label>
                                     <Form.Control
+                                        autoFocus={props.autoFocus ? props.autoFocus : false}
                                         htmlSize={25}
                                         isInvalid={touched.first_name && !!errors.first_name}
                                         isValid={!errors.first_name}
