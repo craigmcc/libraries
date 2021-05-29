@@ -161,6 +161,7 @@ const StageStories = (props: Props) => {
                 }
             }
 
+            props.handleStory(inserted);    // Select the new Story
             props.handleRefresh();
 
         } catch (error) {
