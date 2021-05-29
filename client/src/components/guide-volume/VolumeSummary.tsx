@@ -126,6 +126,7 @@ const VolumeSummary = (props: Props) => {
                             <thead>
                             <tr className="table-secondary">
                                 <th scope="col">Included Stories</th>
+                                <th scope="col">Story Notes</th>
                                 <th scope="col">Story Authors</th>
                             </tr>
                             </thead>
@@ -137,6 +138,9 @@ const VolumeSummary = (props: Props) => {
                                         {story.name}
                                     </td>
                                     <td key={1000 + (rowIndex * 100) + 2}>
+                                        {story.notes}
+                                    </td>
+                                    <td key={1000 + (rowIndex * 100) + 3}>
                                         {storiesAuthors[rowIndex]}
                                     </td>
                                 </tr>
