@@ -199,6 +199,7 @@ const StageVolume = (props: Props) => {
                     </Row>
 
                     <VolumeOptions
+                        handleAdd={handleAdd}
                         handleEdit={handleEdit}
                         handleSelect={handleSelect}
                     />

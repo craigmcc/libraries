@@ -28,6 +28,7 @@ import {listValue} from "../../util/transformations";
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
+    handleAdd?: OnAction;               // Handle Add request (optional)
     handleEdit: HandleVolume;           // Handle request to edit a Volume
     handleSelect: HandleVolume;         // Handle request to select a Volume
 }
@@ -123,7 +124,7 @@ const VolumeOptions = (props: Props) => {
         <Container fluid id="VolumeOptions">
 
             <Row className="mb-3">
-                <Col className="col-10 mr-2">
+                <Col className="col-8">
                     <SearchBar
                         autoFocus
                         handleChange={handleChange}
@@ -131,7 +132,7 @@ const VolumeOptions = (props: Props) => {
                         placeholder="Search by all or part of name"
                     />
                 </Col>
-                <Col>
+                <Col className="col-2">
                     <Pagination
                         currentPage={currentPage}
                         lastPage={(volumes.length === 0) ||
@@ -140,6 +141,15 @@ const VolumeOptions = (props: Props) => {
                         onPrevious={onPrevious}
                     />
                 </Col>
+                {(props.handleAdd) ? (
+                    <Col className="col-2">
+                        <Button
+                            onClick={props.handleAdd}
+                            size="sm"
+                            variant="primary"
+                        >Add</Button>
+                    </Col>
+                ) : null }
             </Row>
 
             <Row className="ml-1 mr-1">
