@@ -102,6 +102,7 @@ const StageVolume = (props: Props) => {
                     copyright: inserted.copyright ? inserted.copyright : undefined,
                     library_id: inserted.library_id,
                     name: inserted.name,
+                    notes: inserted.notes ? inserted.notes : undefined,
                 });
                 const addedStory = await StoryClient.insert(libraryId, newStory);
                 await VolumeClient.storiesInclude(libraryId, inserted.id, addedStory.id);
