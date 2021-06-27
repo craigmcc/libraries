@@ -111,7 +111,7 @@ AuthorRouter.put("/:libraryId/:authorId",
         ));
     });
 
-// Child Lookup Routes -------------------------------------------------------
+// Author-Series Relationships -----------------------------------------------
 
 // GET /:libraryId/:authorId/series - Find Series for this Author
 AuthorRouter.get("/:libraryId/:authorId/series",
@@ -123,6 +123,30 @@ AuthorRouter.get("/:libraryId/:authorId/series",
             req.query
         ));
     });
+
+// DELETE /:libraryId/:authorId/series/:seriesId - Disassociate Author and Series
+AuthorRouter.delete("/:libraryId/:authorId/series/:seriesId",
+    requireRegular,
+    async (req: Request, res: Response) => {
+        res.send(await AuthorServices.seriesExclude(
+            parseInt(req.params.libraryId, 10),
+            parseInt(req.params.authorId, 10),
+            parseInt(req.params.seriesId, 10)
+        ));
+    });
+
+// POST /:libraryId/:authorId/series/:seriesId - Associate Author and Series
+AuthorRouter.post("/:libraryId/:authorId/series/:seriesId",
+    requireRegular,
+    async (req: Request, res: Response) => {
+        res.send(await AuthorServices.seriesInclude(
+            parseInt(req.params.libraryId, 10),
+            parseInt(req.params.authorId, 10),
+            parseInt(req.params.seriesId, 10)
+        ));
+    });
+
+// Author-Story Relationships ------------------------------------------------
 
 // GET /:libraryId/:authorId/stories - Find Stories for this Author
 AuthorRouter.get("/:libraryId/:authorId/stories",
@@ -156,6 +180,8 @@ AuthorRouter.post("/:libraryId/:authorId/stories/:storyId",
             parseInt(req.params.storyId, 10)
         ));
     });
+
+// Author-Volume Relationships -----------------------------------------------
 
 // GET /:libraryId/:authorId/volumes - Find Volumes for this Author
 AuthorRouter.get("/:libraryId/:authorId/volumes",

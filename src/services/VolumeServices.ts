@@ -218,7 +218,7 @@ export class VolumeServices {
         return await library.$get("volumes", options);
     }
 
-    // ***** Child Table Lookups *****
+    // ***** Volume-Author Relationships *****
 
     public async authors(libraryId: number, volumeId: number, query?: any): Promise<Author[]> {
         const library = await Library.findByPk(libraryId);
@@ -245,6 +245,8 @@ export class VolumeServices {
         }, query);
         return await volume.$get("authors", options);
     }
+
+    // ***** Volume-Story Relationships *****
 
     public async stories(libraryId: number, volumeId: number, query?: any): Promise<Story[]> {
         const library = await Library.findByPk(libraryId);

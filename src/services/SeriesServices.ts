@@ -216,7 +216,7 @@ export class SeriesServices {
         return await library.$get("series", options);
     }
 
-    // ***** Child Table Lookups *****
+    // ***** Series-Auihor Relationships *****
 
     public async authors(libraryId: number, seriesId: number, query?: any): Promise<Author[]> {
         const library = await Library.findByPk(libraryId);
@@ -243,6 +243,8 @@ export class SeriesServices {
         }, query);
         return await series.$get("authors", options);
     }
+
+    // ***** Series-Story Relationships *****
 
     public async stories(libraryId: number, seriesId: number, query?: any): Promise<Story[]> {
         const library = await Library.findByPk(libraryId);

@@ -1,4 +1,4 @@
-// AuthorClient -------------------------------------------------------------
+// AuthorClient --------------------------------------------------------------
 
 // Interact with Author related server operations.
 
@@ -13,6 +13,7 @@ import {queryParameters} from "../util/query-parameters";
 import {
     toAuthor,
     toAuthors,
+    toSeries,
     toSerieses,
     toStories,
     toStory,
@@ -74,6 +75,18 @@ export class AuthorClient {
         const values = (await ApiBase.get<Series[]>(AUTHORS_BASE
             + `/${libraryId}/${authorId}/series${queryParameters(params)}`)).data;
         return toSerieses(values);
+    }
+
+    async seriesExclude(libraryId: number, authorId: number, seriesId: number): Promise<Series> {
+        const value = await ApiBase.delete(AUTHORS_BASE
+            + `/${libraryId}/${authorId}/series/${seriesId}`);
+        return toSeries(value);
+    }
+
+    async seriesInclude(libraryId: number, authorId: number, seriesId: number): Promise<Series> {
+        const value = await ApiBase.post(AUTHORS_BASE
+            + `/${libraryId}/${authorId}/series/${seriesId}`);
+        return toSeries(value);
     }
 
     async stories(libraryId: number, authorId: number, params?: Object): Promise<Story[]> {
