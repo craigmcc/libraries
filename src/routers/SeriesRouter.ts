@@ -110,10 +110,10 @@ SeriesRouter.put("/:libraryId/:seriesId",
         ));
     });
 
-// Child Lookup Routes -------------------------------------------------------
+// Series-Author Relationships -----------------------------------------------
 
-// GET /:libraryId/:seriesId/authors - Find Authors for this Series
-SeriesRouter.get("/:libraryId/:seriesId/authors",
+// GET /:libraryId/:seriesId/series/authors - Find Authors for this Series
+SeriesRouter.get("/:libraryId/:seriesId/series/authors",
     requireRegular,
     async (req: Request, res: Response) => {
         res.send(await SeriesServices.authors(
@@ -123,14 +123,38 @@ SeriesRouter.get("/:libraryId/:seriesId/authors",
         ));
     });
 
-// GET /:libraryId/:seriesId/stories - Find Stories for this Series
-SeriesRouter.get("/:libraryId/:seriesId/stories",
+// Series-Story Relationships ------------------------------------------------
+
+// GET /:libraryId/:seriesId/series/stories - Find Stories for this Series
+SeriesRouter.get("/:libraryId/:seriesId/series/stories",
     requireRegular,
     async (req: Request, res: Response) => {
         res.send(await SeriesServices.stories(
             parseInt(req.params.libraryId, 10),
             parseInt(req.params.seriesId, 10),
             req.query
+        ));
+    });
+
+// DELETE /:libraryId/:seriesId/series/stories/:storyId - Disassociate Series and Story
+SeriesRouter.delete("/:libraryId/:seriesId/series/stories/:storyId",
+    requireRegular,
+    async (req: Request, res: Response) => {
+        res.send(await SeriesServices.storiesExclude(
+            parseInt(req.params.libraryId, 10),
+            parseInt(req.params.seriesId, 10),
+            parseInt(req.params.storyId, 10)
+        ));
+    });
+
+// POST /:libraryId/:seriesId/series/stories/:storyId - Associate Series and Story
+SeriesRouter.post("/:libraryId/:seriesId/series/stories/:storyId",
+    requireRegular,
+    async (req: Request, res: Response) => {
+        res.send(await SeriesServices.storiesInclude(
+            parseInt(req.params.libraryId, 10),
+            parseInt(req.params.seriesId, 10),
+            parseInt(req.params.storyId, 10)
         ));
     });
 

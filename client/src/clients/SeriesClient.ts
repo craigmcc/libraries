@@ -13,7 +13,7 @@ import {
     toAuthors,
     toSeries,
     toSerieses,
-    toStories,
+    toStories, toStory,
 } from "../util/to-model-types";
 
 const SERIES_BASE = "/series";
@@ -75,6 +75,18 @@ export class SeriesClient {
         const values = (await ApiBase.get<Story[]>(SERIES_BASE
             + `/${libraryId}/${seriesId}/stories${queryParameters(params)}`)).data;
         return toStories(values);
+    }
+
+    async storiesExclude(libraryId: number, seriesId: number, storyId: number): Promise<Story> {
+        const value = await ApiBase.delete(SERIES_BASE
+            + `/${libraryId}/${seriesId}/stories/${storyId}`);
+        return toStory(value);
+    }
+
+    async storiesInclude(libraryId: number, seriesId: number, storyId: number): Promise<Story> {
+        const value = await ApiBase.post(SERIES_BASE
+            + `/${libraryId}/${seriesId}/stories/${storyId}`);
+        return toStory(value);
     }
 
     async update(libraryId: number, seriesId: number, series: Series): Promise<Series> {

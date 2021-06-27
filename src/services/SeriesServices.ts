@@ -12,10 +12,13 @@ import Author from "../models/Author";
 import Database from "../models/Database";
 import Library from "../models/Library";
 import Series from "../models/Series";
+import SeriesStory from "../models/SeriesStory";
 import * as SortOrder from "../models/SortOrder";
 import Story from "../models/Story";
 import {NotFound} from "../util/http-errors";
 import {appendPagination} from "../util/query-parameters";
+import logger from "../util/server-logger";
+import AuthorStory from "../models/AuthorStory";
 
 // Public Objects ------------------------------------------------------------
 
@@ -216,7 +219,7 @@ export class SeriesServices {
         return await library.$get("series", options);
     }
 
-    // ***** Series-Auihor Relationships *****
+    // ***** Series-Author Relationships *****
 
     public async authors(libraryId: number, seriesId: number, query?: any): Promise<Author[]> {
         const library = await Library.findByPk(libraryId);
@@ -270,6 +273,98 @@ export class SeriesServices {
             order: SortOrder.VOLUMES,
         }, query);
         return await series.$get("stories", options);
+    }
+
+    public async storiesExclude(libraryId: number, seriesId: number, storyId: number): Promise<Story> {
+        logger.info({
+            context: "SeriesServices.storiesExclude",
+            libraryId: libraryId,
+            seriesId: seriesId,
+            storyId: storyId,
+        });
+        const library = await Library.findByPk(libraryId);
+        if (!library) {
+            throw new NotFound(
+                `libraryId: Missing Library ${libraryId}`,
+                "SeriesServices.storiesExclude"
+            );
+        }
+        const series = await Series.findOne({
+            where: {
+                id: seriesId,
+                library_id: libraryId
+            }
+        })
+        if (!series) {
+            throw new NotFound(
+                `seriesId: Missing Series ${seriesId}`,
+                "SeriesServices.storiesExclude"
+            );
+        }
+        const story = await Story.findOne({
+            where: {
+                id: storyId,
+                library_id: libraryId
+            }
+        })
+        if (!story) {
+            throw new NotFound(
+                `storyId: Missing Story ${storyId}`,
+                "SeriesServices.storiesExclude"
+            );
+        }
+        await SeriesStory.destroy({
+            where: {
+                series_id: seriesId,
+                story_id: storyId
+            }
+        });
+        return story;
+    }
+
+    public async storiesInclude(libraryId: number, seriesId: number, storyId: number): Promise<Story> {
+        logger.info({
+            context: "SeriesServices.storiesInclude",
+            libraryId: libraryId,
+            seriesId: seriesId,
+            storyId: storyId,
+        });
+        const library = await Library.findByPk(libraryId);
+        if (!library) {
+            throw new NotFound(
+                `libraryId: Missing Library ${libraryId}`,
+                "SeriesServices.storiesInclude"
+            );
+        }
+        const series = await Series.findOne({
+            where: {
+                id: seriesId,
+                library_id: libraryId
+            }
+        })
+        if (!series) {
+            throw new NotFound(
+                `seriesId: Missing Series ${seriesId}`,
+                "SeriesServices.storiesInclude"
+            );
+        }
+        const story = await Story.findOne({
+            where: {
+                id: storyId,
+                library_id: libraryId
+            }
+        })
+        if (!story) {
+            throw new NotFound(
+                `storyId: Missing Story ${storyId}`,
+                "SeriesServices.storiesInclude"
+            );
+        }
+        await SeriesStory.create({
+            author_id: seriesId,
+            story_id: storyId
+        });
+        return story;
     }
 
 }

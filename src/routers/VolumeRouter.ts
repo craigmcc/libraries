@@ -110,7 +110,7 @@ VolumeRouter.put("/:libraryId/:volumeId",
         ));
     });
 
-// Child Lookup Routes -------------------------------------------------------
+// Volume-Author Relationships -----------------------------------------------
 
 // GET /:libraryId/:volumeId/authors - Find Authors for this Volume
 VolumeRouter.get("/:libraryId/:volumeId/authors",
@@ -122,6 +122,8 @@ VolumeRouter.get("/:libraryId/:volumeId/authors",
             req.query
         ));
     });
+
+// Volume-Story Relationships ------------------------------------------------
 
 // GET /:libraryId/:volumeId/stories - Find Stories for this Volume
 VolumeRouter.get("/:libraryId/:volumeId/stories",
