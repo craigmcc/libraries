@@ -21,6 +21,7 @@ import {LibraryContextProvider} from "./contexts/LibraryContext";
 import {LoginContextProvider} from "./contexts/LoginContext";
 import HomeView from "./components/HomeView";
 import AuthorView from "./components/authors/AuthorView";
+import GuideSeries from "./components/guide-series/GuideSeries";
 import GuideVolume from "./components/guide-volume/GuideVolume";
 import LibraryView from "./components/libraries/LibraryView";
 import SeriesView from "./components/series/SeriesView";
@@ -62,26 +63,29 @@ function App() {
                                 <NavItem className="nav-link">Home</NavItem>
                             </LinkContainer>
                             <LinkContainer to="/guide-volume">
-                                <NavItem className="nav-link">Guide</NavItem>
-                            </LinkContainer>
-                            <LinkContainer to="/authors">
-                                <NavItem className="nav-link">Authors</NavItem>
-                            </LinkContainer>
-                            <LinkContainer to="/series">
-                                <NavItem className="nav-link">Series</NavItem>
-                            </LinkContainer>
-                            <LinkContainer to="/stories">
-                                <NavItem className="nav-link">Stories</NavItem>
-                            </LinkContainer>
-                            <LinkContainer to="/volumes">
                                 <NavItem className="nav-link">Volumes</NavItem>
                             </LinkContainer>
+                            <LinkContainer to="/guide-series">
+                                <NavItem className="nav-link">Series</NavItem>
+                            </LinkContainer>
                             <NavDropdown id="master" title="Masters">
+                                <LinkContainer to="/authors">
+                                    <NavDropdown.Item>Authors</NavDropdown.Item>
+                                </LinkContainer>
                                 <LinkContainer to="/libraries">
                                     <NavDropdown.Item>Libraries</NavDropdown.Item>
                                 </LinkContainer>
+                                <LinkContainer to="/series">
+                                    <NavDropdown.Item>Series</NavDropdown.Item>
+                                </LinkContainer>
+                                <LinkContainer to="/stories">
+                                    <NavDropdown.Item>Stories</NavDropdown.Item>
+                                </LinkContainer>
                                 <LinkContainer to="/users">
                                     <NavDropdown.Item>Users</NavDropdown.Item>
+                                </LinkContainer>
+                                <LinkContainer to="/volumes">
+                                    <NavDropdown.Item>Volumes</NavDropdown.Item>
                                 </LinkContainer>
                             </NavDropdown>
                         </Nav>
@@ -96,6 +100,9 @@ function App() {
                 <Switch>
                     <Route exact path="/authors">
                         <AuthorView/>
+                    </Route>
+                    <Route exact path="/guide-series">
+                        <GuideSeries/>
                     </Route>
                     <Route exact path="/guide-volume">
                         <GuideVolume/>

@@ -1,7 +1,7 @@
-// VolumeSummary -------------------------------------------------------------
+// SeriesSummary -------------------------------------------------------------
 
-// Render a summary of the currently selected Volume and its associated
-// currently selected Authors and Stories (with their authors).
+// Render a summary of the currently selected Series and its associated
+// currently selected Authors and Stories (with their Authors).
 
 // External Modules ----------------------------------------------------------
 
@@ -15,7 +15,7 @@ import Table from "react-bootstrap/Table";
 
 import StoryClient from "../../clients/StoryClient";
 import Author from "../../models/Author";
-import Volume from "../../models/Volume";
+import Series from "../../models/Series";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
 import logger from "../../util/client-logger";
@@ -24,12 +24,12 @@ import {HandleAction} from "../types";
 // Incoming Properties ------------------------------------------------------
 
 export interface Props {
-    volume: Volume;                     // Currently selected Volume
+    series: Series;                     // Currently selected Series
 }
 
 // Component Details --------------------------------------------------------
 
-const VolumeSummary = (props: Props) => {
+const SeriesSummary = (props: Props) => {
 
     const libraryContext = useContext(LibraryContext);
     const loginContext = useContext(LoginContext);
@@ -42,25 +42,25 @@ const VolumeSummary = (props: Props) => {
 
         const fetchStoriesAuthors = async () => {
             logger.info({
-                context: "VolumeSummary.useEffect",
-                volume: props.volume,
+                context: "SeriesSummary.useEffect",
+                series: props.series,
             });
-            if (loginContext.state.loggedIn && (libraryId > 0) && (props.volume.id > 0)) {
-                    // For each Story, select the corresponding Authors
-                    const storiesAuthors: string[] = [];
-                    for (const story of props.volume.stories) {
-                        const storyAuthors: Author[] = await StoryClient.authors(libraryId, story.id);
-                        storiesAuthors.push(calculateAuthorsKeys(storyAuthors));
-                    }
-                    setStoriesAuthors(storiesAuthors);
-                } else {
-                    setStoriesAuthors([]);
+            if (loginContext.state.loggedIn && (libraryId > 0) && (props.series.id > 0)) {
+                // For each Story, select the corresponding Authors
+                const storiesAuthors: string[] = [];
+                for (const story of props.series.stories) {
+                    const storyAuthors: Author[] = await StoryClient.authors(libraryId, story.id);
+                    storiesAuthors.push(calculateAuthorsKeys(storyAuthors));
                 }
+                setStoriesAuthors(storiesAuthors);
+            } else {
+                setStoriesAuthors([]);
+            }
         }
 
         fetchStoriesAuthors();
 
-    }, [libraryContext, loginContext, libraryId, props, props.volume]);
+    }, [libraryContext, loginContext, libraryId, props, props.series]);
 
     const calculateAuthorsKeys = (authors: Author[]): string => {
         const keys: string[] = [];
@@ -75,13 +75,13 @@ const VolumeSummary = (props: Props) => {
     }
 
     return (
-        <Container fluid id="VolumeSummary">
+        <Container fluid id="SeriesSummary">
 
             <Row className="mb-1">
                 <Col className="text-center">
-                    <span>Summary for Volume:&nbsp;</span>
+                    <span>Summary for Series:&nbsp;</span>
                     <span className="text-info">
-                        {props.volume.name}&nbsp;&nbsp;
+                        {props.series.name}&nbsp;&nbsp;
                     </span>
                     {(expand) ? (
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
@@ -108,9 +108,9 @@ const VolumeSummary = (props: Props) => {
                 <>
                     <Row className="mb-3">
                         <Col className="text-center">
-                            <span>Volume Authors:&nbsp;</span>
+                            <span>Series Authors:&nbsp;</span>
                             <span className="text-info">
-                               {calculateAuthorsKeys(props.volume.authors)}
+                                {calculateAuthorsKeys(props.series.authors)}
                             </span>
                         </Col>
                     </Row>
@@ -132,7 +132,7 @@ const VolumeSummary = (props: Props) => {
                             </thead>
 
                             <tbody>
-                            {props.volume.stories.map((story, rowIndex) => (
+                            {props.series.stories.map((story, rowIndex) => (
                                 <tr key={1000 + (rowIndex * 100)}>
                                     <td key={1000 + (rowIndex * 100) + 1}>
                                         {story.name}
@@ -150,11 +150,11 @@ const VolumeSummary = (props: Props) => {
                         </Table>
                     </Row>
                 </>
-                ) : null}
+            ) : null}
 
         </Container>
     )
 
 }
 
-export default VolumeSummary;
+export default SeriesSummary;

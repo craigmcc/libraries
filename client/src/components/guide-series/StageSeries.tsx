@@ -1,7 +1,7 @@
-// StageVolume ---------------------------------------------------------------
+// StageSeries ---------------------------------------------------------------
 
-// Select the Volume to process for subsequent stages, while offering the option
-// to edit existing Volumes or create a new one.
+// Select the Series to process for subsequent stages, while offering the option
+// to edit existing Series or create a new one.
 
 // External Modules ----------------------------------------------------------
 
@@ -13,16 +13,14 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
-import {HandleStage, Stage} from "./GuideVolume";
-import VolumeOptions from "./VolumeOptions";
-import {HandleAction, HandleVolume, OnAction, Scopes} from "../types";
-import VolumeForm from "../volumes/VolumeForm";
-import StoryClient from "../../clients/StoryClient";
-import VolumeClient from "../../clients/VolumeClient";
+import {HandleStage, Stage} from "./GuideSeries";
+import SeriesOptions from "./SeriesOptions";
+import {HandleAction, HandleSeries, OnAction, Scopes} from "../types";
+import SeriesForm from "../series/SeriesForm";
+import SeriesClient from "../../clients/SeriesClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
-import Story from "../../models/Story";
-import Volume from "../../models/Volume";
+import Series from "../../models/Series";
 import logger from "../../util/client-logger";
 import ReportError from "../../util/ReportError";
 
@@ -30,149 +28,127 @@ import ReportError from "../../util/ReportError";
 
 export interface Props {
     handleRefresh: HandleAction;        // Trigger a UI refresh
+    handleSeries: HandleSeries;         // Handle request to select a Series
     handleStage: HandleStage;           // Handle changing guide stage
-    handleVolume: HandleVolume;         // Handle request to select a Volume
-    volume: Volume;                     // Currently selected Volume (if id>0)
+    series: Series;                     // Currently selected Series (if id>0)
 }
 
 // Component Details ---------------------------------------------------------
 
-const StageVolume = (props: Props) => {
+const StageSeries = (props: Props) => {
 
     const libraryContext = useContext(LibraryContext);
     const loginContext = useContext(LoginContext);
 
     const [canRemove, setCanRemove] = useState<boolean>(false);
     const [libraryId] = useState<number>(libraryContext.state.library.id);
-    const [volume, setVolume] = useState<Volume | null>(null);
+    const [series, setSeries] = useState<Series | null>(null);
 
     useEffect(() => {
 
         logger.info({
-            context: "StageVolume.useEffect",
-            volume: props.volume,
+            context: "StageSeries.useEffect",
+            series: props.series,
         });
 
         // Record current permissions
         setCanRemove(loginContext.validateScope(Scopes.SUPERUSER));
 
     }, [libraryContext, loginContext,
-        libraryId, volume, props.volume]);
+        libraryId, series, props.series]);
 
     const handleAdd: OnAction = () => {
-        const newVolume = new Volume({
+        const newSeries = new Series({
             copyright: null,
-            isbn: null,
             library_id: libraryId,
-            location: "Kindle",
             name: null,
             notes: null,
-            type: "Single",
         });
         logger.debug({
-            context: "StageVolume.handleAdd",
-            volume: newVolume,
+            context: "StageSeries.handleAdd",
+            series: newSeries,
         });
-        setVolume(newVolume);
+        setSeries(newSeries);
     }
 
-    const handleEdit: HandleVolume = (newVolume) => {
+    const handleEdit: HandleSeries = (newSeries) => {
         logger.debug({
-            context: "StageVolume.handleEdit",
-            volume: newVolume,
+            context: "StageSeries.handleEdit",
+            series: newSeries,
         });
-        setVolume(newVolume);
+        setSeries(newSeries);
     }
 
-    const handleInsert: HandleVolume = async (newVolume) => {
+    const handleInsert: HandleSeries = async (newSeries) => {
         logger.info({
-            context: "StageVolume.handleInsert",
-            volume: newVolume,
+            context: "StageSeries.handleInsert",
+            series: newSeries,
         });
         try {
 
-            // Persist the requested Volume
-            const inserted = await VolumeClient.insert(libraryId, newVolume);
-            setVolume(null);
+            // Persist the requested Series
+            const inserted = await SeriesClient.insert(libraryId, newSeries);
+            setSeries(null);
 
-            // If the Volume is of type "Single", create a Story with the same name
-            // and associate it with this Volume
-            if (inserted.type === "Single") {
-                const newStory = new Story({
-                    copyright: inserted.copyright ? inserted.copyright : undefined,
-                    library_id: inserted.library_id,
-                    name: inserted.name,
-                    notes: inserted.notes ? inserted.notes : undefined,
-                });
-                const addedStory = await StoryClient.insert(libraryId, newStory);
-                await VolumeClient.storiesInclude(libraryId, inserted.id, addedStory.id);
-                logger.info({
-                    context: "StageVolume.handleInsert",
-                    msg: "Added Story for Volume of type Single",
-                    volume: inserted,
-                    story: addedStory,
-                })
-            }
-
-            // Select the inserted Volume, and switch to Authors stage
-            props.handleVolume(inserted);     // Implicitly select the new Volume
-            props.handleStage(Stage.AUTHORS); // and switch to Authors stage
+            // Select the inserted Series, and switch to Authors stage
+            props.handleSeries(inserted);
+            props.handleStage(Stage.AUTHORS);
 
         } catch (error) {
-            ReportError("StageVolume.handleInsert", error);
+            ReportError("StageSeries.handleInsert", error);
         }
         props.handleRefresh();
     }
 
-    const handleRemove: HandleVolume = async (newVolume) => {
+    const handleRemove: HandleSeries = async (newSeries) => {
         logger.info({
-            context: "StageVolume.handleRemove",
-            volume: newVolume,
+            context: "StageSeries.handleRemove",
+            series: newSeries,
         });
         try {
-            await VolumeClient.remove(libraryId, newVolume.id);
-            setVolume(null);
-            if (newVolume.id === props.volume.id) {
-                props.handleVolume(new Volume());   // Unselect if we were current
+            await SeriesClient.remove(libraryId, newSeries.id);
+            setSeries(null);
+            if (newSeries.id === props.series.id) {
+                props.handleSeries(new Series()); // Unselect if we were current
             }
         } catch (error) {
-            ReportError("StageVolume.handleRemove", error);
+            ReportError("StageSeries.handleRemove", error);
         }
         props.handleRefresh();
     }
 
-    const handleSelect: HandleVolume = (newVolume) => {
+    const handleSelect: HandleSeries = (newSeries) => {
         logger.info({
-            context: "StageVolume.handleSelect",
-            volume: newVolume,
+            context: "StageSeries.handleSelect",
+            series: newSeries,
         });
-        props.handleVolume(newVolume);
+        props.handleSeries(newSeries);
         props.handleRefresh();
     }
 
-    const handleUpdate: HandleVolume = async (newVolume) => {
+    const handleUpdate: HandleSeries = async (newSeries) => {
         logger.info({
-            context: "StageVolume.handleUpdate",
-            volume: newVolume,
+            context: "StageSeries.handleUpdate",
+            series: newSeries,
         });
         try {
-            await VolumeClient.update(libraryId, newVolume.id, newVolume);
-            setVolume(null);
+            await SeriesClient.update(libraryId, newSeries.id, newSeries);
+            setSeries(null);
         } catch (error) {
-            ReportError("StageVolume.handleUpdate", error);
+            ReportError("StageSeries.handleUpdate", error);
         }
-        // If we updated the currently selected volume, propagate to summary
-        if (newVolume.id === props.volume.id) {
-            props.handleVolume(newVolume);
+        // If we updated the currently selected Series, propagate to summary
+        if (newSeries.id === props.series.id) {
+            props.handleSeries(newSeries);
         }
         props.handleRefresh();
     }
 
     return (
-        <Container fluid id="StageVolume">
+        <Container fluid id="StageSeries">
 
             {/* List View */}
-            {(!volume) ? (
+            {(!series) ? (
                 <>
 
                     <Row className="mb-3 ml-1 mr-1">
@@ -184,22 +160,22 @@ const StageVolume = (props: Props) => {
                             >Previous</Button>
                         </Col>
                         <Col className="text-center">
-                            <span>Select or Create Volume for Library:&nbsp;</span>
+                            <span>Select or Create Series for Library:&nbsp;</span>
                             <span className="text-info">
                                 {libraryContext.state.library.name}
                             </span>
                         </Col>
                         <Col className="text-right">
                             <Button
-                                disabled={props.volume.id <= 0}
+                                disabled={props.series.id <= 0}
                                 onClick={() => props.handleStage(Stage.AUTHORS)}
                                 size="sm"
-                                variant={(props.volume.id <= 0) ? "outline-success" : "success"}
+                                variant={(props.series.id <= 0) ? "outline-success" : "success"}
                             >Next</Button>
                         </Col>
                     </Row>
 
-                    <VolumeOptions
+                    <SeriesOptions
                         handleAdd={handleAdd}
                         handleEdit={handleEdit}
                         handleSelect={handleSelect}
@@ -216,24 +192,24 @@ const StageVolume = (props: Props) => {
             ) : null}
 
             {/* Detail View */}
-            {(volume) ? (
+            {(series) ? (
                 <>
 
                     <Row className="mb-3 ml-1 mr-1">
                         <Col className="text-center">
-                            {(volume.id > 0) ? (
+                            {(series.id > 0) ? (
                                 <span>Edit Existing</span>
                             ) : (
                                 <span>Add New</span>
                             )}
-                            &nbsp;Volume for Library:&nbsp;
+                            &nbsp;Series for Library:&nbsp;
                             <span className="text-info">
                                 {libraryContext.state.library.name}
                             </span>
                         </Col>
                         <Col className="text-right">
                             <Button
-                                onClick={() => setVolume(null)}
+                                onClick={() => setSeries(null)}
                                 size="sm"
                                 type="button"
                                 variant="secondary"
@@ -241,13 +217,13 @@ const StageVolume = (props: Props) => {
                         </Col>
                     </Row>
 
-                    <VolumeForm
+                    <SeriesForm
                         autoFocus
                         canRemove={canRemove}
                         handleInsert={handleInsert}
                         handleRemove={handleRemove}
                         handleUpdate={handleUpdate}
-                        volume={volume}
+                        series={series}
                     />
 
                 </>
@@ -258,4 +234,4 @@ const StageVolume = (props: Props) => {
 
 }
 
-export default StageVolume;
+export default StageSeries;

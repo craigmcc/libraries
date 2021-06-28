@@ -6,6 +6,10 @@
 
 // Internal Modules ----------------------------------------------------------
 
+import Author from "./Author";
+import Story from "./Story";
+import {toAuthors, toStories} from "../util/to-model-types";
+
 // Public Objects ------------------------------------------------------------
 
 class Series {
@@ -17,6 +21,8 @@ class Series {
         this.library_id = data.library_id;
         this.name = data.name;
         this.notes = data.notes;
+        this.authors = data.authors ? toAuthors(data.authors) : [];
+        this.stories = data.stories ? toStories(data.stories) : [];
     }
 
     id: number;
@@ -25,6 +31,8 @@ class Series {
     library_id: number;
     name: string;
     notes: string;
+    authors: Author[];
+    stories: Story[];
 }
 
 export default Series;
