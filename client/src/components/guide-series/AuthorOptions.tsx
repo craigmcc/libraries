@@ -1,7 +1,8 @@
-// SeriesOptions -------------------------------------------------------------
+// AuthorOptions -------------------------------------------------------------
 
-// List Series that match search criteria, offering callbacks for adding,
-// editing, or selecting a Series.
+// List Authors that match search criteria, offering callbacks for adding,
+// editing, including (marking this Author as creator of this Series),
+// or excluding (marking this Author as not a creator of this Series).
 
 // External Modules ----------------------------------------------------------
 
@@ -16,10 +17,12 @@ import Table from "react-bootstrap/Table";
 
 import Pagination from "../Pagination";
 import SearchBar from "../SearchBar";
-import {HandleSeries, HandleValue, OnAction} from "../types";
+import {HandleAuthor, HandleValue, OnAction} from "../types";
+import AuthorClient from "../../clients/AuthorClient";
 import SeriesClient from "../../clients/SeriesClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
+import Author from "../../models/Author";
 import Series from "../../models/Series";
 import logger from "../../util/client-logger";
 import ReportError from "../../util/ReportError";
@@ -28,86 +31,97 @@ import {listValue} from "../../util/transformations";
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
-    handleAdd?: OnAction;               // Handle Add request (optional)
-    handleEdit: HandleSeries;           // Handle request to edit a Volume
-    handleSelect: HandleSeries;         // Handle request to select a Volume
+    handleEdit: HandleAuthor;           // Handle request to edit an Author
+    handleExclude: HandleAuthor;        // Handle request to exclude an Author
+    handleInclude: HandleAuthor;        // Handle request to include an Author
+    included: (author: Author) => boolean;
+    // Is the specified Author included?
+    series: Series;                     // Currently selected Series
 }
 
 // Component Details ---------------------------------------------------------
 
-const SeriesOptions = (props: Props) => {
+const AuthorOptions = (props: Props) => {
 
     const libraryContext = useContext(LibraryContext);
     const loginContext = useContext(LoginContext);
 
+    const [authors, setAuthors] = useState<Author[]>([]);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [libraryId] = useState<number>(libraryContext.state.library.id);
     const [pageSize] = useState<number>(25);
     const [searchText, setSearchText] = useState<string>("");
-    // Gotta love English pluralization rules sometimes
-    const [serieses, setSerieses] = useState<Series[]>([]);
 
     useEffect(() => {
 
-        const fetchSerieses = async () => {
+        const fetchAuthors = async () => {
 
-            // Fetch matching or first N series
-            if (loginContext.state.loggedIn && (libraryId > 0)) {
-                let newSerieses: Series[] = [];
+            // Fetch matching (search text) or included (no search text) Authors
+            if (loginContext.state.loggedIn && (libraryId > 0) && (props.series.id > 0)) {
+                let newAuthors: Author[] = [];
                 try {
                     if (searchText.length > 0) {
-                        newSerieses =
-                            await SeriesClient.name(libraryId, searchText, {
+                        // Fetch all Library Authors matching searchText
+                        newAuthors =
+                            await AuthorClient.name(libraryId, searchText, {
                                 limit: pageSize,
                                 offset: (pageSize * (currentPage - 1)),
                             });
                         logger.info({
-                            context: "SeriesOptions.fetchSerieses",
+                            context: "AuthorOptions.fetchAuthors",
                             msg: "Select by searchText",
                             searchText: searchText,
-                            series: newSerieses,
+                            authors: newAuthors,
                         });
                     } else {
-                        newSerieses =
-                            await SeriesClient.all(libraryId, {
-                                limit: pageSize,
-                                offset: (pageSize * (currentPage - 1)),
-                            });
+                        // Fetch only Authors included in the current Series
+                        newAuthors =
+                            await SeriesClient.authors(libraryId, props.series.id);
                         logger.info({
-                            context: "SeriesOptions.fetchSerieses",
-                            msg: "Select by library",
-                            series: newSerieses,
+                            context: "AuthorOptions.fetchAuthors",
+                            msg: "Select by included",
+                            searchText: searchText,
+                            authors: newAuthors,
                         });
                     }
-                    setSerieses(newSerieses);
+                    setAuthors(newAuthors);
                 } catch (error) {
-                    setSerieses([]);
+                    setAuthors([]);
                     if (error.response && (error.response.status === 403)) {
                         logger.debug({
-                            context: "SeriesOptions.fetchSerieses",
+                            context: "AuthorOptions.fetchAuthors",
                             msg: "FORBIDDEN",
                         });
                     } else {
-                        ReportError("SeriesOptions.fetchSerieses", error);
+                        ReportError("AuthorOptions.fetchAuthors", error);
                     }
+
                 }
             } else {
-                setSerieses([]);
+                setAuthors([]);
                 logger.debug({
-                    context: "SeriesOptions.fetchSerieses",
+                    context: "AuthorOptions.fetchAuthors",
                     msg: "SKIPPED",
                 });
             }
 
         }
 
-        fetchSerieses();
+        fetchAuthors();
 
-    }, [libraryContext, loginContext, props,
+    }, [libraryContext, loginContext, props, props.series,
         currentPage, libraryId, pageSize, searchText]);
 
     const handleChange: HandleValue = (newSearchText) => {
         setSearchText(newSearchText);
+    }
+
+    const handleExclude: HandleAuthor = (author) => {
+        props.handleExclude(author);
+    }
+
+    const handleInclude: HandleAuthor = (author) => {
+        props.handleInclude(author);
     }
 
     const onNext: OnAction = () => {
@@ -121,36 +135,27 @@ const SeriesOptions = (props: Props) => {
     }
 
     return (
-        <Container fluid id="SeriesOptions">
+        <Container fluid id="AuthorOptions">
 
             <Row className="mb-3">
-                <Col className="col-8">
+                <Col className="col-10 mr-2">
                     <SearchBar
                         autoFocus
                         handleChange={handleChange}
-                        label="Search For Series:"
-                        placeholder="Search by all or part of name"
+                        initialValue={searchText}
+                        label="Search For Authors:"
+                        placeholder="Search by all or part of either name"
                     />
                 </Col>
-                <Col className="col-2">
+                <Col>
                     <Pagination
                         currentPage={currentPage}
-                        lastPage={(serieses.length === 0) ||
-                        (serieses.length < pageSize)}
+                        lastPage={(authors.length === 0) ||
+                        (authors.length < pageSize)}
                         onNext={onNext}
                         onPrevious={onPrevious}
-                        variant="secondary"
                     />
                 </Col>
-                {(props.handleAdd) ? (
-                    <Col className="col-2">
-                        <Button
-                            onClick={props.handleAdd}
-                            size="sm"
-                            variant="primary"
-                        >Add</Button>
-                    </Col>
-                ) : null }
             </Row>
 
             <Row className="ml-1 mr-1">
@@ -163,47 +168,56 @@ const SeriesOptions = (props: Props) => {
 
                     <thead>
                     <tr className="table-secondary">
-                        <th scope="col">Name</th>
+                        <th scope="col">First Name</th>
+                        <th scope="col">Last Name</th>
                         <th scope="col">Active</th>
-                        <th scope="col">Copyright</th>
                         <th scope="col">Notes</th>
                         <th scope="col">Actions</th>
                     </tr>
                     </thead>
 
                     <tbody>
-                    {serieses.map((series, rowIndex) => (
+                    {authors.map((author, rowIndex) => (
                         <tr
                             className="table-default"
                             key={1000 + (rowIndex * 100)}
                         >
                             <td key={1000 + (rowIndex * 100) + 1}>
-                                {series.name}
+                                {author.first_name}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 2}>
-                                {listValue(series.active)}
+                                {author.last_name}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 3}>
-                                {listValue(series.copyright)}
+                                {listValue(author.active)}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 4}>
-                                {series.notes}
+                                {author.notes}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 99}>
                                 <Button
                                     className="mr-1"
-                                    onClick={() => props.handleEdit(serieses[rowIndex])}
+                                    onClick={() => props.handleEdit(authors[rowIndex])}
                                     size="sm"
                                     type="button"
                                     variant="secondary"
                                 >Edit</Button>
                                 <Button
                                     className="mr-1"
-                                    onClick={() => props.handleSelect(serieses[rowIndex])}
+                                    disabled={props.included(authors[rowIndex])}
+                                    onClick={() => handleInclude(authors[rowIndex])}
                                     size="sm"
                                     type="button"
                                     variant="primary"
-                                >Select</Button>
+                                >Include</Button>
+                                <Button
+                                    className="mr-1"
+                                    disabled={!props.included(authors[rowIndex])}
+                                    onClick={() => handleExclude(authors[rowIndex])}
+                                    size="sm"
+                                    type="button"
+                                    variant="primary"
+                                >Exclude</Button>
                             </td>
                         </tr>
                     ))}
@@ -217,4 +231,4 @@ const SeriesOptions = (props: Props) => {
 
 }
 
-export default SeriesOptions;
+export default AuthorOptions;

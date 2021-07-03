@@ -18,6 +18,7 @@ import Story from "../../models/Story";
 import logger from "../../util/client-logger";
 import ReportError from "../../util/ReportError";
 import StoryClient from "../../clients/StoryClient";
+import StageAuthors from "./StageAuthors";
 import StageSeries from "./StageSeries";
 
 // Component Details ---------------------------------------------------------
@@ -218,6 +219,14 @@ const GuideSeries = () => {
                     series={series}
                 />
             ): null}
+
+            {(stage === Stage.AUTHORS) ? (
+                <StageAuthors
+                    handleRefresh={handleRefresh}
+                    handleStage={handleStage}
+                    series={series}
+                />
+            ) : null}
 
         </Container>
     )
