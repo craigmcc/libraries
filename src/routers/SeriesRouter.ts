@@ -112,8 +112,8 @@ SeriesRouter.put("/:libraryId/:seriesId",
 
 // Series-Author Relationships -----------------------------------------------
 
-// GET /:libraryId/:seriesId/series/authors - Find Authors for this Series
-SeriesRouter.get("/:libraryId/:seriesId/series/authors",
+// GET /:libraryId/:seriesId/authors - Find Authors for this Series
+SeriesRouter.get("/:libraryId/:seriesId/authors",
     requireRegular,
     async (req: Request, res: Response) => {
         res.send(await SeriesServices.authors(
@@ -125,8 +125,8 @@ SeriesRouter.get("/:libraryId/:seriesId/series/authors",
 
 // Series-Story Relationships ------------------------------------------------
 
-// GET /:libraryId/:seriesId/series/stories - Find Stories for this Series
-SeriesRouter.get("/:libraryId/:seriesId/series/stories",
+// GET /:libraryId/:seriesId/stories - Find Stories for this Series
+SeriesRouter.get("/:libraryId/:seriesId/stories",
     requireRegular,
     async (req: Request, res: Response) => {
         res.send(await SeriesServices.stories(
@@ -136,8 +136,8 @@ SeriesRouter.get("/:libraryId/:seriesId/series/stories",
         ));
     });
 
-// DELETE /:libraryId/:seriesId/series/stories/:storyId - Disassociate Series and Story
-SeriesRouter.delete("/:libraryId/:seriesId/series/stories/:storyId",
+// DELETE /:libraryId/:seriesId/stories/:storyId - Disassociate Series and Story
+SeriesRouter.delete("/:libraryId/:seriesId/stories/:storyId",
     requireRegular,
     async (req: Request, res: Response) => {
         res.send(await SeriesServices.storiesExclude(
@@ -147,8 +147,8 @@ SeriesRouter.delete("/:libraryId/:seriesId/series/stories/:storyId",
         ));
     });
 
-// POST /:libraryId/:seriesId/series/stories/:storyId - Associate Series and Story
-SeriesRouter.post("/:libraryId/:seriesId/series/stories/:storyId",
+// POST /:libraryId/:seriesId/stories/:storyId - Associate Series and Story
+SeriesRouter.post("/:libraryId/:seriesId/stories/:storyId",
     requireRegular,
     async (req: Request, res: Response) => {
         res.send(await SeriesServices.storiesInclude(

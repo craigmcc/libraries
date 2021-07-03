@@ -13,7 +13,8 @@ import {
     toAuthors,
     toSeries,
     toSerieses,
-    toStories, toStory,
+    toStories,
+    toStory,
 } from "../util/to-model-types";
 
 const SERIES_BASE = "/series";
