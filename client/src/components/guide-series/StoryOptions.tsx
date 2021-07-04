@@ -1,7 +1,8 @@
-// SeriesOptions -------------------------------------------------------------
+// StoryOptions --------------------------------------------------------------
 
-// List Series that match search criteria, offering callbacks for adding,
-// editing, or selecting a Series.
+// List Stories that match search criteria, offering callbacks for adding,
+// editing, including (marking this Story as part of this Series), or
+// excluding (marking this Story as not part of this Series).
 
 // External Modules ----------------------------------------------------------
 
@@ -16,11 +17,12 @@ import Table from "react-bootstrap/Table";
 
 import Pagination from "../Pagination";
 import SearchBar from "../SearchBar";
-import {HandleSeries, HandleValue, OnAction} from "../types";
-import SeriesClient from "../../clients/SeriesClient";
+import {HandleStory, HandleValue, OnAction} from "../types";
+import StoryClient from "../../clients/StoryClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
 import Series from "../../models/Series";
+import Story from "../../models/Story";
 import logger from "../../util/client-logger";
 import ReportError from "../../util/ReportError";
 import {listValue} from "../../util/transformations";
@@ -28,14 +30,18 @@ import {listValue} from "../../util/transformations";
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
-    handleAdd?: OnAction;               // Handle Add request (optional)
-    handleEdit: HandleSeries;           // Handle request to edit a Volume
-    handleSelect: HandleSeries;         // Handle request to select a Volume
+    handleEdit: HandleStory;            // Handle request to edit this Story
+    handleExclude: HandleStory;         // Handle request to exclude a Story
+    handleInclude: HandleStory;         // Handle request to include a Story
+    handleInsert: HandleStory;          // Handle request to insert a Story
+    handleSelect: HandleStory;          // Handle request to select a Story
+    included: (story: Story) => boolean; // Is the specified Story included?
+    series: Series;                     // Currently selected Series
 }
 
 // Component Details ---------------------------------------------------------
 
-const SeriesOptions = (props: Props) => {
+const StoryOptions = (props: Props) => {
 
     const libraryContext = useContext(LibraryContext);
     const loginContext = useContext(LoginContext);
@@ -44,70 +50,75 @@ const SeriesOptions = (props: Props) => {
     const [libraryId] = useState<number>(libraryContext.state.library.id);
     const [pageSize] = useState<number>(25);
     const [searchText, setSearchText] = useState<string>("");
-    // Gotta love English pluralization rules sometimes
-    const [serieses, setSerieses] = useState<Series[]>([]);
+    const [stories, setStories] = useState<Story[]>([]);
 
     useEffect(() => {
 
-        const fetchSerieses = async () => {
+        const fetchStories = async () => {
 
-            // Fetch matching or first N series
-            if (loginContext.state.loggedIn && (libraryId > 0)) {
-                let newSerieses: Series[] = [];
+            // Fetch matching (search text) or included (no search text) Stories
+            if (loginContext.state.loggedIn && (libraryId > 0) && (props.series.id > 0)) {
+                let newStories: Story[] = [];
                 try {
                     if (searchText.length > 0) {
-                        newSerieses =
-                            await SeriesClient.name(libraryId, searchText, {
+
+                        // Fetch matching Stories
+                        newStories =
+                            await StoryClient.name(libraryId, searchText, {
                                 limit: pageSize,
                                 offset: (pageSize * (currentPage - 1)),
                             });
                         logger.info({
-                            context: "SeriesOptions.fetchSerieses",
+                            context: "StoryOptions.fetchStories",
                             msg: "Select by searchText",
                             searchText: searchText,
-                            series: newSerieses,
+                            stories: newStories,
                         });
+
                     } else {
-                        newSerieses =
-                            await SeriesClient.all(libraryId, {
-                                limit: pageSize,
-                                offset: (pageSize * (currentPage - 1)),
-                            });
-                        logger.info({
-                            context: "SeriesOptions.fetchSerieses",
-                            msg: "Select by library",
-                            series: newSerieses,
-                        });
+
+                        // Fetch currently included Stories
+                        newStories = props.series.stories;
+
                     }
-                    setSerieses(newSerieses);
+                    setStories(newStories);
+
                 } catch (error) {
-                    setSerieses([]);
+                    setStories([]);
                     if (error.response && (error.response.status === 403)) {
                         logger.debug({
-                            context: "SeriesOptions.fetchSerieses",
+                            context: "StoryOptions.fetchStories",
                             msg: "FORBIDDEN",
                         });
                     } else {
-                        ReportError("SeriesOptions.fetchSerieses", error);
+                        ReportError("StoryOptions.fetchStories", error);
                     }
                 }
             } else {
-                setSerieses([]);
+                setStories([]);
                 logger.debug({
-                    context: "SeriesOptions.fetchSerieses",
+                    context: "StoryOptions.fetchStories",
                     msg: "SKIPPED",
                 });
             }
 
         }
 
-        fetchSerieses();
+        fetchStories();
 
-    }, [loginContext.state.loggedIn,
+    }, [loginContext.state.loggedIn, props.series,
         currentPage, libraryId, pageSize, searchText]);
 
     const handleChange: HandleValue = (newSearchText) => {
         setSearchText(newSearchText);
+    }
+
+    const handleExclude: HandleStory = (story) => {
+        props.handleExclude(story);
+    }
+
+    const handleInclude: HandleStory = (story) => {
+        props.handleInclude(story);
     }
 
     const onNext: OnAction = () => {
@@ -121,36 +132,28 @@ const SeriesOptions = (props: Props) => {
     }
 
     return (
-        <Container fluid id="SeriesOptions">
+        <Container fluid id="StoryOptions">
 
             <Row className="mb-3">
-                <Col className="col-8">
+                <Col className="col-10 mr-2">
                     <SearchBar
                         autoFocus
                         handleChange={handleChange}
-                        label="Search For Series:"
+                        initialValue={searchText}
+                        label="Search For Stories:"
                         placeholder="Search by all or part of name"
                     />
                 </Col>
-                <Col className="col-2">
+                <Col>
                     <Pagination
                         currentPage={currentPage}
-                        lastPage={(serieses.length === 0) ||
-                            (serieses.length < pageSize)}
+                        lastPage={(stories.length === 0) ||
+                            (stories.length < pageSize)}
                         onNext={onNext}
                         onPrevious={onPrevious}
                         variant="secondary"
                     />
                 </Col>
-                {(props.handleAdd) ? (
-                    <Col className="col-2">
-                        <Button
-                            onClick={props.handleAdd}
-                            size="sm"
-                            variant="primary"
-                        >Add</Button>
-                    </Col>
-                ) : null }
             </Row>
 
             <Row className="ml-1 mr-1">
@@ -165,45 +168,57 @@ const SeriesOptions = (props: Props) => {
                     <tr className="table-secondary">
                         <th scope="col">Name</th>
                         <th scope="col">Active</th>
-                        <th scope="col">Copyright</th>
                         <th scope="col">Notes</th>
                         <th scope="col">Actions</th>
                     </tr>
                     </thead>
 
                     <tbody>
-                    {serieses.map((series, rowIndex) => (
+                    {stories.map((story, rowIndex) => (
                         <tr
                             className="table-default"
                             key={1000 + (rowIndex * 100)}
                         >
                             <td key={1000 + (rowIndex * 100) + 1}>
-                                {series.name}
+                                {story.name}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 2}>
-                                {listValue(series.active)}
+                                {listValue(story.active)}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 3}>
-                                {listValue(series.copyright)}
-                            </td>
-                            <td key={1000 + (rowIndex * 100) + 4}>
-                                {series.notes}
+                                {story.notes}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 99}>
                                 <Button
                                     className="mr-1"
-                                    onClick={() => props.handleEdit(serieses[rowIndex])}
+                                    onClick={() => props.handleEdit(stories[rowIndex])}
                                     size="sm"
                                     type="button"
                                     variant="secondary"
                                 >Edit</Button>
                                 <Button
                                     className="mr-1"
-                                    onClick={() => props.handleSelect(serieses[rowIndex])}
+                                    disabled={props.included(stories[rowIndex])}
+                                    onClick={() => handleInclude(stories[rowIndex])}
                                     size="sm"
                                     type="button"
                                     variant="primary"
-                                >Select</Button>
+                                >Include</Button>
+                                <Button
+                                    className="mr-1"
+                                    disabled={!props.included(stories[rowIndex])}
+                                    onClick={() => handleExclude(stories[rowIndex])}
+                                    size="sm"
+                                    type="button"
+                                    variant="primary"
+                                >Exclude</Button>
+                                <Button
+                                    className="mr-1"
+                                    onClick={() => props.handleSelect(stories[rowIndex])}
+                                    size="sm"
+                                    type="button"
+                                    variant="secondary"
+                                >Writers</Button>
                             </td>
                         </tr>
                     ))}
@@ -217,4 +232,4 @@ const SeriesOptions = (props: Props) => {
 
 }
 
-export default SeriesOptions;
+export default StoryOptions;

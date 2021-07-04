@@ -1,6 +1,6 @@
 // StageStories --------------------------------------------------------------
 
-// Select Story(ies) for the currently selected Volume, while offering the
+// Select Story(ies) for the currently selected Series, while offering the
 // option to edit existing Stories or create a new one.
 
 // External Modules ----------------------------------------------------------
@@ -13,17 +13,17 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
-import {HandleStage, Stage} from "./GuideVolume";
+import {HandleStage, Stage} from "./GuideSeries";
 import StoryOptions from "./StoryOptions";
 import {HandleAction, HandleStory, OnAction, Scopes} from "../types";
 import StoryForm from "../stories/StoryForm";
 import AuthorClient from "../../clients/AuthorClient";
+import SeriesClient from "../../clients/SeriesClient";
 import StoryClient from "../../clients/StoryClient";
-import VolumeClient from "../../clients/VolumeClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
+import Series from "../../models/Series";
 import Story from "../../models/Story";
-import Volume from "../../models/Volume";
 import logger from "../../util/client-logger";
 import ReportError from "../../util/ReportError";
 
@@ -33,7 +33,7 @@ export interface Props {
     handleRefresh: HandleAction;        // Trigger a UI refresh
     handleStage: HandleStage;           // Handle changing guide stage
     handleStory: HandleStory;           // Handle selecting a Story
-    volume: Volume;                     // Currently selected Volume
+    series: Series;                     // Currently selected Series
 }
 
 // Component Details ---------------------------------------------------------
@@ -51,14 +51,13 @@ const StageStories = (props: Props) => {
 
         logger.info({
             context: "StageStories.useEffect",
-            volume: props.volume,
+            series: props.series,
         });
 
         // Record current permissions
         setCanRemove(loginContext.validateScope(Scopes.SUPERUSER));
 
-    }, [libraryContext, loginContext,
-        libraryId, props.volume]);
+    }, [loginContext, libraryId, props.series]);
 
     const handleAdd: OnAction = () => {
         const newStory = new Story({
@@ -82,17 +81,17 @@ const StageStories = (props: Props) => {
         setStory(newStory);
     }
 
-    // Exclude this Story from the current Volume, but not the current Author
+    // Exclude this Story from the current Series, but not the current Author
     const handleExclude: HandleStory = async (newStory) => {
         logger.info({
             context: "StageStories.handleExclude",
-            msg: "Excluding Story for Volume",
+            msg: "Excluding Story for Series",
+            series: props.series,
             story: newStory,
-            volume: props.volume,
         });
         try {
-            const disassociated = await VolumeClient.storiesExclude
-                (libraryId, props.volume.id, newStory.id);
+            const disassociated = await SeriesClient.storiesExclude
+                (libraryId, props.series.id, newStory.id);
             logger.info({
                 context: "StageStories.handleExclude",
                 story: newStory,
@@ -108,13 +107,13 @@ const StageStories = (props: Props) => {
     const handleInclude: HandleStory = async (newStory) => {
         logger.info({
             context: "StageStories.handleInclude",
-            msg: "Including Story for Volume",
+            msg: "Including Story for Series",
+            series: props.series,
             story: newStory,
-            volume: props.volume,
         });
         try {
-            const associated = await VolumeClient.storiesInclude
-                (libraryId, props.volume.id, newStory.id);
+            const associated = await SeriesClient.storiesInclude
+                (libraryId, props.series.id, newStory.id);
             logger.info({
                 context: "StageStories.handleInclude",
                 story: newStory,
@@ -138,27 +137,24 @@ const StageStories = (props: Props) => {
             });
             setStory(null);
 
-            // Assume the new Story is included in the current Volume
+            // Assume the new Story is included in the current Series
             await handleInclude(inserted);
 
-            // For Volumes of type "Single" or "Collection", assume
-            // that the Author(s) for this Volume wrote this Story as well.
-            if ((props.volume.type === "Single") || (props.volume.type === "Collection")) {
+            // Assume that the Author(s) for this Series wrote this Story as well.
+            logger.info({
+                context: "StageStories.handleInsert",
+                msg: "About to add Story Authors",
+                story: inserted,
+                authors: props.series.authors,
+            });
+            for (const author of props.series.authors) {
                 logger.info({
                     context: "StageStories.handleInsert",
-                    msg: "About to add Story Authors",
+                    msg: "Adding Story Author",
                     story: inserted,
-                    authors: props.volume.authors,
+                    author: author,
                 });
-                for (const author of props.volume.authors) {
-                    logger.info({
-                        context: "StageStories.handleInsert",
-                        msg: "Adding Story Author",
-                        story: inserted,
-                        author: author,
-                    });
-                    await AuthorClient.storiesInclude(libraryId, author.id, inserted.id);
-                }
+                await AuthorClient.storiesInclude(libraryId, author.id, inserted.id);
             }
 
             props.handleStory(inserted);    // Select the new Story
@@ -211,7 +207,7 @@ const StageStories = (props: Props) => {
     // Is the specified Story currently included for this Volume?
     const included = (story: Story): boolean => {
         let result = false;
-        props.volume.stories.forEach(includedStory => {
+        props.series.stories.forEach(includedStory => {
             if (story.id === includedStory.id) {
                 result = true;
             }
@@ -236,9 +232,9 @@ const StageStories = (props: Props) => {
                             >Previous</Button>
                         </Col>
                         <Col className="text-center">
-                            <span>Manage Stories for Volume:&nbsp;</span>
+                            <span>Manage Stories for Series:&nbsp;</span>
                             <span className="text-info">
-                                {props.volume.name}
+                                {props.series.name}
                             </span>
                         </Col>
                         <Col className="text-right">
@@ -257,7 +253,7 @@ const StageStories = (props: Props) => {
                         handleInsert={handleInsert}
                         handleSelect={handleSelect}
                         included={included}
-                        volume={props.volume}
+                        series={props.series}
                     />
                     <Button
                         className="mt-3 ml-1"
@@ -280,9 +276,9 @@ const StageStories = (props: Props) => {
                             ) : (
                                 <span>Add New&nbsp;</span>
                             )}
-                            <span>Story for Volume:&nbsp;</span>
+                            <span>Story for Series:&nbsp;</span>
                             <span className="text-info">
-                                {props.volume.name}
+                                {props.series.name}
                             </span>
                         </Col>
                         <Col className="text-right">

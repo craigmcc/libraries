@@ -361,7 +361,7 @@ export class SeriesServices {
             );
         }
         await SeriesStory.create({
-            author_id: seriesId,
+            series_id: seriesId,
             story_id: storyId
         });
         return story;

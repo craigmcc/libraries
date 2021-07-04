@@ -10,6 +10,9 @@ import Container from "react-bootstrap/Container";
 // Internal Modules ----------------------------------------------------------
 
 import SeriesSummary from "./SeriesSummary";
+import StageAuthors from "./StageAuthors";
+import StageSeries from "./StageSeries";
+import StageStories from "./StageStories";
 import SeriesClient from "../../clients/SeriesClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
@@ -18,8 +21,6 @@ import Story from "../../models/Story";
 import logger from "../../util/client-logger";
 import ReportError from "../../util/ReportError";
 import StoryClient from "../../clients/StoryClient";
-import StageAuthors from "./StageAuthors";
-import StageSeries from "./StageSeries";
 
 // Component Details ---------------------------------------------------------
 
@@ -211,6 +212,14 @@ const GuideSeries = () => {
         setStage(newStage);
     }
 
+    const handleStory = (newStory: Story): void => {
+        logger.info({
+            context: "GuideSeries.handleStory",
+            story: newStory,
+        });
+        setStoryId(newStory.id);
+    }
+
     return (
         <Container fluid id="GuideSeries">
 
@@ -232,6 +241,15 @@ const GuideSeries = () => {
                 <StageAuthors
                     handleRefresh={handleRefresh}
                     handleStage={handleStage}
+                    series={series}
+                />
+            ) : null}
+
+            {(stage === Stage.STORIES) ? (
+                <StageStories
+                    handleRefresh={handleRefresh}
+                    handleStage={handleStage}
+                    handleStory={handleStory}
                     series={series}
                 />
             ) : null}
