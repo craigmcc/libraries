@@ -13,7 +13,7 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
-import {HandleStage, Stage} from "./GuideVolume";
+import {HandleStage, Stage} from "./GuideSeries";
 import WriterOptions from "./WriterOptions";
 import {HandleAction, HandleAuthor, OnAction, Scopes} from "../types";
 import AuthorForm from "../authors/AuthorForm";
@@ -90,7 +90,7 @@ const StageWriters = (props: Props) => {
 
             // Exclude this Writer for the current Story
             const disassociated = await AuthorClient.storiesExclude
-                (libraryId, newWriter.id, props.story.id);
+            (libraryId, newWriter.id, props.story.id);
             logger.info({
                 context: "StageWriters.handleExclude",
                 writer: newWriter,
@@ -114,7 +114,7 @@ const StageWriters = (props: Props) => {
 
             // Include this Writer for the current Story
             const associated = await AuthorClient.storiesInclude
-                (libraryId, newWriter.id, props.story.id);
+            (libraryId, newWriter.id, props.story.id);
             logger.info({
                 context: "StageWriters.handleInclude",
                 writer: newWriter,

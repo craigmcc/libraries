@@ -13,6 +13,7 @@ import SeriesSummary from "./SeriesSummary";
 import StageAuthors from "./StageAuthors";
 import StageSeries from "./StageSeries";
 import StageStories from "./StageStories";
+import StageWriters from "./StageWriters";
 import SeriesClient from "../../clients/SeriesClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
@@ -148,6 +149,9 @@ const GuideSeries = () => {
                                 story: newStory,
                             });
                             setStory(newStory);
+                            if (stage === Stage.STORIES) {
+                                setStage(Stage.WRITERS); // Implicitly advance after Story selected
+                            }
                             setStoryId(-1);
                         } catch (error) {
                             ReportError("GuideSeries.fetchStory", error);
@@ -251,6 +255,14 @@ const GuideSeries = () => {
                     handleStage={handleStage}
                     handleStory={handleStory}
                     series={series}
+                />
+            ) : null}
+
+            {(stage === Stage.WRITERS) ? (
+                <StageWriters
+                    handleRefresh={handleRefresh}
+                    handleStage={handleStage}
+                    story={story}
                 />
             ) : null}
 
