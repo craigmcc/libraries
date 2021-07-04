@@ -103,7 +103,7 @@ const SeriesOptions = (props: Props) => {
 
         fetchSerieses();
 
-    }, [libraryContext, loginContext, props,
+    }, [loginContext.state.loggedIn,
         currentPage, libraryId, pageSize, searchText]);
 
     const handleChange: HandleValue = (newSearchText) => {

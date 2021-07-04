@@ -54,7 +54,7 @@ const StageAuthors = (props: Props) => {
         // Record current permissions
         setCanRemove(loginContext.validateScope(Scopes.SUPERUSER));
 
-    }, [libraryContext, loginContext,
+    }, [loginContext, loginContext.state.loggedIn,
         libraryId, props.series]);
 
     const handleAdd: OnAction = () => {
@@ -90,7 +90,7 @@ const StageAuthors = (props: Props) => {
 
             // Exclude this Author for the current Series
             const disassociated = await AuthorClient.seriesExclude
-            (libraryId, newAuthor.id, props.series.id);
+                (libraryId, newAuthor.id, props.series.id);
             logger.info({
                 context: "StageAuthors.handleExclude",
                 author: newAuthor,
@@ -124,7 +124,7 @@ const StageAuthors = (props: Props) => {
 
             // Include this Author for the current Series
             const associated = await AuthorClient.seriesInclude
-            (libraryId, newAuthor.id, props.series.id);
+                (libraryId, newAuthor.id, props.series.id);
             logger.info({
                 context: "StageAuthors.handleInclude",
                 author: newAuthor,

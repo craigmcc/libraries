@@ -54,8 +54,8 @@ const StageSeries = (props: Props) => {
         // Record current permissions
         setCanRemove(loginContext.validateScope(Scopes.SUPERUSER));
 
-    }, [libraryContext, loginContext,
-        libraryId, series, props.series]);
+    }, [loginContext, loginContext.state.loggedIn,
+        libraryId, props.series]);
 
     const handleAdd: OnAction = () => {
         const newSeries = new Series({
@@ -123,7 +123,7 @@ const StageSeries = (props: Props) => {
             series: newSeries,
         });
         props.handleSeries(newSeries);
-        props.handleRefresh();
+        props.handleStage(Stage.AUTHORS);
     }
 
     const handleUpdate: HandleSeries = async (newSeries) => {

@@ -38,7 +38,6 @@ const GuideSeries = () => {
     const loginContext = useContext(LoginContext);
 
     const [libraryId] = useState<number>(libraryContext.state.library.id);
-    const [refresh, setRefresh] = useState<boolean>(false);
     const [series, setSeries] = useState<Series>(new Series());
     const [seriesId, setSeriesId] = useState<number>(-1);
     const [stage, setStage] = useState<Stage>(Stage.SERIES);
@@ -53,47 +52,60 @@ const GuideSeries = () => {
                 context: "GuideSeries.fetchSeries",
                 msg: "Input conditions",
                 libraryId: libraryId,
-                refresh: refresh,
                 seriesId: seriesId,
                 series: series,
             });
 
             if (loginContext.state.loggedIn) {
-                if ((libraryId > 0) && (seriesId > 0)) {
-                    if ((seriesId !== series.id) || refresh) {
+                if (libraryId > 0) {
+                    if (seriesId > 0) {
+                        logger.info({
+                            context: "GuideSeries.fetchSeries",
+                            msg: "Fetch requested Series",
+                            seriesId: seriesId,
+                        });
                         try {
                             const newSeries = await SeriesClient.find(libraryId, seriesId, {
                                 withAuthors: "",
                                 withStories: "",
                             });
+                            for (const story of newSeries.stories) {
+                                story.authors = await StoryClient.authors(libraryId, story.id);
+                            }
                             logger.info({
                                 context: "GuideSeries.fetchSeries",
-                                msg: "Fetch updated Series",
+                                msg: "Flesh out Series",
                                 series: newSeries,
                             });
                             setSeries(newSeries);
-                            if (stage === Stage.SERIES) {
-                                setStage(Stage.AUTHORS); // Implicitly advance after Series selected
-                            }
+                            setSeriesId(-1);
                         } catch (error) {
                             ReportError("GuideSeries.fetchSeries", error);
+                            setSeries(new Series());
+                            setSeriesId(-1);
                         }
                     } else {
                         logger.info({
                             context: "GuideSeries.fetchSeries",
-                            msg: "Logged in, same Series or not refresh - skip"
+                            msg: "No new seriesId - keep existing",
                         });
                     }
                 } else {
                     logger.info({
                         context: "GuideSeries.fetchSeries",
-                        msg: "Logged in, not refresh, missing libraryId/seriesId - skip",
+                        msg: "No libraryId - reset",
                     });
+                    if (series.id > 0) {
+                        setSeries(new Series());
+                    }
+                    if (seriesId > 0) {
+                        setSeriesId(-1);
+                    }
                 }
             } else {
                 logger.info({
                     context: "GuideSeries.fetchSeries",
-                    msg: "Not logged in, revert",
+                    msg: "Not logged in - reset",
                 });
                 if (series.id > 0) {
                     setSeries(new Series());
@@ -103,16 +115,12 @@ const GuideSeries = () => {
                 }
             }
 
-            if (refresh) {
-                setRefresh(false);
-            }
-
         }
 
         fetchSeries();
 
-    }, [libraryContext, loginContext,
-        libraryId, refresh, series, seriesId, stage]);
+    }, [loginContext.state.loggedIn,
+        libraryId, series, seriesId, stage]);
 
     useEffect(() => {
 
@@ -122,46 +130,51 @@ const GuideSeries = () => {
                 context: "GuideSeries.fetchStory",
                 msg: "Input conditions",
                 libraryId: libraryId,
-                refresh: refresh,
                 storyId: storyId,
                 story: story,
             });
 
             if (loginContext.state.loggedIn) {
-                if ((libraryId > 0) && (storyId > 0)) {
-                    if ((storyId !== story.id) || refresh) {
+                if (libraryId > 0) {
+                    if (storyId > 0) {
                         try {
                             const newStory = await StoryClient.find(libraryId, storyId, {
                                 withAuthors: "",
                             });
                             logger.info({
                                 context: "GuideSeries.fetchStory",
-                                msg: "Fetch updated Story",
+                                msg: "Flesh out Story",
                                 story: newStory,
                             });
                             setStory(newStory);
-                            if (stage === Stage.STORIES) {
-                                setStage(Stage.WRITERS); // Implicitly advance after Story selected
-                            }
+                            setStoryId(-1);
                         } catch (error) {
                             ReportError("GuideSeries.fetchStory", error);
+                            setStory(new Story());
+                            setStoryId(-1);
                         }
                     } else {
                         logger.info({
                             context: "GuideSeries.fetchStory",
-                            msg: "Logged in, same Story or not refresh - skip"
+                            msg: "No new storyId - keep existing",
                         });
                     }
                 } else {
                     logger.info({
                         context: "GuideSeries.fetchStory",
-                        msg: "Logged in, not refresh, missing libraryId/storyId - skip",
+                        msg: "No libraryId - reset",
                     });
+                    if (story.id > 0) {
+                        setStory(new Story());
+                    }
+                    if (storyId > 0) {
+                        setStoryId(-1);
+                    }
                 }
             } else {
                 logger.info({
                     context: "GuideSeries.fetchStory",
-                    msg: "Not logged in, revert",
+                    msg: "Not logged in - reset"
                 });
                 if (story.id > 0) {
                     setStory(new Story());
@@ -171,24 +184,19 @@ const GuideSeries = () => {
                 }
             }
 
-            if (refresh) {
-                setRefresh(false);
-            }
-
         }
 
         fetchStory();
 
-    }, [libraryContext, loginContext,
-        libraryId, refresh, stage, story, storyId]);
+    }, [loginContext.state.loggedIn,
+        libraryId, stage, story, storyId]);
 
     const handleRefresh = (): void => {
         logger.info({
             context: "GuideSeries.handleRefresh",
-            seriesId: series.id,
             series: series,
         });
-        setRefresh(true);
+        setSeriesId(series.id);
     }
 
     const handleSeries = async (newSeries: Series): Promise<void> => {

@@ -5,7 +5,7 @@
 
 // External Modules ----------------------------------------------------------
 
-import React, {useContext, useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import Col from "react-bootstrap/Col";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
@@ -13,13 +13,10 @@ import Table from "react-bootstrap/Table";
 
 // Internal Modules ----------------------------------------------------------
 
-import StoryClient from "../../clients/StoryClient";
+import {HandleAction} from "../types";
 import Author from "../../models/Author";
 import Series from "../../models/Series";
-import LibraryContext from "../../contexts/LibraryContext";
-import LoginContext from "../../contexts/LoginContext";
 import logger from "../../util/client-logger";
-import {HandleAction} from "../types";
 
 // Incoming Properties ------------------------------------------------------
 
@@ -31,36 +28,16 @@ export interface Props {
 
 const SeriesSummary = (props: Props) => {
 
-    const libraryContext = useContext(LibraryContext);
-    const loginContext = useContext(LoginContext);
-
     const [expand, setExpand] = useState<boolean>(true);
-    const [libraryId] = useState<number>(libraryContext.state.library.id);
-    const [storiesAuthors, setStoriesAuthors] = useState<string[]>([]);
 
     useEffect(() => {
 
-        const fetchStoriesAuthors = async () => {
-            logger.info({
-                context: "SeriesSummary.useEffect",
-                series: props.series,
-            });
-            if (loginContext.state.loggedIn && (libraryId > 0) && (props.series.id > 0)) {
-                // For each Story, select the corresponding Authors
-                const storiesAuthors: string[] = [];
-                for (const story of props.series.stories) {
-                    const storyAuthors: Author[] = await StoryClient.authors(libraryId, story.id);
-                    storiesAuthors.push(calculateAuthorsKeys(storyAuthors));
-                }
-                setStoriesAuthors(storiesAuthors);
-            } else {
-                setStoriesAuthors([]);
-            }
-        }
+        logger.info({
+            context: "SeriesSummary.useEffect",
+            series: props.series,
+        });
 
-        fetchStoriesAuthors();
-
-    }, [libraryContext, loginContext, libraryId, props, props.series]);
+    }, [props.series]);
 
     const calculateAuthorsKeys = (authors: Author[]): string => {
         const keys: string[] = [];
@@ -141,7 +118,7 @@ const SeriesSummary = (props: Props) => {
                                         {story.notes}
                                     </td>
                                     <td key={1000 + (rowIndex * 100) + 3}>
-                                        {storiesAuthors[rowIndex]}
+                                        {calculateAuthorsKeys(story.authors)}
                                     </td>
                                 </tr>
                             ))}

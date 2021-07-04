@@ -34,8 +34,7 @@ export interface Props {
     handleEdit: HandleAuthor;           // Handle request to edit an Author
     handleExclude: HandleAuthor;        // Handle request to exclude an Author
     handleInclude: HandleAuthor;        // Handle request to include an Author
-    included: (author: Author) => boolean;
-    // Is the specified Author included?
+    included: (author: Author) => boolean; // Is the specified Author included?
     series: Series;                     // Currently selected Series
 }
 
@@ -109,7 +108,7 @@ const AuthorOptions = (props: Props) => {
 
         fetchAuthors();
 
-    }, [libraryContext, loginContext, props, props.series,
+    }, [loginContext.state.loggedIn, props.series,
         currentPage, libraryId, pageSize, searchText]);
 
     const handleChange: HandleValue = (newSearchText) => {
