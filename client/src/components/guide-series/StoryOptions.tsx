@@ -167,6 +167,7 @@ const StoryOptions = (props: Props) => {
                     <thead>
                     <tr className="table-secondary">
                         <th scope="col">Name</th>
+                        <th scope="col">Ordinal</th>
                         <th scope="col">Active</th>
                         <th scope="col">Notes</th>
                         <th scope="col">Actions</th>
@@ -183,9 +184,12 @@ const StoryOptions = (props: Props) => {
                                 {story.name}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 2}>
-                                {listValue(story.active)}
+                                {story.ordinal}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 3}>
+                                {listValue(story.active)}
+                            </td>
+                            <td key={1000 + (rowIndex * 100) + 4}>
                                 {story.notes}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 99}>

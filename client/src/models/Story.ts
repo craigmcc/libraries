@@ -22,6 +22,7 @@ class Story {
         this.library_id = data.library_id;
         this.name = data.name;
         this.notes = data.notes;
+        this.ordinal = this.calculateOrdinal(data);
         this.authors = data.authors ? toAuthors(data.authors) : [];
     }
 
@@ -31,7 +32,19 @@ class Story {
     library_id: number;
     name: string;
     notes: string;
+    ordinal: number | null;
     authors: Author[];
+
+    private calculateOrdinal(data: any): number | null {
+        if (data.ordinal) {
+            return data.ordinal;
+        } else if (data.SeriesStory && data.SeriesStory.ordinal) {
+            return data.SeriesStory.ordinal;
+        } else {
+            return null;
+        }
+    }
+
 }
 
 export default Story;

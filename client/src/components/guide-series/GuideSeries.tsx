@@ -71,6 +71,15 @@ const GuideSeries = () => {
                                 withAuthors: "",
                                 withStories: "",
                             });
+                            newSeries.stories = newSeries.stories.sort(function (a, b) {
+                                if (a.ordinal === null) {
+                                    return (b.ordinal === null ? 0 : -1);
+                                } else if (b.ordinal === null) {
+                                    return 1;
+                                } else {
+                                    return a.ordinal - b.ordinal;
+                                }
+                            });
                             for (const story of newSeries.stories) {
                                 story.authors = await StoryClient.authors(libraryId, story.id);
                             }

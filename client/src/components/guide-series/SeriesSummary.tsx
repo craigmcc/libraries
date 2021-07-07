@@ -103,6 +103,7 @@ const SeriesSummary = (props: Props) => {
                             <thead>
                             <tr className="table-secondary">
                                 <th scope="col">Included Stories</th>
+                                <th scope="col">Ordinal</th>
                                 <th scope="col">Story Notes</th>
                                 <th scope="col">Story Authors</th>
                             </tr>
@@ -115,9 +116,12 @@ const SeriesSummary = (props: Props) => {
                                         {story.name}
                                     </td>
                                     <td key={1000 + (rowIndex * 100) + 2}>
-                                        {story.notes}
+                                        {story.ordinal}
                                     </td>
                                     <td key={1000 + (rowIndex * 100) + 3}>
+                                        {story.notes}
+                                    </td>
+                                    <td key={1000 + (rowIndex * 100) + 4}>
                                         {calculateAuthorsKeys(story.authors)}
                                     </td>
                                 </tr>
