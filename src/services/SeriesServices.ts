@@ -322,12 +322,13 @@ export class SeriesServices {
         return story;
     }
 
-    public async storiesInclude(libraryId: number, seriesId: number, storyId: number): Promise<Story> {
+    public async storiesInclude(libraryId: number, seriesId: number, storyId: number, ordinal: number | null): Promise<Story> {
         logger.info({
             context: "SeriesServices.storiesInclude",
             libraryId: libraryId,
             seriesId: seriesId,
             storyId: storyId,
+            ordinal: ordinal,
         });
         const library = await Library.findByPk(libraryId);
         if (!library) {
@@ -362,7 +363,8 @@ export class SeriesServices {
         }
         await SeriesStory.create({
             series_id: seriesId,
-            story_id: storyId
+            story_id: storyId,
+            ordinal: ordinal,
         });
         return story;
     }

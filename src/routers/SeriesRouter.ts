@@ -151,10 +151,15 @@ SeriesRouter.delete("/:libraryId/:seriesId/stories/:storyId",
 SeriesRouter.post("/:libraryId/:seriesId/stories/:storyId",
     requireRegular,
     async (req: Request, res: Response) => {
+        let ordinal: number | null = null;
+        if (req.query && req.query.ordinal) {
+            ordinal = parseInt("" + req.query.ordinal, 10);
+        }
         res.send(await SeriesServices.storiesInclude(
             parseInt(req.params.libraryId, 10),
             parseInt(req.params.seriesId, 10),
-            parseInt(req.params.storyId, 10)
+            parseInt(req.params.storyId, 10),
+            ordinal,
         ));
     });
 
