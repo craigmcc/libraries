@@ -76,7 +76,8 @@ const AuthorForm = (props: Props) => {
                     async function (this) {
                         return await validateAuthorNameUnique(toAuthor(this.parent))
                     }),
-        })
+            principal: Yup.boolean(),
+        });
     }
 
     return (
@@ -114,12 +115,10 @@ const AuthorForm = (props: Props) => {
                         >
 
                             <Form.Row id="nameRow">
-                                <Form.Group as={Col} className="mr-4"
-                                            controlId="first_name" id="firstNameGroup">
+                                <Form.Group as={Col} controlId="first_name" id="firstNameGroup">
                                     <Form.Label>First Name:</Form.Label>
                                     <Form.Control
                                         autoFocus={props.autoFocus ? props.autoFocus : false}
-                                        htmlSize={25}
                                         isInvalid={touched.first_name && !!errors.first_name}
                                         isValid={!errors.first_name}
                                         name="first_name"
@@ -136,11 +135,9 @@ const AuthorForm = (props: Props) => {
                                         {errors.first_name}
                                     </Form.Control.Feedback>
                                 </Form.Group>
-                                <Form.Group as={Col} className="mr-4"
-                                            controlId="last_name" id="lastNameGroup">
+                                <Form.Group as={Col} controlId="last_name" id="lastNameGroup">
                                     <Form.Label>Last Name:</Form.Label>
                                     <Form.Control
-                                        htmlSize={25}
                                         isInvalid={touched.last_name && !!errors.last_name}
                                         isValid={!errors.last_name}
                                         name="last_name"
@@ -159,12 +156,21 @@ const AuthorForm = (props: Props) => {
                                 </Form.Group>
                             </Form.Row>
 
-                            <Form.Row id="notesRow">
-                                <Form.Group as={Col} className="mr-4"
-                                            controlId="notes" id="notesGroup">
+                            <Form.Row id="principalNotesRow">
+                                <Form.Group as={Col} controlId="active" id="principalGroup">
+                                    <Form.Check
+                                        feedback={errors.principal}
+                                        defaultChecked={values.principal}
+                                        id="principal"
+                                        label="Principal Author?"
+                                        name="principal"
+                                        onBlur={handleBlur}
+                                        onChange={handleChange}
+                                    />
+                                </Form.Group>
+                                <Form.Group as={Col} controlId="notes" id="notesGroup">
                                     <Form.Label>Notes:</Form.Label>
                                     <Form.Control
-                                        htmlSize={25}
                                         isInvalid={touched.notes && !!errors.notes}
                                         isValid={!errors.notes}
                                         name="notes"

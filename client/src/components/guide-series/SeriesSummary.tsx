@@ -42,7 +42,8 @@ const SeriesSummary = (props: Props) => {
     const calculateAuthorsKeys = (authors: Author[]): string => {
         const keys: string[] = [];
         authors.forEach(author => {
-            keys.push(`${author.last_name}, ${author.first_name}`);
+            const principalFlag = author.principal ? "*" : "";
+            keys.push(`${author.last_name}, ${author.first_name}${principalFlag}`);
         })
         return keys.join(" | ");
     }

@@ -169,6 +169,7 @@ const AuthorOptions = (props: Props) => {
                     <tr className="table-secondary">
                         <th scope="col">First Name</th>
                         <th scope="col">Last Name</th>
+                        <th scope="col">Principal</th>
                         <th scope="col">Active</th>
                         <th scope="col">Notes</th>
                         <th scope="col">Actions</th>
@@ -188,9 +189,12 @@ const AuthorOptions = (props: Props) => {
                                 {author.last_name}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 3}>
-                                {listValue(author.active)}
+                                {listValue(author.principal)}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 4}>
+                                {listValue(author.active)}
+                            </td>
+                            <td key={1000 + (rowIndex * 100) + 5}>
                                 {author.notes}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 99}>

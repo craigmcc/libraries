@@ -17,6 +17,7 @@ import StageWriters from "./StageWriters";
 import SeriesClient from "../../clients/SeriesClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
+import Author from "../../models/Author";
 import Series from "../../models/Series";
 import Story from "../../models/Story";
 import logger from "../../util/client-logger";
@@ -71,6 +72,7 @@ const GuideSeries = () => {
                                 withAuthors: "",
                                 withStories: "",
                             });
+                            newSeries.authors = sortAuthors(newSeries.authors);
                             newSeries.stories = newSeries.stories.sort(function (a, b) {
                                 if (a.ordinal === null) {
                                     return (b.ordinal === null ? 0 : -1);
@@ -126,6 +128,20 @@ const GuideSeries = () => {
                 }
             }
 
+        }
+
+        const sortAuthors = (authors: Author[]): Author[] => {
+            return authors.sort(function (a, b) {
+                const aName = a.last_name + "|" + a.first_name;
+                const bName = b.last_name + "|" + b.first_name;
+                if (aName > bName) {
+                    return 1;
+                } else if (aName < bName) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            });
         }
 
         fetchSeries();
