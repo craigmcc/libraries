@@ -68,7 +68,7 @@ const StoryOptions = (props: Props) => {
                                 limit: pageSize,
                                 offset: (pageSize * (currentPage - 1)),
                             });
-                        logger.info({
+                        logger.debug({
                             context: "StoryOptions.fetchStories",
                             msg: "Select by searchText",
                             searchText: searchText,

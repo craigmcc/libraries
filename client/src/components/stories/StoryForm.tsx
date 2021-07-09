@@ -68,6 +68,9 @@ const StoryForm = (props: Props) => {
             active: Yup.boolean(),
             name: Yup.string()
                 .required("Name is required"),
+            ordinal: Yup.number()
+                .min(0)
+                .nullable(true),
         });
     }
 
@@ -106,12 +109,10 @@ const StoryForm = (props: Props) => {
                         >
 
                             <Form.Row id="nameRow">
-                                <Form.Group as={Col} className="mr-4"
-                                            controlId="name" id="nameGroup">
+                                <Form.Group as={Col} controlId="name" id="nameGroup">
                                     <Form.Label>Name:</Form.Label>
                                     <Form.Control
                                         autoFocus={props.autoFocus ? props.autoFocus : false}
-                                        htmlSize={25}
                                         isInvalid={touched.name && !!errors.name}
                                         isValid={!errors.name}
                                         name="name"
@@ -130,12 +131,29 @@ const StoryForm = (props: Props) => {
                                 </Form.Group>
                             </Form.Row>
 
-                            <Form.Row id="copyrightRow">
-                                <Form.Group as={Col} className="mr-4"
-                                            controlId="copyright" id="copyrightGroup">
+                            <Form.Row id="ordinalCopyrightRow">
+                                <Form.Group as={Col} controlId="ordinal" id="ordinalGroup">
+                                    <Form.Label>Ordinal:</Form.Label>
+                                    <Form.Control
+                                        isInvalid={touched.ordinal && !!errors.ordinal}
+                                        isValid={!errors.ordinal}
+                                        name="ordinal"
+                                        onBlur={handleBlur}
+                                        onChange={handleChange}
+                                        size="sm"
+                                        type="text"
+                                        value={values.ordinal}
+                                    />
+                                    <Form.Control.Feedback type="valid">
+                                        Index of this Story as part of this Series.
+                                    </Form.Control.Feedback>
+                                    <Form.Control.Feedback type="invalid">
+                                        {errors.ordinal}
+                                    </Form.Control.Feedback>
+                                </Form.Group>
+                                <Form.Group as={Col} controlId="copyright" id="copyrightGroup">
                                     <Form.Label>Copyright Year:</Form.Label>
                                     <Form.Control
-                                        htmlSize={8}
                                         isInvalid={touched.copyright && !!errors.copyright}
                                         isValid={!errors.copyright}
                                         name="copyright"
@@ -155,11 +173,9 @@ const StoryForm = (props: Props) => {
                             </Form.Row>
 
                             <Form.Row id="notesRow">
-                                <Form.Group as={Col} className="mr-4"
-                                            controlId="notes" id="notesGroup">
+                                <Form.Group as={Col} controlId="notes" id="notesGroup">
                                     <Form.Label>Notes:</Form.Label>
                                     <Form.Control
-                                        htmlSize={25}
                                         isInvalid={touched.notes && !!errors.notes}
                                         isValid={!errors.notes}
                                         name="notes"

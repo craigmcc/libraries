@@ -61,7 +61,7 @@ const SeriesOptions = (props: Props) => {
                                 limit: pageSize,
                                 offset: (pageSize * (currentPage - 1)),
                             });
-                        logger.info({
+                        logger.debug({
                             context: "SeriesOptions.fetchSerieses",
                             msg: "Select by searchText",
                             searchText: searchText,
@@ -73,7 +73,7 @@ const SeriesOptions = (props: Props) => {
                                 limit: pageSize,
                                 offset: (pageSize * (currentPage - 1)),
                             });
-                        logger.info({
+                        logger.debug({
                             context: "SeriesOptions.fetchSerieses",
                             msg: "Select by library",
                             series: newSerieses,

@@ -84,9 +84,12 @@ export class SeriesClient {
         return toStory(value);
     }
 
-    async storiesInclude(libraryId: number, seriesId: number, storyId: number): Promise<Story> {
-        const value = await ApiBase.post(SERIES_BASE
-            + `/${libraryId}/${seriesId}/stories/${storyId}`);
+    async storiesInclude(libraryId: number, seriesId: number, storyId: number, ordinal: number | null): Promise<Story> {
+        let url = SERIES_BASE + `/${libraryId}/${seriesId}/stories/${storyId}`;
+        if (ordinal) {
+            url += `?ordinal=${ordinal}`;
+        }
+        const value = await ApiBase.post(url);
         return toStory(value);
     }
 

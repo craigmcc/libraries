@@ -80,7 +80,7 @@ const StageAuthors = (props: Props) => {
     }
 
     const handleExclude: HandleAuthor = async (newAuthor) => {
-        logger.info({
+        logger.debug({
             context: "StageAuthors.handleExclude",
             msg: "Excluding Author for Series",
             author: newAuthor,
@@ -89,12 +89,13 @@ const StageAuthors = (props: Props) => {
         try {
 
             // Exclude this Author for the current Series
-            const disassociated = await AuthorClient.seriesExclude
+            /* const disassociated = */ await AuthorClient.seriesExclude
                 (libraryId, newAuthor.id, props.series.id);
             logger.info({
                 context: "StageAuthors.handleExclude",
+                msg: "Excluded Author for Series",
+                series: props.series,
                 author: newAuthor,
-                disassociated: disassociated,
             });
 
             // For any Story in this Series, exclude this Author
@@ -114,7 +115,7 @@ const StageAuthors = (props: Props) => {
     }
 
     const handleInclude: HandleAuthor = async (newAuthor) => {
-        logger.info({
+        logger.debug({
             context: "StageAuthors.handleInclude",
             msg: "Including Author for Series",
             author: newAuthor,
@@ -123,12 +124,13 @@ const StageAuthors = (props: Props) => {
         try {
 
             // Include this Author for the current Series
-            const associated = await AuthorClient.seriesInclude
+            /* const associated = */ await AuthorClient.seriesInclude
                 (libraryId, newAuthor.id, props.series.id);
             logger.info({
                 context: "StageAuthors.handleInclude",
+                msg: "Included Author for Series",
+                series: props.series,
                 author: newAuthor,
-                associated: associated,
             });
 
         } catch (error) {
@@ -138,14 +140,20 @@ const StageAuthors = (props: Props) => {
     }
 
     const handleInsert: HandleAuthor = async (newAuthor) => {
-        logger.info({
+        logger.debug({
             context: "StageAuthors.handleInsert",
+            msg: "Inserting new Author",
             author: newAuthor,
         });
         try {
 
             // Persist the new Author
             const inserted = await AuthorClient.insert(libraryId, newAuthor);
+            logger.info({
+                context: "StageAuthors.insert",
+                msg: "Inserted new Author",
+                author: newAuthor,
+            })
             setAuthor(null);
 
             // Assume a new Author is included in the current Series
@@ -158,12 +166,18 @@ const StageAuthors = (props: Props) => {
     }
 
     const handleRemove: HandleAuthor = async (newAuthor) => {
-        logger.info({
+        logger.debug({
             context: "StageAuthors.handleRemove",
+            msg: "Removing existing Author",
             author: newAuthor,
         });
         try {
             AuthorClient.remove(libraryId, newAuthor.id);
+            logger.info({
+                context: "StageAuthors.handleRemove",
+                msg: "Removed existing Author",
+                author: newAuthor,
+            });
             setAuthor(null);
         } catch (error) {
             ReportError("StageAuthors.handleRemove", error);
@@ -172,12 +186,18 @@ const StageAuthors = (props: Props) => {
     }
 
     const handleUpdate: HandleAuthor = async (newAuthor) => {
-        logger.info({
+        logger.debug({
             context: "StageAuthors.handleUpdate",
+            msg: "Updating existing Author",
             author: newAuthor,
         });
         try {
             await AuthorClient.update(libraryId, newAuthor.id, newAuthor);
+            logger.info({
+                context: "StageAuthors.handleUpdate",
+                msg: "Updated existing Author",
+                author: newAuthor,
+            });
             setAuthor(null);
         } catch (error) {
             ReportError("StageAuthors.handleUpdate", error);

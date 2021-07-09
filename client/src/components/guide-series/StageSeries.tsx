@@ -66,6 +66,7 @@ const StageSeries = (props: Props) => {
         });
         logger.debug({
             context: "StageSeries.handleAdd",
+            msg: "Adding new Series",
             series: newSeries,
         });
         setSeries(newSeries);
@@ -74,20 +75,27 @@ const StageSeries = (props: Props) => {
     const handleEdit: HandleSeries = (newSeries) => {
         logger.debug({
             context: "StageSeries.handleEdit",
+            msg: "Editing existing Series",
             series: newSeries,
         });
         setSeries(newSeries);
     }
 
     const handleInsert: HandleSeries = async (newSeries) => {
-        logger.info({
+        logger.debug({
             context: "StageSeries.handleInsert",
+            msg: "Inserting new Series",
             series: newSeries,
         });
         try {
 
             // Persist the requested Series
             const inserted = await SeriesClient.insert(libraryId, newSeries);
+            logger.info({
+                context: "StageSeries.handleInsert",
+                msg: "Inserted new Series",
+                series: inserted,
+            });
             setSeries(null);
 
             // Select the inserted Series, and switch to Authors stage
@@ -101,12 +109,18 @@ const StageSeries = (props: Props) => {
     }
 
     const handleRemove: HandleSeries = async (newSeries) => {
-        logger.info({
+        logger.debug({
             context: "StageSeries.handleRemove",
+            msg: "Removing existing Series",
             series: newSeries,
         });
         try {
             await SeriesClient.remove(libraryId, newSeries.id);
+            logger.info({
+                context: "StageSeries.handleRemove",
+                msg: "Removed existing Series",
+                series: newSeries,
+            });
             setSeries(null);
             if (newSeries.id === props.series.id) {
                 props.handleSeries(new Series()); // Unselect if we were current
@@ -118,8 +132,9 @@ const StageSeries = (props: Props) => {
     }
 
     const handleSelect: HandleSeries = (newSeries) => {
-        logger.info({
+        logger.debug({
             context: "StageSeries.handleSelect",
+            msg: "Selecting existing Series",
             series: newSeries,
         });
         props.handleSeries(newSeries);
@@ -127,12 +142,18 @@ const StageSeries = (props: Props) => {
     }
 
     const handleUpdate: HandleSeries = async (newSeries) => {
-        logger.info({
+        logger.debug({
             context: "StageSeries.handleUpdate",
+            msg: "Updating existing Series",
             series: newSeries,
         });
         try {
             await SeriesClient.update(libraryId, newSeries.id, newSeries);
+            logger.info({
+                context: "StageSeries.handleUpdate",
+                msg: "Updated existing Series",
+                series: newSeries,
+            });
             setSeries(null);
         } catch (error) {
             ReportError("StageSeries.handleUpdate", error);

@@ -66,7 +66,7 @@ const AuthorOptions = (props: Props) => {
                                 limit: pageSize,
                                 offset: (pageSize * (currentPage - 1)),
                             });
-                        logger.info({
+                        logger.debug({
                             context: "AuthorOptions.fetchAuthors",
                             msg: "Select by searchText",
                             searchText: searchText,
@@ -76,7 +76,7 @@ const AuthorOptions = (props: Props) => {
                         // Fetch only Authors included in the current Series
                         newAuthors =
                             await SeriesClient.authors(libraryId, props.series.id);
-                        logger.info({
+                        logger.debug({
                             context: "AuthorOptions.fetchAuthors",
                             msg: "Select by included",
                             searchText: searchText,

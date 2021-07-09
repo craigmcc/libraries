@@ -50,7 +50,7 @@ const GuideSeries = () => {
 
         const fetchSeries = async () => {
 
-            logger.info({
+            logger.debug({
                 context: "GuideSeries.fetchSeries",
                 msg: "Input conditions",
                 libraryId: libraryId,
@@ -61,7 +61,7 @@ const GuideSeries = () => {
             if (loginContext.state.loggedIn) {
                 if (libraryId > 0) {
                     if (seriesId > 0) {
-                        logger.info({
+                        logger.debug({
                             context: "GuideSeries.fetchSeries",
                             msg: "Fetch requested Series",
                             seriesId: seriesId,
@@ -85,7 +85,7 @@ const GuideSeries = () => {
                             }
                             logger.info({
                                 context: "GuideSeries.fetchSeries",
-                                msg: "Flesh out Series",
+                                msg: "Fleshed out Series",
                                 series: newSeries,
                             });
                             setSeries(newSeries);
@@ -96,13 +96,13 @@ const GuideSeries = () => {
                             setSeriesId(-1);
                         }
                     } else {
-                        logger.info({
+                        logger.debug({
                             context: "GuideSeries.fetchSeries",
                             msg: "No new seriesId - keep existing",
                         });
                     }
                 } else {
-                    logger.info({
+                    logger.debug({
                         context: "GuideSeries.fetchSeries",
                         msg: "No libraryId - reset",
                     });
@@ -114,7 +114,7 @@ const GuideSeries = () => {
                     }
                 }
             } else {
-                logger.info({
+                logger.debug({
                     context: "GuideSeries.fetchSeries",
                     msg: "Not logged in - reset",
                 });
@@ -137,7 +137,7 @@ const GuideSeries = () => {
 
         const fetchStory = async () => {
 
-            logger.info({
+            logger.debug({
                 context: "GuideSeries.fetchStory",
                 msg: "Input conditions",
                 libraryId: libraryId,
@@ -154,7 +154,7 @@ const GuideSeries = () => {
                             });
                             logger.info({
                                 context: "GuideSeries.fetchStory",
-                                msg: "Flesh out Story",
+                                msg: "Fleshed out Story",
                                 story: newStory,
                             });
                             setStory(newStory);
@@ -168,13 +168,13 @@ const GuideSeries = () => {
                             setStoryId(-1);
                         }
                     } else {
-                        logger.info({
+                        logger.debug({
                             context: "GuideSeries.fetchStory",
                             msg: "No new storyId - keep existing",
                         });
                     }
                 } else {
-                    logger.info({
+                    logger.debug({
                         context: "GuideSeries.fetchStory",
                         msg: "No libraryId - reset",
                     });
@@ -186,7 +186,7 @@ const GuideSeries = () => {
                     }
                 }
             } else {
-                logger.info({
+                logger.debug({
                     context: "GuideSeries.fetchStory",
                     msg: "Not logged in - reset"
                 });
@@ -222,6 +222,10 @@ const GuideSeries = () => {
     }
 
     const handleStage = (newStage: Stage): void => {
+        logger.debug({
+            context: "GuideSeries.handleStage",
+            stage: newStage,
+        });
         setStage(newStage);
     }
 

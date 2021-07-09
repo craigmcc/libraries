@@ -68,6 +68,7 @@ const StageStories = (props: Props) => {
         });
         logger.debug({
             context: "StageStories.handleAdd",
+            msg: "Adding new Story",
             story: newStory,
         });
         setStory(newStory);
@@ -76,26 +77,28 @@ const StageStories = (props: Props) => {
     const handleEdit: HandleStory = async (newStory) => {
         logger.debug({
             context: "StageStories.handleEdit",
+            msg: "Editing existing Story",
             story: newStory,
         });
         setStory(newStory);
     }
 
-    // Exclude this Story from the current Series, but not the current Author
+    // Exclude this Story from the current Series, no effect on Author(s)
     const handleExclude: HandleStory = async (newStory) => {
-        logger.info({
+        logger.debug({
             context: "StageStories.handleExclude",
             msg: "Excluding Story for Series",
             series: props.series,
             story: newStory,
         });
         try {
-            const disassociated = await SeriesClient.storiesExclude
+            /* const disassociated = */ await SeriesClient.storiesExclude
                 (libraryId, props.series.id, newStory.id);
             logger.info({
                 context: "StageStories.handleExclude",
+                msg: "Excluded Story for Series",
+                series: props.series,
                 story: newStory,
-                disassociated: disassociated,
             });
         } catch (error) {
             ReportError("StageStories.handleExclude", error);
@@ -103,21 +106,22 @@ const StageStories = (props: Props) => {
         props.handleRefresh();
     }
 
-    // Include this Story in the current Volume, no effect on Author(s)
+    // Include this Story in the current Series, no effect on Author(s)
     const handleInclude: HandleStory = async (newStory) => {
-        logger.info({
+        logger.debug({
             context: "StageStories.handleInclude",
             msg: "Including Story for Series",
             series: props.series,
             story: newStory,
         });
         try {
-            const associated = await SeriesClient.storiesInclude
-                (libraryId, props.series.id, newStory.id);
+            /* const associated = */ await SeriesClient.storiesInclude
+                (libraryId, props.series.id, newStory.id, newStory.ordinal);
             logger.info({
                 context: "StageStories.handleInclude",
+                msg: "Included Story for Series",
+                series: props.series,
                 story: newStory,
-                associated: associated,
             });
         } catch (error) {
             ReportError("StageStories.handleInclude", error);
@@ -126,22 +130,28 @@ const StageStories = (props: Props) => {
     }
 
     const handleInsert: HandleStory = async (newStory) => {
+        logger.debug({
+            context: "StageStories.handleStory",
+            msg: "Inserting new Story",
+            story: newStory,
+        });
         try {
 
             // Persist the new Story
             const inserted = await StoryClient.insert(libraryId, newStory);
             logger.info({
                 context: "StageStories.handleInsert",
-                msg: "Inserting new Story",
+                msg: "Inserted new Story",
                 story: inserted,
             });
             setStory(null);
 
             // Assume the new Story is included in the current Series
+            inserted.ordinal = newStory.ordinal; // Carry ordinal (if any) forward
             await handleInclude(inserted);
 
             // Assume that the Author(s) for this Series wrote this Story as well.
-            logger.info({
+            logger.debug({
                 context: "StageStories.handleInsert",
                 msg: "About to add Story Authors",
                 story: inserted,
@@ -167,12 +177,18 @@ const StageStories = (props: Props) => {
     }
 
     const handleRemove: HandleStory = async (newStory) => {
-        logger.info({
+        logger.debug({
             context: "StageStories.handleRemove",
+            msg: "Removing old Story",
             story: newStory,
         });
         try {
             StoryClient.remove(libraryId, newStory.id);
+            logger.info({
+                context: "StageStories.handleRemove",
+                msg: "Removed old Story",
+                story: newStory,
+            });
             setStory(null);
             // Database cascades will take care of joins
         } catch (error) {
@@ -182,7 +198,7 @@ const StageStories = (props: Props) => {
     }
 
     const handleSelect: HandleStory = async (newStory) => {
-        logger.info({
+        logger.debug({
             context: "StageStories.handleSelect",
             story: newStory,
         });
@@ -191,12 +207,45 @@ const StageStories = (props: Props) => {
     }
 
     const handleUpdate: HandleStory = async (newStory) => {
-        logger.info({
+        logger.debug({
             context: "StageStories.handleUpdate",
+            msg: "Updating existing Story",
             story: newStory,
         });
         try {
+            // Update the Story itself
             await StoryClient.update(libraryId, newStory.id, newStory);
+            logger.info({
+                context: "StageStories.handleUpdate",
+                msg: "Updated existing Story",
+                story: newStory,
+            });
+            // If the ordinal changed, remove and insert to update it
+            if (story && (newStory.ordinal !== story.ordinal)) {
+                logger.info({
+                    context: "StageStories.handleUpdate",
+                    msg: "Reregister Series-Story for new ordinal",
+                    story: newStory,
+                });
+                try {
+                    await SeriesClient.storiesExclude
+                        (libraryId, props.series.id, newStory.id);
+                } catch (error) {
+                    // Ignore error if not previously included
+                }
+                try {
+                    await SeriesClient.storiesInclude
+                        (libraryId, props.series.id, newStory.id, newStory.ordinal);
+                } catch (error) {
+                    ReportError("StageStories.handleUpdate.include", error);
+                }
+            } else {
+                logger.info({
+                    context: "StageStories.handleUpdate",
+                    msg: "No reregister is required",
+                    story: newStory,
+                });
+            }
             setStory(null);
         } catch (error) {
             ReportError("StageAuthors.handleUpdate", error);

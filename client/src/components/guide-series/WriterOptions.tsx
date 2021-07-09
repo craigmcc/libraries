@@ -67,7 +67,7 @@ const WriterOptions = (props: Props) => {
                                 limit: pageSize,
                                 offset: (pageSize * (currentPage - 1)),
                             });
-                        logger.info({
+                        logger.debug({
                             context: "WriterOptions.fetchWriters",
                             msg: "Select by searchText",
                             searchText: searchText,
@@ -77,7 +77,7 @@ const WriterOptions = (props: Props) => {
                         // Fetch only Authors included in the current Story
                         newWriters =
                             await StoryClient.authors(libraryId, props.story.id);
-                        logger.info({
+                        logger.debug({
                             context: "WriterOptions.fetchWriters",
                             msg: "Select by included",
                             searchText: searchText,

@@ -66,6 +66,7 @@ const StageWriters = (props: Props) => {
         });
         logger.debug({
             context: "StageWriters.handleAdd",
+            msg: "Adding new Writer",
             writer: newWriter,
         });
         setWriter(newWriter);
@@ -74,13 +75,14 @@ const StageWriters = (props: Props) => {
     const handleEdit: HandleAuthor = async (newWriter) => {
         logger.debug({
             context: "StageWriters.handleEdit",
+            msg: "Editing existing Writer",
             writer: newWriter,
         });
         setWriter(newWriter);
     }
 
     const handleExclude: HandleAuthor = async (newWriter) => {
-        logger.info({
+        logger.debug({
             context: "StageWriters.handleExclude",
             msg: "Excluding Writer for Story",
             writer: newWriter,
@@ -89,12 +91,13 @@ const StageWriters = (props: Props) => {
         try {
 
             // Exclude this Writer for the current Story
-            const disassociated = await AuthorClient.storiesExclude
-            (libraryId, newWriter.id, props.story.id);
+            /* const disassociated = */ await AuthorClient.storiesExclude
+                (libraryId, newWriter.id, props.story.id);
             logger.info({
                 context: "StageWriters.handleExclude",
+                msg: "Excluded Writer for Story",
+                story: props.story,
                 writer: newWriter,
-                disassociated: disassociated,
             });
 
         } catch (error) {
@@ -104,7 +107,7 @@ const StageWriters = (props: Props) => {
     }
 
     const handleInclude: HandleAuthor = async (newWriter) => {
-        logger.info({
+        logger.debug({
             context: "StageWriters.handleInclude",
             msg: "Including Author for Story",
             writer: newWriter,
@@ -113,12 +116,13 @@ const StageWriters = (props: Props) => {
         try {
 
             // Include this Writer for the current Story
-            const associated = await AuthorClient.storiesInclude
-            (libraryId, newWriter.id, props.story.id);
+            /* const associated = */ await AuthorClient.storiesInclude
+                (libraryId, newWriter.id, props.story.id);
             logger.info({
                 context: "StageWriters.handleInclude",
+                msg: "Included Writer for Story",
+                story: props.story,
                 writer: newWriter,
-                associated: associated,
             });
 
         } catch (error) {
@@ -128,14 +132,20 @@ const StageWriters = (props: Props) => {
     }
 
     const handleInsert: HandleAuthor = async (newWriter) => {
-        logger.info({
+        logger.debug({
             context: "StageWriters.handleInsert",
+            msg: "Inserting new Writer",
             writer: newWriter,
         });
         try {
 
             // Persist the new Writer
             const inserted = await AuthorClient.insert(libraryId, newWriter);
+            logger.info({
+                context: "StageWriters.handleInsert",
+                msg: "Inserted new Writer",
+                writer: newWriter,
+            });
             setWriter(null);
 
             // Assume a new Author is included in the current Story
@@ -148,12 +158,18 @@ const StageWriters = (props: Props) => {
     }
 
     const handleRemove: HandleAuthor = async (newWriter) => {
-        logger.info({
+        logger.debug({
             context: "StageWriters.handleRemove",
+            msg: "Removing existing Writer",
             writer: newWriter,
         });
         try {
             AuthorClient.remove(libraryId, newWriter.id);
+            logger.info({
+                context: "StageWriters.handleRemove",
+                msg: "Removed existing Writer",
+                writer: newWriter,
+            });
             setWriter(null);
         } catch (error) {
             ReportError("StageWriters.handleRemove", error);
@@ -162,12 +178,18 @@ const StageWriters = (props: Props) => {
     }
 
     const handleUpdate: HandleAuthor = async (newWriter) => {
-        logger.info({
+        logger.debug({
             context: "StageWriters.handleUpdate",
-            author: newWriter,
+            msg: "Updating existing Writer",
+            writer: newWriter,
         });
         try {
             await AuthorClient.update(libraryId, newWriter.id, newWriter);
+            logger.info({
+                context: "StageWriters.handleUpdate",
+                msg: "Updated existing Writer",
+                writer: newWriter,
+            });
             setWriter(null);
         } catch (error) {
             ReportError("StageWriters.handleUpdate", error);

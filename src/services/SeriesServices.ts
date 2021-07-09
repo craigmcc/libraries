@@ -276,7 +276,7 @@ export class SeriesServices {
     }
 
     public async storiesExclude(libraryId: number, seriesId: number, storyId: number): Promise<Story> {
-        logger.info({
+        logger.debug({
             context: "SeriesServices.storiesExclude",
             libraryId: libraryId,
             seriesId: seriesId,
@@ -323,7 +323,7 @@ export class SeriesServices {
     }
 
     public async storiesInclude(libraryId: number, seriesId: number, storyId: number, ordinal: number | null): Promise<Story> {
-        logger.info({
+        logger.debug({
             context: "SeriesServices.storiesInclude",
             libraryId: libraryId,
             seriesId: seriesId,
