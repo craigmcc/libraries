@@ -32,6 +32,7 @@ import {listValue} from "../../util/transformations";
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
+    handleAdd?: OnAction;               // Handle request to add a Writer (optional)
     handleEdit: HandleAuthor;           // Handle request to edit a Writer
     handleExclude: HandleAuthor;        // Handle request to exclude a Writer
     handleInclude: HandleAuthor;        // Handle request to include a Writer
@@ -109,7 +110,7 @@ const WriterOptions = (props: Props) => {
 
         fetchWriters();
 
-    }, [libraryContext, loginContext, props, props.story,
+    }, [libraryContext.state.library.id, loginContext.state.loggedIn, props.story,
         currentPage, libraryId, pageSize, searchText]);
 
     const handleChange: HandleValue = (newSearchText) => {
@@ -138,7 +139,7 @@ const WriterOptions = (props: Props) => {
         <Container fluid id="WriterOptions">
 
             <Row className="mb-3">
-                <Col className="col-10 mr-2">
+                <Col className="col-8">
                     <SearchBar
                         autoFocus
                         handleChange={handleChange}
@@ -147,7 +148,7 @@ const WriterOptions = (props: Props) => {
                         placeholder="Search by all or part of either name"
                     />
                 </Col>
-                <Col>
+                <Col className="col-2">
                     <Pagination
                         currentPage={currentPage}
                         lastPage={(writers.length === 0) ||
@@ -157,6 +158,15 @@ const WriterOptions = (props: Props) => {
                         variant="secondary"
                     />
                 </Col>
+                {(props.handleAdd) ? (
+                    <Col className="col-2">
+                        <Button
+                            onClick={props.handleAdd}
+                            size="sm"
+                            variant="primary"
+                        >Add</Button>
+                    </Col>
+                ) : null }
             </Row>
 
             <Row className="ml-1 mr-1">

@@ -13,11 +13,8 @@ import Table from "react-bootstrap/Table";
 
 // Internal Modules ----------------------------------------------------------
 
-import StoryClient from "../../clients/StoryClient";
 import Author from "../../models/Author";
 import Volume from "../../models/Volume";
-import LibraryContext from "../../contexts/LibraryContext";
-import LoginContext from "../../contexts/LoginContext";
 import logger from "../../util/client-logger";
 import {HandleAction} from "../types";
 
@@ -31,41 +28,22 @@ export interface Props {
 
 const VolumeSummary = (props: Props) => {
 
-    const libraryContext = useContext(LibraryContext);
-    const loginContext = useContext(LoginContext);
-
     const [expand, setExpand] = useState<boolean>(true);
-    const [libraryId] = useState<number>(libraryContext.state.library.id);
-    const [storiesAuthors, setStoriesAuthors] = useState<string[]>([]);
 
     useEffect(() => {
 
-        const fetchStoriesAuthors = async () => {
-            logger.info({
-                context: "VolumeSummary.useEffect",
-                volume: props.volume,
-            });
-            if (loginContext.state.loggedIn && (libraryId > 0) && (props.volume.id > 0)) {
-                    // For each Story, select the corresponding Authors
-                    const storiesAuthors: string[] = [];
-                    for (const story of props.volume.stories) {
-                        const storyAuthors: Author[] = await StoryClient.authors(libraryId, story.id);
-                        storiesAuthors.push(calculateAuthorsKeys(storyAuthors));
-                    }
-                    setStoriesAuthors(storiesAuthors);
-                } else {
-                    setStoriesAuthors([]);
-                }
-        }
+        logger.info({
+            context: "VolumeSummary.useEffect",
+            volume: props.volume,
+        });
 
-        fetchStoriesAuthors();
-
-    }, [libraryContext, loginContext, libraryId, props, props.volume]);
+    }, [props.volume]);
 
     const calculateAuthorsKeys = (authors: Author[]): string => {
         const keys: string[] = [];
         authors.forEach(author => {
-            keys.push(`${author.last_name}, ${author.first_name}`);
+            const principalFlag = author.principal ? "*" : "";
+            keys.push(`${author.last_name}, ${author.first_name}${principalFlag}`);
         })
         return keys.join(" | ");
     }
@@ -141,7 +119,7 @@ const VolumeSummary = (props: Props) => {
                                         {story.notes}
                                     </td>
                                     <td key={1000 + (rowIndex * 100) + 3}>
-                                        {storiesAuthors[rowIndex]}
+                                        {calculateAuthorsKeys(story.authors)}
                                     </td>
                                 </tr>
                             ))}

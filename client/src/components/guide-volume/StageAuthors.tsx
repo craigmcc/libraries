@@ -54,7 +54,7 @@ const StageAuthors = (props: Props) => {
         // Record current permissions
         setCanRemove(loginContext.validateScope(Scopes.SUPERUSER));
 
-    }, [libraryContext, loginContext,
+    }, [libraryContext.state.library.id, loginContext.state.loggedIn,
         libraryId, props.volume]);
 
     const handleAdd: OnAction = () => {
@@ -63,6 +63,7 @@ const StageAuthors = (props: Props) => {
             last_name: null,
             library_id: libraryId,
             notes: null,
+            primary: true,
         });
         logger.debug({
             context: "StageAuthors.handleAdd",
@@ -80,7 +81,7 @@ const StageAuthors = (props: Props) => {
     }
 
     const handleExclude: HandleAuthor = async (newAuthor) => {
-        logger.info({
+        logger.debug({
             context: "StageAuthors.handleExclude",
             msg: "Excluding Author for Volume",
             author: newAuthor,
@@ -89,12 +90,13 @@ const StageAuthors = (props: Props) => {
         try {
 
             // Exclude this Author for the current Volume
-            const disassociated = await AuthorClient.volumesExclude
+            /* const disassociated = */ await AuthorClient.volumesExclude
                (libraryId, newAuthor.id, props.volume.id);
             logger.info({
                 context: "StageAuthors.handleExclude",
+                msg: "Excluded Author for Volume",
+                volume: props.volume,
                 author: newAuthor,
-                disassociated: disassociated,
             });
 
             // For any Story in this Volume, exclude this Author
@@ -114,7 +116,7 @@ const StageAuthors = (props: Props) => {
     }
 
     const handleInclude: HandleAuthor = async (newAuthor) => {
-        logger.info({
+        logger.debug({
             context: "StageAuthors.handleInclude",
             msg: "Including Author for Volume",
             author: newAuthor,
@@ -123,12 +125,13 @@ const StageAuthors = (props: Props) => {
         try {
 
             // Include this Author for the current Volume
-            const associated = await AuthorClient.volumesInclude
+            /* const associated = */ await AuthorClient.volumesInclude
                 (libraryId, newAuthor.id, props.volume.id, newAuthor.principal);
             logger.info({
                 context: "StageAuthors.handleInclude",
+                msg: "Included Author for Volume",
+                volume: props.volume,
                 author: newAuthor,
-                associated: associated,
             });
 
             // For "Single" or "Collection" Volume, add to Authors for each Story
@@ -150,14 +153,20 @@ const StageAuthors = (props: Props) => {
     }
 
     const handleInsert: HandleAuthor = async (newAuthor) => {
-        logger.info({
+        logger.debug({
             context: "StageAuthors.handleInsert",
+            msg: "Inserting new Author",
             author: newAuthor,
         });
         try {
 
             // Persist the new Author
             const inserted = await AuthorClient.insert(libraryId, newAuthor);
+            logger.info({
+                context: "StageAuthors.insert",
+                msg: "Inserted new Author",
+                author: inserted,
+            })
             setAuthor(null);
 
             // Assume a new Author is included in the current Volume
@@ -170,12 +179,18 @@ const StageAuthors = (props: Props) => {
     }
 
     const handleRemove: HandleAuthor = async (newAuthor) => {
-        logger.info({
+        logger.debug({
             context: "StageAuthors.handleRemove",
+            msg: "Removing existing Author",
             author: newAuthor,
         });
         try {
             AuthorClient.remove(libraryId, newAuthor.id);
+            logger.info({
+                context: "StageAuthors.handleRemove",
+                msg: "Removed existing Author",
+                author: newAuthor,
+            });
             setAuthor(null);
         } catch (error) {
             ReportError("StageAuthors.handleRemove", error);
@@ -184,15 +199,48 @@ const StageAuthors = (props: Props) => {
     }
 
     const handleUpdate: HandleAuthor = async (newAuthor) => {
-        logger.info({
+        logger.debug({
             context: "StageAuthors.handleUpdate",
+            msg: "Updating existing Author",
             author: newAuthor,
         });
         try {
+            // Update the Author itself
             await AuthorClient.update(libraryId, newAuthor.id, newAuthor);
+            logger.info({
+                context: "StageAuthors.handleUpdate",
+                msg: "Updated existing Author",
+                author: newAuthor,
+            })
             setAuthor(null);
         } catch (error) {
             ReportError("StageAuthors.handleUpdate", error);
+        }
+        // If the principal changed, remove and insert to update it
+        if (author && (newAuthor.principal !== author.principal)) {
+            logger.info({
+                context: "StageAuthors.handleUpdate",
+                msg: "Reregister Author-Series for new principal",
+                author: newAuthor,
+            });
+            try {
+                await AuthorClient.volumesExclude
+                    (libraryId, newAuthor.id, props.volume.id);
+            } catch (error) {
+                // Ignore error if not previously included
+            }
+            try {
+                await AuthorClient.volumesInclude
+                (libraryId, newAuthor.id, props.volume.id, newAuthor.principal);
+            } catch (error) {
+                ReportError("StageAuthors.handleUpdate.include", error);
+            }
+        } else {
+            logger.info({
+                context: "StageAuthors.handleUpdate",
+                msg: "No reregister is required",
+                author: newAuthor,
+            });
         }
         props.handleRefresh();
     }
@@ -232,7 +280,6 @@ const StageAuthors = (props: Props) => {
                         </Col>
                         <Col className="text-right">
                             <Button
-                                // TODO - when is this disabled?
                                 disabled={props.volume.authors.length < 1}
                                 onClick={() => props.handleStage(Stage.STORIES)}
                                 size="sm"
@@ -242,6 +289,7 @@ const StageAuthors = (props: Props) => {
                     </Row>
 
                     <AuthorOptions
+                        handleAdd={handleAdd}
                         handleEdit={handleEdit}
                         handleExclude={handleExclude}
                         handleInclude={handleInclude}

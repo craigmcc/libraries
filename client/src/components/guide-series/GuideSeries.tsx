@@ -130,23 +130,9 @@ const GuideSeries = () => {
 
         }
 
-        const sortAuthors = (authors: Author[]): Author[] => {
-            return authors.sort(function (a, b) {
-                const aName = a.last_name + "|" + a.first_name;
-                const bName = b.last_name + "|" + b.first_name;
-                if (aName > bName) {
-                    return 1;
-                } else if (aName < bName) {
-                    return -1;
-                } else {
-                    return 0;
-                }
-            });
-        }
-
         fetchSeries();
 
-    }, [loginContext.state.loggedIn,
+    }, [libraryContext.state.library.id, loginContext.state.loggedIn,
         libraryId, series, seriesId, stage]);
 
     useEffect(() => {
@@ -168,6 +154,7 @@ const GuideSeries = () => {
                             const newStory = await StoryClient.find(libraryId, storyId, {
                                 withAuthors: "",
                             });
+                            newStory.authors = sortAuthors(newStory.authors);
                             logger.info({
                                 context: "GuideSeries.fetchStory",
                                 msg: "Fleshed out Story",
@@ -218,7 +205,7 @@ const GuideSeries = () => {
 
         fetchStory();
 
-    }, [loginContext.state.loggedIn,
+    }, [libraryContext.state.library.id, loginContext.state.loggedIn,
         libraryId, stage, story, storyId]);
 
     const handleRefresh = (): void => {
@@ -251,6 +238,25 @@ const GuideSeries = () => {
             story: newStory,
         });
         setStoryId(newStory.id);
+    }
+
+    const sortAuthors = (authors: Author[]): Author[] => {
+        return authors.sort(function (a, b) {
+            if (a.principal && !b.principal) {
+                return -1;
+            } else if (!a.principal && b.principal) {
+                return 1;
+            }
+            const aName = a.last_name + "|" + a.first_name;
+            const bName = b.last_name + "|" + b.first_name;
+            if (aName > bName) {
+                return 1;
+            } else if (aName < bName) {
+                return -1;
+            } else {
+                return 0;
+            }
+        });
     }
 
     return (

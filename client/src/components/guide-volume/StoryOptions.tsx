@@ -30,6 +30,7 @@ import {listValue} from "../../util/transformations";
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
+    handleAdd?: OnAction;               // Handle request to add a Story (optional)
     handleEdit: HandleStory;            // Handle request to edit this Story
     handleExclude: HandleStory;         // Handle request to exclude a Story
     handleInclude: HandleStory;         // Handle request to include a Story
@@ -68,6 +69,7 @@ const StoryOptions = (props: Props) => {
                             await StoryClient.name(libraryId, searchText, {
                                 limit: pageSize,
                                 offset: (pageSize * (currentPage - 1)),
+                                withAuthors: "",
                             });
                         logger.info({
                             context: "StoryOptions.fetchStories",
@@ -106,7 +108,7 @@ const StoryOptions = (props: Props) => {
 
         fetchStories();
 
-    }, [libraryContext, loginContext, props, props.volume,
+    }, [libraryContext.state.library.id, loginContext.state.loggedIn, props.volume,
         currentPage, libraryId, pageSize, searchText]);
 
     const handleChange: HandleValue = (newSearchText) => {
@@ -135,7 +137,7 @@ const StoryOptions = (props: Props) => {
         <Container fluid id="StoryOptions">
 
             <Row className="mb-3">
-                <Col className="col-10 mr-2">
+                <Col className="col-8">
                     <SearchBar
                         autoFocus
                         handleChange={handleChange}
@@ -144,15 +146,25 @@ const StoryOptions = (props: Props) => {
                         placeholder="Search by all or part of name"
                     />
                 </Col>
-                <Col>
+                <Col className="col-2">
                     <Pagination
                         currentPage={currentPage}
                         lastPage={(stories.length === 0) ||
                             (stories.length < pageSize)}
                         onNext={onNext}
                         onPrevious={onPrevious}
+                        variant="secondary"
                     />
                 </Col>
+                {(props.handleAdd) ? (
+                    <Col className="col-2">
+                        <Button
+                            onClick={props.handleAdd}
+                            size="sm"
+                            variant="primary"
+                        >Add</Button>
+                    </Col>
+                ) : null }
             </Row>
 
             <Row className="ml-1 mr-1">

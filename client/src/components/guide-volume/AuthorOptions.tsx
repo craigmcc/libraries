@@ -31,11 +31,11 @@ import {listValue} from "../../util/transformations";
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
+    handleAdd?: OnAction;               // Handle request to add an Author (optional)
     handleEdit: HandleAuthor;           // Handle request to edit an Author
     handleExclude: HandleAuthor;        // Handle request to exclude an Author
     handleInclude: HandleAuthor;        // Handle request to include an Author
-    included: (author: Author) => boolean;
-                                        // Is the specified Author included?
+    included: (author: Author) => boolean; // Is the specified Author included?
     volume: Volume;                     // Currently selected Volume
 }
 
@@ -67,7 +67,7 @@ const AuthorOptions = (props: Props) => {
                                 limit: pageSize,
                                 offset: (pageSize * (currentPage - 1)),
                             });
-                        logger.info({
+                        logger.debug({
                             context: "AuthorOptions.fetchAuthors",
                             msg: "Select by searchText",
                             searchText: searchText,
@@ -109,7 +109,7 @@ const AuthorOptions = (props: Props) => {
 
         fetchAuthors();
 
-    }, [libraryContext, loginContext, props, props.volume,
+    }, [libraryContext, loginContext, props.volume,
         currentPage, libraryId, pageSize, searchText]);
 
     const handleChange: HandleValue = (newSearchText) => {
@@ -138,7 +138,7 @@ const AuthorOptions = (props: Props) => {
         <Container fluid id="AuthorOptions">
 
             <Row className="mb-3">
-                <Col className="col-10 mr-2">
+                <Col className="col-8">
                     <SearchBar
                         autoFocus
                         handleChange={handleChange}
@@ -147,15 +147,25 @@ const AuthorOptions = (props: Props) => {
                         placeholder="Search by all or part of either name"
                     />
                 </Col>
-                <Col>
+                <Col className="col-2">
                     <Pagination
                         currentPage={currentPage}
                         lastPage={(authors.length === 0) ||
                             (authors.length < pageSize)}
                         onNext={onNext}
                         onPrevious={onPrevious}
+                        variant="secondary"
                     />
                 </Col>
+                {(props.handleAdd) ? (
+                    <Col className="col-2">
+                        <Button
+                            onClick={props.handleAdd}
+                            size="sm"
+                            variant="primary"
+                        >Add</Button>
+                    </Col>
+                ) : null }
             </Row>
 
             <Row className="ml-1 mr-1">
@@ -170,6 +180,7 @@ const AuthorOptions = (props: Props) => {
                     <tr className="table-secondary">
                         <th scope="col">First Name</th>
                         <th scope="col">Last Name</th>
+                        <th scope="col">Principal</th>
                         <th scope="col">Active</th>
                         <th scope="col">Notes</th>
                         <th scope="col">Actions</th>
@@ -189,9 +200,12 @@ const AuthorOptions = (props: Props) => {
                                 {author.last_name}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 3}>
-                                {listValue(author.active)}
+                                {listValue(author.principal)}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 4}>
+                                {listValue(author.active)}
+                            </td>
+                            <td key={1000 + (rowIndex * 100) + 5}>
                                 {author.notes}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 99}>

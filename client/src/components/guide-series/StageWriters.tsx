@@ -54,7 +54,7 @@ const StageWriters = (props: Props) => {
         // Record current permissions
         setCanRemove(loginContext.validateScope(Scopes.SUPERUSER));
 
-    }, [libraryContext, loginContext,
+    }, [libraryContext.state.library.id, loginContext.state.loggedIn,
         libraryId, props.story]);
 
     const handleAdd: OnAction = () => {
@@ -195,7 +195,7 @@ const StageWriters = (props: Props) => {
             if (writer && (newWriter.principal !== writer.principal)) {
                 logger.info({
                     context: "StageWriters.handleUpdate",
-                    msg: "Reregister Author-Series for new principal",
+                    msg: "Reregister Author-Story for new principal",
                     writer: newWriter,
                 });
                 try {
@@ -268,6 +268,7 @@ const StageWriters = (props: Props) => {
                     </Row>
 
                     <WriterOptions
+                        handleAdd={handleAdd}
                         handleEdit={handleEdit}
                         handleExclude={handleExclude}
                         handleInclude={handleInclude}

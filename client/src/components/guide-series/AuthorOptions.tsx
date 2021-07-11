@@ -31,6 +31,7 @@ import {listValue} from "../../util/transformations";
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
+    handleAdd?: OnAction;               // Handle request to add an Author (optional)
     handleEdit: HandleAuthor;           // Handle request to edit an Author
     handleExclude: HandleAuthor;        // Handle request to exclude an Author
     handleInclude: HandleAuthor;        // Handle request to include an Author
@@ -137,7 +138,7 @@ const AuthorOptions = (props: Props) => {
         <Container fluid id="AuthorOptions">
 
             <Row className="mb-3">
-                <Col className="col-10 mr-2">
+                <Col className="col-8">
                     <SearchBar
                         autoFocus
                         handleChange={handleChange}
@@ -146,15 +147,25 @@ const AuthorOptions = (props: Props) => {
                         placeholder="Search by all or part of either name"
                     />
                 </Col>
-                <Col>
+                <Col className="col-2">
                     <Pagination
                         currentPage={currentPage}
                         lastPage={(authors.length === 0) ||
-                        (authors.length < pageSize)}
+                            (authors.length < pageSize)}
                         onNext={onNext}
                         onPrevious={onPrevious}
+                        variant="secondary"
                     />
                 </Col>
+                {(props.handleAdd) ? (
+                    <Col className="col-2">
+                        <Button
+                            onClick={props.handleAdd}
+                            size="sm"
+                            variant="primary"
+                        >Add</Button>
+                    </Col>
+                ) : null }
             </Row>
 
             <Row className="ml-1 mr-1">

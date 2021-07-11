@@ -28,9 +28,9 @@ import {listValue} from "../../util/transformations";
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
-    handleAdd?: OnAction;               // Handle Add request (optional)
-    handleEdit: HandleSeries;           // Handle request to edit a Volume
-    handleSelect: HandleSeries;         // Handle request to select a Volume
+    handleAdd?: OnAction;               // Handle request to add a Series (optional)
+    handleEdit: HandleSeries;           // Handle request to edit a Series
+    handleSelect: HandleSeries;         // Handle request to select a Series
 }
 
 // Component Details ---------------------------------------------------------
@@ -103,7 +103,7 @@ const SeriesOptions = (props: Props) => {
 
         fetchSerieses();
 
-    }, [loginContext.state.loggedIn,
+    }, [libraryContext.state.library.id, loginContext.state.loggedIn,
         currentPage, libraryId, pageSize, searchText]);
 
     const handleChange: HandleValue = (newSearchText) => {

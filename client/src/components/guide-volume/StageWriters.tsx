@@ -54,7 +54,7 @@ const StageWriters = (props: Props) => {
         // Record current permissions
         setCanRemove(loginContext.validateScope(Scopes.SUPERUSER));
 
-    }, [libraryContext, loginContext,
+    }, [libraryContext.state.library.id, loginContext.state.loggedIn,
         libraryId, props.story]);
 
     const handleAdd: OnAction = () => {
@@ -66,6 +66,7 @@ const StageWriters = (props: Props) => {
         });
         logger.debug({
             context: "StageWriters.handleAdd",
+            msg: "Adding new Writer",
             writer: newWriter,
         });
         setWriter(newWriter);
@@ -74,13 +75,14 @@ const StageWriters = (props: Props) => {
     const handleEdit: HandleAuthor = async (newWriter) => {
         logger.debug({
             context: "StageWriters.handleEdit",
+            msg: "Editing existing Writer",
             writer: newWriter,
         });
         setWriter(newWriter);
     }
 
     const handleExclude: HandleAuthor = async (newWriter) => {
-        logger.info({
+        logger.debug({
             context: "StageWriters.handleExclude",
             msg: "Excluding Writer for Story",
             writer: newWriter,
@@ -89,12 +91,13 @@ const StageWriters = (props: Props) => {
         try {
 
             // Exclude this Writer for the current Story
-            const disassociated = await AuthorClient.storiesExclude
+            /* const disassociated = */ await AuthorClient.storiesExclude
                 (libraryId, newWriter.id, props.story.id);
             logger.info({
                 context: "StageWriters.handleExclude",
+                msg: "Excluded Writer for Story",
+                story: props.story,
                 writer: newWriter,
-                disassociated: disassociated,
             });
 
         } catch (error) {
@@ -104,7 +107,7 @@ const StageWriters = (props: Props) => {
     }
 
     const handleInclude: HandleAuthor = async (newWriter) => {
-        logger.info({
+        logger.debug({
             context: "StageWriters.handleInclude",
             msg: "Including Author for Story",
             writer: newWriter,
@@ -113,12 +116,13 @@ const StageWriters = (props: Props) => {
         try {
 
             // Include this Writer for the current Story
-            const associated = await AuthorClient.storiesInclude
+            /* const associated = */ await AuthorClient.storiesInclude
                 (libraryId, newWriter.id, props.story.id, newWriter.principal);
             logger.info({
                 context: "StageWriters.handleInclude",
+                msg: "Included Writer for Story",
+                story: props.story,
                 writer: newWriter,
-                associated: associated,
             });
 
         } catch (error) {
@@ -128,14 +132,20 @@ const StageWriters = (props: Props) => {
     }
 
     const handleInsert: HandleAuthor = async (newWriter) => {
-        logger.info({
+        logger.debug({
             context: "StageWriters.handleInsert",
+            msg: "Inserting new Writer",
             writer: newWriter,
         });
         try {
 
             // Persist the new Writer
             const inserted = await AuthorClient.insert(libraryId, newWriter);
+            logger.info({
+                context: "StageWriters.handleInsert",
+                msg: "Inserted new Writer",
+                writer: newWriter,
+            })
             setWriter(null);
 
             // Assume a new Author is included in the current Story
@@ -148,12 +158,18 @@ const StageWriters = (props: Props) => {
     }
 
     const handleRemove: HandleAuthor = async (newWriter) => {
-        logger.info({
+        logger.debug({
             context: "StageWriters.handleRemove",
+            msg: "Removing existing Writer",
             writer: newWriter,
         });
         try {
             AuthorClient.remove(libraryId, newWriter.id);
+            logger.info({
+                context: "StageWriters.handleRemove",
+                msg: "Removed existing Writer",
+                writer: newWriter,
+            })
             setWriter(null);
         } catch (error) {
             ReportError("StageWriters.handleRemove", error);
@@ -162,12 +178,45 @@ const StageWriters = (props: Props) => {
     }
 
     const handleUpdate: HandleAuthor = async (newWriter) => {
-        logger.info({
+        logger.debug({
             context: "StageWriters.handleUpdate",
+            msg: "Updating existing Writer",
             author: newWriter,
         });
         try {
+            // Update the Writer itself
             await AuthorClient.update(libraryId, newWriter.id, newWriter);
+            logger.info({
+                context: "StageWriters.handleUpdate",
+                msg: "Updated existing Writer",
+                writer: newWriter,
+            })
+            // If the principal changed, remove and insert to update it
+            if (writer && (newWriter.principal !== writer.principal)) {
+                logger.info({
+                    context: "StageWriters.handleUpdate",
+                    msg: "Reregister Author-Story for new principal",
+                    writer: newWriter,
+                });
+                try {
+                    await AuthorClient.storiesExclude
+                        (libraryId, newWriter.id, props.story.id);
+                } catch (error) {
+                    // Ignore error if not previously included
+                }
+                try {
+                    await AuthorClient.storiesInclude
+                        (libraryId, newWriter.id, props.story.id, newWriter.principal);
+                } catch (error) {
+                    ReportError("StageAuthors.handleUpdate.include", error);
+                }
+            } else {
+                logger.info({
+                    context: "StageWriters.handleUpdate",
+                    msg: "No reregister is required",
+                    writer: newWriter,
+                });
+            }
             setWriter(null);
         } catch (error) {
             ReportError("StageWriters.handleUpdate", error);
@@ -219,6 +268,7 @@ const StageWriters = (props: Props) => {
                     </Row>
 
                     <WriterOptions
+                        handleAdd={handleAdd}
                         handleEdit={handleEdit}
                         handleExclude={handleExclude}
                         handleInclude={handleInclude}

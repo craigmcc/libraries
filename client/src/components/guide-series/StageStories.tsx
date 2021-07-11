@@ -57,7 +57,8 @@ const StageStories = (props: Props) => {
         // Record current permissions
         setCanRemove(loginContext.validateScope(Scopes.SUPERUSER));
 
-    }, [loginContext, libraryId, props.series]);
+    }, [libraryContext.state.library.id, loginContext.state.loggedIn,
+        libraryId, props.series]);
 
     const handleAdd: OnAction = () => {
         const newStory = new Story({
@@ -131,7 +132,7 @@ const StageStories = (props: Props) => {
 
     const handleInsert: HandleStory = async (newStory) => {
         logger.debug({
-            context: "StageStories.handleStory",
+            context: "StageStories.handleInsert",
             msg: "Inserting new Story",
             story: newStory,
         });
@@ -296,6 +297,7 @@ const StageStories = (props: Props) => {
                     </Row>
 
                     <StoryOptions
+                        handleAdd={handleAdd}
                         handleEdit={handleEdit}
                         handleExclude={handleExclude}
                         handleInclude={handleInclude}

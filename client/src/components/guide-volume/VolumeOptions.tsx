@@ -28,7 +28,7 @@ import {listValue} from "../../util/transformations";
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
-    handleAdd?: OnAction;               // Handle Add request (optional)
+    handleAdd?: OnAction;               // Handle request to add a Volume (optional)
     handleEdit: HandleVolume;           // Handle request to edit a Volume
     handleSelect: HandleVolume;         // Handle request to select a Volume
 }
@@ -60,7 +60,7 @@ const VolumeOptions = (props: Props) => {
                                 limit: pageSize,
                                 offset: (pageSize * (currentPage - 1)),
                             });
-                        logger.info({
+                        logger.debug({
                             context: "VolumeOptions.fetchVolumes",
                             msg: "Select by searchText",
                             searchText: searchText,
@@ -72,7 +72,7 @@ const VolumeOptions = (props: Props) => {
                                 limit: pageSize,
                                 offset: (pageSize * (currentPage - 1)),
                             });
-                        logger.info({
+                        logger.debug({
                             context: "VolumeOptions.fetchVolumes",
                             msg: "Select by library",
                             volumes: newVolumes,
@@ -103,7 +103,7 @@ const VolumeOptions = (props: Props) => {
 
         fetchVolumes();
 
-    }, [libraryContext, loginContext, props,
+    }, [libraryContext.state.library.id, loginContext.state.loggedIn,
         currentPage, libraryId, pageSize, searchText]);
 
     const handleChange: HandleValue = (newSearchText) => {
@@ -139,6 +139,7 @@ const VolumeOptions = (props: Props) => {
                         (volumes.length < pageSize)}
                         onNext={onNext}
                         onPrevious={onPrevious}
+                        variant="secondary"
                     />
                 </Col>
                 {(props.handleAdd) ? (

@@ -63,6 +63,7 @@ const StageAuthors = (props: Props) => {
             last_name: null,
             library_id: libraryId,
             notes: null,
+            primary: true,
         });
         logger.debug({
             context: "StageAuthors.handleAdd",
@@ -152,7 +153,7 @@ const StageAuthors = (props: Props) => {
             logger.info({
                 context: "StageAuthors.insert",
                 msg: "Inserted new Author",
-                author: newAuthor,
+                author: inserted,
             })
             setAuthor(null);
 
@@ -208,7 +209,7 @@ const StageAuthors = (props: Props) => {
                 });
                 try {
                     await AuthorClient.seriesExclude
-                    (libraryId, newAuthor.id, props.series.id);
+                       (libraryId, newAuthor.id, props.series.id);
                 } catch (error) {
                     // Ignore error if not previously included
                 }
@@ -267,7 +268,6 @@ const StageAuthors = (props: Props) => {
                         </Col>
                         <Col className="text-right">
                             <Button
-                                // TODO - when is this disabled?
                                 disabled={props.series.authors.length < 1}
                                 onClick={() => props.handleStage(Stage.STORIES)}
                                 size="sm"
@@ -277,6 +277,7 @@ const StageAuthors = (props: Props) => {
                     </Row>
 
                     <AuthorOptions
+                        handleAdd={handleAdd}
                         handleEdit={handleEdit}
                         handleExclude={handleExclude}
                         handleInclude={handleInclude}
