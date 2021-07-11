@@ -83,9 +83,12 @@ export class AuthorClient {
         return toSeries(value);
     }
 
-    async seriesInclude(libraryId: number, authorId: number, seriesId: number): Promise<Series> {
-        const value = await ApiBase.post(AUTHORS_BASE
-            + `/${libraryId}/${authorId}/series/${seriesId}`);
+    async seriesInclude(libraryId: number, authorId: number, seriesId: number, principal: boolean | null): Promise<Series> {
+        let url = AUTHORS_BASE + `/${libraryId}/${authorId}/series/${seriesId}`;
+        if (principal) {
+            url += '?principal=true';
+        }
+        const value = await ApiBase.post(url);
         return toSeries(value);
     }
 
@@ -101,9 +104,12 @@ export class AuthorClient {
         return toStory(value);
     }
 
-    async storiesInclude(libraryId: number, authorId: number, storyId: number): Promise<Story> {
-        const value = await ApiBase.post(AUTHORS_BASE
-            + `/${libraryId}/${authorId}/stories/${storyId}`);
+    async storiesInclude(libraryId: number, authorId: number, storyId: number, principal: boolean | null): Promise<Story> {
+        let url = AUTHORS_BASE + `/${libraryId}/${authorId}/stories/${storyId}`;
+        if (principal) {
+            url += '?principal=true';
+        }
+        const value = await ApiBase.post(url);
         return toStory(value);
     }
 
@@ -125,9 +131,12 @@ export class AuthorClient {
         return toVolume(value);
     }
 
-    async volumesInclude(libraryId: number, authorId: number, volumeId: number): Promise<Volume> {
-        const value = await ApiBase.post(AUTHORS_BASE
-            + `/${libraryId}/${authorId}/volumes/${volumeId}`);
+    async volumesInclude(libraryId: number, authorId: number, volumeId: number, principal: boolean | null): Promise<Volume> {
+        let url = AUTHORS_BASE + `/${libraryId}/${authorId}/volumes/${volumeId}`;
+        if (principal) {
+            url += '?principal=true';
+        }
+        const value = await ApiBase.post(url);
         return toVolume(value);
     }
 

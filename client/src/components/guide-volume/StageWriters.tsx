@@ -114,7 +114,7 @@ const StageWriters = (props: Props) => {
 
             // Include this Writer for the current Story
             const associated = await AuthorClient.storiesInclude
-                (libraryId, newWriter.id, props.story.id);
+                (libraryId, newWriter.id, props.story.id, newWriter.principal);
             logger.info({
                 context: "StageWriters.handleInclude",
                 writer: newWriter,

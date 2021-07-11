@@ -157,7 +157,7 @@ const StageStories = (props: Props) => {
                         story: inserted,
                         author: author,
                     });
-                    await AuthorClient.storiesInclude(libraryId, author.id, inserted.id);
+                    await AuthorClient.storiesInclude(libraryId, author.id, inserted.id, author.principal);
                 }
             }
 

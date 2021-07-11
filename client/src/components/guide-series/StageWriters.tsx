@@ -117,7 +117,7 @@ const StageWriters = (props: Props) => {
 
             // Include this Writer for the current Story
             /* const associated = */ await AuthorClient.storiesInclude
-                (libraryId, newWriter.id, props.story.id);
+                (libraryId, newWriter.id, props.story.id, newWriter.principal);
             logger.info({
                 context: "StageWriters.handleInclude",
                 msg: "Included Writer for Story",
@@ -184,12 +184,39 @@ const StageWriters = (props: Props) => {
             writer: newWriter,
         });
         try {
+            // Update the Writer itself
             await AuthorClient.update(libraryId, newWriter.id, newWriter);
             logger.info({
                 context: "StageWriters.handleUpdate",
                 msg: "Updated existing Writer",
                 writer: newWriter,
             });
+            // If the principal changed, remove and insert to update it
+            if (writer && (newWriter.principal !== writer.principal)) {
+                logger.info({
+                    context: "StageWriters.handleUpdate",
+                    msg: "Reregister Author-Series for new principal",
+                    writer: newWriter,
+                });
+                try {
+                    await AuthorClient.storiesExclude
+                        (libraryId, newWriter.id, props.story.id);
+                } catch (error) {
+                    // Ignore error if not previously included
+                }
+                try {
+                    await AuthorClient.storiesInclude
+                        (libraryId, newWriter.id, props.story.id, newWriter.principal);
+                } catch (error) {
+                    ReportError("StageAuthors.handleUpdate.include", error);
+                }
+            } else {
+                logger.info({
+                    context: "StageWriters.handleUpdate",
+                    msg: "No reregister is required",
+                    writer: newWriter,
+                });
+            }
             setWriter(null);
         } catch (error) {
             ReportError("StageWriters.handleUpdate", error);

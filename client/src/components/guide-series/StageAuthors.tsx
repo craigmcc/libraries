@@ -125,7 +125,7 @@ const StageAuthors = (props: Props) => {
 
             // Include this Author for the current Series
             /* const associated = */ await AuthorClient.seriesInclude
-                (libraryId, newAuthor.id, props.series.id);
+                (libraryId, newAuthor.id, props.series.id, newAuthor.principal);
             logger.info({
                 context: "StageAuthors.handleInclude",
                 msg: "Included Author for Series",
@@ -192,12 +192,39 @@ const StageAuthors = (props: Props) => {
             author: newAuthor,
         });
         try {
+            // Update the Author itself
             await AuthorClient.update(libraryId, newAuthor.id, newAuthor);
             logger.info({
                 context: "StageAuthors.handleUpdate",
                 msg: "Updated existing Author",
                 author: newAuthor,
             });
+            // If the principal changed, remove and insert to update it
+            if (author && (newAuthor.principal !== author.principal)) {
+                logger.info({
+                    context: "StageAuthors.handleUpdate",
+                    msg: "Reregister Author-Series for new principal",
+                    author: newAuthor,
+                });
+                try {
+                    await AuthorClient.seriesExclude
+                    (libraryId, newAuthor.id, props.series.id);
+                } catch (error) {
+                    // Ignore error if not previously included
+                }
+                try {
+                    await AuthorClient.seriesInclude
+                        (libraryId, newAuthor.id, props.series.id, newAuthor.principal);
+                } catch (error) {
+                    ReportError("StageAuthors.handleUpdate.include", error);
+                }
+            } else {
+                logger.info({
+                    context: "StageAuthors.handleUpdate",
+                    msg: "No reregister is required",
+                    author: newAuthor,
+                });
+            }
             setAuthor(null);
         } catch (error) {
             ReportError("StageAuthors.handleUpdate", error);

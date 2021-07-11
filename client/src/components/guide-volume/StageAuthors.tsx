@@ -124,7 +124,7 @@ const StageAuthors = (props: Props) => {
 
             // Include this Author for the current Volume
             const associated = await AuthorClient.volumesInclude
-                (libraryId, newAuthor.id, props.volume.id);
+                (libraryId, newAuthor.id, props.volume.id, newAuthor.principal);
             logger.info({
                 context: "StageAuthors.handleInclude",
                 author: newAuthor,
@@ -138,7 +138,7 @@ const StageAuthors = (props: Props) => {
                     msg: `Adding Author to ${props.volume.stories.length} Stories`,
                 });
                 for (const story of props.volume.stories) {
-                    await AuthorClient.storiesInclude(libraryId, newAuthor.id, story.id);
+                    await AuthorClient.storiesInclude(libraryId, newAuthor.id, story.id, newAuthor.principal);
                 }
             }
 
