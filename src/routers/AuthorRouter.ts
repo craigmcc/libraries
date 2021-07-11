@@ -139,10 +139,15 @@ AuthorRouter.delete("/:libraryId/:authorId/series/:seriesId",
 AuthorRouter.post("/:libraryId/:authorId/series/:seriesId",
     requireRegular,
     async (req: Request, res: Response) => {
+        let principal: boolean | null = null;
+        if (req.query && req.query.principal) {
+            principal = true;
+        }
         res.send(await AuthorServices.seriesInclude(
             parseInt(req.params.libraryId, 10),
             parseInt(req.params.authorId, 10),
-            parseInt(req.params.seriesId, 10)
+            parseInt(req.params.seriesId, 10),
+            principal,
         ));
     });
 
@@ -174,10 +179,15 @@ AuthorRouter.delete("/:libraryId/:authorId/stories/:storyId",
 AuthorRouter.post("/:libraryId/:authorId/stories/:storyId",
     requireRegular,
     async (req: Request, res: Response) => {
+        let principal: boolean | null = null;
+        if (req.query && req.query.principal) {
+            principal = true;
+        }
         res.send(await AuthorServices.storiesInclude(
             parseInt(req.params.libraryId, 10),
             parseInt(req.params.authorId, 10),
-            parseInt(req.params.storyId, 10)
+            parseInt(req.params.storyId, 10),
+            principal,
         ));
     });
 
@@ -209,10 +219,15 @@ AuthorRouter.delete("/:libraryId/:authorId/volumes/:volumeId",
 AuthorRouter.post("/:libraryId/:authorId/volumes/:volumeId",
     requireRegular,
     async (req: Request, res: Response) => {
+        let principal: boolean | null = null;
+        if (req.query && req.query.principal) {
+            principal = true;
+        }
         res.send(await AuthorServices.volumesInclude(
             parseInt(req.params.libraryId, 10),
             parseInt(req.params.authorId, 10),
-            parseInt(req.params.volumeId, 10)
+            parseInt(req.params.volumeId, 10),
+            principal,
         ));
     });
 

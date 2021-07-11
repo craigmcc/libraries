@@ -312,12 +312,13 @@ export class AuthorServices {
         return series;
     }
 
-    public async seriesInclude(libraryId: number, authorId: number, seriesId: number): Promise<Series> {
+    public async seriesInclude(libraryId: number, authorId: number, seriesId: number, principal: boolean | null): Promise<Series> {
         logger.info({
             context: "AuthorServices.seriesInclude",
             libraryId: libraryId,
             authorId: authorId,
             seriesId: seriesId,
+            principal: principal,
         });
         const library = await Library.findByPk(libraryId);
         if (!library) {
@@ -352,7 +353,8 @@ export class AuthorServices {
         }
         await AuthorSeries.create({
             author_id: authorId,
-            series_id: seriesId
+            series_id: seriesId,
+            principal: principal ? true : false,
         });
         return series;
     }
@@ -432,12 +434,13 @@ export class AuthorServices {
         return story;
     }
 
-    public async storiesInclude(libraryId: number, authorId: number, storyId: number): Promise<Story> {
+    public async storiesInclude(libraryId: number, authorId: number, storyId: number, principal: boolean | null): Promise<Story> {
         logger.info({
             context: "AuthorServices.storiesInclude",
             libraryId: libraryId,
             authorId: authorId,
             storyId: storyId,
+            principal: principal,
         });
         const library = await Library.findByPk(libraryId);
         if (!library) {
@@ -472,7 +475,8 @@ export class AuthorServices {
         }
         await AuthorStory.create({
             author_id: authorId,
-            story_id: storyId
+            story_id: storyId,
+            principal: principal ? true : false,
         });
         return story;
     }
@@ -546,7 +550,14 @@ export class AuthorServices {
         return volume;
     }
 
-    public async volumesInclude(libraryId: number, authorId: number, volumeId: number): Promise<Volume> {
+    public async volumesInclude(libraryId: number, authorId: number, volumeId: number, principal: boolean | null): Promise<Volume> {
+        logger.info({
+            context: "AuthorServices.storiesInclude",
+            libraryId: libraryId,
+            authorId: authorId,
+            volumeId: volumeId,
+            principal: principal,
+        });
         const library = await Library.findByPk(libraryId);
         if (!library) {
             throw new NotFound(
@@ -580,7 +591,8 @@ export class AuthorServices {
         }
         await AuthorVolume.create({
             author_id: authorId,
-            volume_id: volumeId
+            volume_id: volumeId,
+            principal: principal ? true : false,
         });
         return volume;
     }
