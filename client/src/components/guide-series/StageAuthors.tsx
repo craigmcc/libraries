@@ -63,7 +63,7 @@ const StageAuthors = (props: Props) => {
             last_name: null,
             library_id: libraryId,
             notes: null,
-            primary: true,
+            principal: true,
         });
         logger.debug({
             context: "StageAuthors.handleAdd",
@@ -125,6 +125,7 @@ const StageAuthors = (props: Props) => {
         try {
 
             // Include this Author for the current Series
+            newAuthor.principal = true; // Assume by default
             /* const associated = */ await AuthorClient.seriesInclude
                 (libraryId, newAuthor.id, props.series.id, newAuthor.principal);
             logger.info({

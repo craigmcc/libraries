@@ -99,13 +99,11 @@ const StageSeries = (props: Props) => {
             setSeries(null);
 
             // Select the inserted Series, and switch to Authors stage
-            props.handleSeries(inserted);
-            props.handleStage(Stage.AUTHORS);
+            handleSelect(inserted);
 
         } catch (error) {
             ReportError("StageSeries.handleInsert", error);
         }
-        props.handleRefresh();
     }
 
     const handleRemove: HandleSeries = async (newSeries) => {

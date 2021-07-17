@@ -117,13 +117,11 @@ const StageVolume = (props: Props) => {
             }
 
             // Select the inserted Volume, and switch to Authors stage
-            props.handleVolume(inserted);     // Implicitly select the new Volume
-            props.handleStage(Stage.AUTHORS); // and switch to Authors stage
+            handleSelect(inserted);
 
         } catch (error) {
             ReportError("StageVolume.handleInsert", error);
         }
-        props.handleRefresh();
     }
 
     const handleRemove: HandleVolume = async (newVolume) => {
