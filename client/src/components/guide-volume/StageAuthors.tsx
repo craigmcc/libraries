@@ -54,7 +54,7 @@ const StageAuthors = (props: Props) => {
         // Record current permissions
         setCanRemove(loginContext.validateScope(Scopes.SUPERUSER));
 
-    }, [libraryContext.state.library.id, loginContext.state.loggedIn,
+    }, [libraryContext.state.library.id, loginContext, loginContext.state.loggedIn,
         libraryId, props.volume]);
 
     const handleAdd: OnAction = () => {

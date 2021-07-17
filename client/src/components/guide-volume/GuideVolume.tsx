@@ -132,7 +132,7 @@ const GuideVolume = () => {
 
         fetchVolume();
 
-    }, [libraryContext.state.library.id, loginContext.state.loggedIn,,
+    }, [libraryContext.state.library.id, loginContext.state.loggedIn,
               libraryId, stage, volume, volumeId]);
 
     useEffect(() => {
