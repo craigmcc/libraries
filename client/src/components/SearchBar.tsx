@@ -18,7 +18,7 @@ export interface Props {
     disabled?: boolean;             // Should element be disabled? [false]
     handleChange?: HandleValue;     // Handle (value) on each change [no handler]
     handleValue?: HandleValue;      // Handle (value) on enter [no handler]
-    htmlSize?: number;              // Number of characters to show [not rendered]
+    htmlSize?: number;              // Number of characters to show [50]
     initialValue?: string;          // Initial value to display [""]
     label?: string;                 // Element label [none]
     placeholder?: string;           // Placeholder text [none]

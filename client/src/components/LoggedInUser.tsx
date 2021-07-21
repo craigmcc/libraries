@@ -129,7 +129,6 @@ export const LoggedInUser = () => {
 */}
                     </Form.Label>
                     <Form.Control
-                        htmlSize={12}
                         id="loggedInUsername"
                         readOnly={true}
                         size="sm"

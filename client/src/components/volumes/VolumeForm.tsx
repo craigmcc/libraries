@@ -136,7 +136,6 @@ const VolumeForm = (props: Props) => {
                                     <Form.Label>Name:</Form.Label>
                                     <Form.Control
                                         autoFocus={props.autoFocus ? props.autoFocus : false}
-                                        htmlSize={25}
                                         isInvalid={touched.name && !!errors.name}
                                         isValid={!errors.name}
                                         name="name"
@@ -160,7 +159,6 @@ const VolumeForm = (props: Props) => {
                                             controlId="copyright" id="copyrightGroup">
                                     <Form.Label>Copyright Year:</Form.Label>
                                     <Form.Control
-                                        htmlSize={8}
                                         isInvalid={touched.copyright && !!errors.copyright}
                                         isValid={!errors.copyright}
                                         name="copyright"
@@ -181,7 +179,6 @@ const VolumeForm = (props: Props) => {
                                             controlId="google_id" id="googleIdGroup">
                                     <Form.Label>Google Books ID:</Form.Label>
                                     <Form.Control
-                                        htmlSize={16}
                                         isInvalid={touched.google_id && !!errors.google_id}
                                         isValid={!errors.google_id}
                                         name="google_id"
@@ -205,7 +202,6 @@ const VolumeForm = (props: Props) => {
                                             controlId="isbn" id="isbnGroup">
                                     <Form.Label>ISBN ID:</Form.Label>
                                     <Form.Control
-                                        htmlSize={16}
                                         isInvalid={touched.isbn && !!errors.isbn}
                                         isValid={!errors.isbn}
                                         name="isbn"
@@ -253,7 +249,6 @@ const VolumeForm = (props: Props) => {
                                             controlId="notes" id="notesGroup">
                                     <Form.Label>Notes:</Form.Label>
                                     <Form.Control
-                                        htmlSize={25}
                                         isInvalid={touched.notes && !!errors.notes}
                                         isValid={!errors.notes}
                                         name="notes"

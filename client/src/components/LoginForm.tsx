@@ -87,7 +87,6 @@ export const LoginForm = (props: Props) => {
                                     <Form.Label>Username:</Form.Label>
                                     <Form.Control
                                         autoFocus={props.autoFocus}
-                                        htmlSize={16}
                                         isInvalid={touched.username && !!errors.username}
                                         isValid={!errors.username}
                                         name="username"
@@ -106,7 +105,6 @@ export const LoginForm = (props: Props) => {
                                 <Form.Group controlId="password">
                                     <Form.Label>Password:</Form.Label>
                                     <Form.Control
-                                        htmlSize={16}
                                         isInvalid={touched.password && !!errors.password}
                                         isValid={!errors.password}
                                         name="password"

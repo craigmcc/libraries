@@ -149,11 +149,9 @@ const UserForm = (props: Props) => {
                         >
 
                             <Form.Row id="usernameRow">
-                                <Form.Group as={Row} className="mr-4"
-                                            controlId="name" id="usernameGroup">
+                                <Form.Group as={Col} controlId="name" id="usernameGroup">
                                     <Form.Label>Username:</Form.Label>
                                     <Form.Control
-                                        htmlSize={25}
                                         isInvalid={touched.username && !!errors.username}
                                         isValid={!errors.username}
                                         name="username"
@@ -173,11 +171,9 @@ const UserForm = (props: Props) => {
                             </Form.Row>
 
                             <Form.Row id="passwordRow">
-                                <Form.Group as={Row} className="mr-4"
-                                            controlId="name" id="passwordGroup">
+                                <Form.Group as={Col} controlId="name" id="passwordGroup">
                                     <Form.Label>Password:</Form.Label>
                                     <Form.Control
-                                        htmlSize={25}
                                         isInvalid={touched.password && !!errors.password}
                                         isValid={!errors.password}
                                         name="password"
@@ -198,11 +194,9 @@ const UserForm = (props: Props) => {
                             </Form.Row>
 
                             <Form.Row id="scopeRow">
-                                <Form.Group as={Row} className="mr-4"
-                                            controlId="name" id="scopeGroup">
+                                <Form.Group as={Col} controlId="name" id="scopeGroup">
                                     <Form.Label>Scope:</Form.Label>
                                     <Form.Control
-                                        htmlSize={25}
                                         isInvalid={touched.scope && !!errors.scope}
                                         isValid={!errors.scope}
                                         name="scope"
@@ -222,7 +216,7 @@ const UserForm = (props: Props) => {
                             </Form.Row>
 
                             <Form.Row id="activeRow">
-                                <Form.Group as={Row} controlId="active" id="activeGroup">
+                                <Form.Group as={Col} controlId="active" id="activeGroup">
                                     <Form.Check
                                         feedback={errors.active}
                                         defaultChecked={values.active}

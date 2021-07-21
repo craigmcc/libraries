@@ -128,11 +128,9 @@ const LibraryForm = (props: Props) => {
                         >
 
                             <Form.Row id="nameRow">
-                                <Form.Group as={Row} className="mr-4"
-                                            controlId="name" id="nameGroup">
+                                <Form.Group as={Col} controlId="name" id="nameGroup">
                                     <Form.Label>Name:</Form.Label>
                                     <Form.Control
-                                        htmlSize={25}
                                         isInvalid={touched.name && !!errors.name}
                                         isValid={!errors.name}
                                         name="name"
@@ -152,11 +150,9 @@ const LibraryForm = (props: Props) => {
                             </Form.Row>
 
                             <Form.Row id="notesRow">
-                                <Form.Group as={Row} className="mr-4"
-                                            controlId="notes" id="notesGroup">
+                                <Form.Group as={Col} controlId="notes" id="notesGroup">
                                     <Form.Label>Notes:</Form.Label>
                                     <Form.Control
-                                        htmlSize={25}
                                         isInvalid={touched.notes && !!errors.notes}
                                         isValid={!errors.notes}
                                         name="notes"
@@ -176,11 +172,9 @@ const LibraryForm = (props: Props) => {
                             </Form.Row>
 
                             <Form.Row id="scopeRow">
-                                <Form.Group as={Row} className="mr-4"
-                                            controlId="name" id="scopeGroup">
+                                <Form.Group as={Col} controlId="name" id="scopeGroup">
                                     <Form.Label>Scope:</Form.Label>
                                     <Form.Control
-                                        htmlSize={25}
                                         isInvalid={touched.scope && !!errors.scope}
                                         isValid={!errors.scope}
                                         name="scope"
@@ -201,7 +195,7 @@ const LibraryForm = (props: Props) => {
                             </Form.Row>
 
                             <Form.Row id="activeRow">
-                                <Form.Group as={Row} controlId="active" id="activeGroup">
+                                <Form.Group as={Col} controlId="active" id="activeGroup">
                                     <Form.Check
                                         feedback={errors.active}
                                         defaultChecked={values.active}
