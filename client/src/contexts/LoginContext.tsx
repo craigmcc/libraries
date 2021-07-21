@@ -87,7 +87,8 @@ export const LoginContextProvider = (props: any) => {
         logger.info({
             context: "LoginContext.handleLogin",
             username: newUsername,
-        })
+            tokenResponse: tokenResponse,
+        });
 
         // Set relevant state variables
         const newExpires: Date = new Date
@@ -115,7 +116,7 @@ export const LoginContextProvider = (props: any) => {
             })
         }
         setLevel(CURRENT_LOG_LEVEL);
-        logger.debug({
+        logger.info({
             context: "LoginContext.handleLogin",
             msg: "Successful completion",
             allowed: CURRENT_ALLOWED,
