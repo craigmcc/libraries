@@ -156,7 +156,7 @@ const SeriesOptions = (props: Props) => {
             <Row className="ml-1 mr-1">
                 <Table
                     bordered={true}
-                    hover={false}
+                    hover={true}
                     size="sm"
                     striped={true}
                 >
