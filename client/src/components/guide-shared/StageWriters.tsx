@@ -13,10 +13,10 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
+import {HandleStage, Stage} from "./Stage";
+import WriterOptions from "./WriterOptions";
 import {HandleAction, HandleAuthor, OnAction, Scopes} from "../types";
 import AuthorForm from "../authors/AuthorForm";
-import {HandleStage, Stage} from "../guide-shared/Stage";
-import WriterOptions from "../guide-shared/WriterOptions";
 import AuthorClient from "../../clients/AuthorClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
@@ -93,7 +93,7 @@ const StageWriters = (props: Props) => {
 
             // Exclude this Writer for the current Story
             /* const disassociated = */ await AuthorClient.storiesExclude
-                (libraryId, newWriter.id, props.story.id);
+            (libraryId, newWriter.id, props.story.id);
             logger.info({
                 context: "StageWriters.handleExclude",
                 msg: "Excluded Writer for Story",
@@ -119,7 +119,7 @@ const StageWriters = (props: Props) => {
             // Include this Writer for the current Story
             newWriter.principal = true; // Assume by default
             /* const associated = */ await AuthorClient.storiesInclude
-                (libraryId, newWriter.id, props.story.id, newWriter.principal);
+            (libraryId, newWriter.id, props.story.id, newWriter.principal);
             logger.info({
                 context: "StageWriters.handleInclude",
                 msg: "Included Writer for Story",
@@ -202,13 +202,13 @@ const StageWriters = (props: Props) => {
                 });
                 try {
                     await AuthorClient.storiesExclude
-                        (libraryId, newWriter.id, props.story.id);
+                    (libraryId, newWriter.id, props.story.id);
                 } catch (error) {
                     // Ignore error if not previously included
                 }
                 try {
                     await AuthorClient.storiesInclude
-                        (libraryId, newWriter.id, props.story.id, newWriter.principal);
+                    (libraryId, newWriter.id, props.story.id, newWriter.principal);
                 } catch (error) {
                     ReportError("StageAuthors.handleUpdate.include", error);
                 }
