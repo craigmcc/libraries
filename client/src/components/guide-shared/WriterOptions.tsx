@@ -68,7 +68,7 @@ const WriterOptions = (props: Props) => {
                                 limit: pageSize,
                                 offset: (pageSize * (currentPage - 1)),
                             });
-                        logger.info({
+                        logger.debug({
                             context: "WriterOptions.fetchWriters",
                             msg: "Select by searchText",
                             searchText: searchText,
@@ -78,7 +78,7 @@ const WriterOptions = (props: Props) => {
                         // Fetch only Authors included in the current Story
                         newWriters =
                             await StoryClient.authors(libraryId, props.story.id);
-                        logger.info({
+                        logger.debug({
                             context: "WriterOptions.fetchWriters",
                             msg: "Select by included",
                             searchText: searchText,
@@ -152,7 +152,7 @@ const WriterOptions = (props: Props) => {
                     <Pagination
                         currentPage={currentPage}
                         lastPage={(writers.length === 0) ||
-                            (writers.length < pageSize)}
+                        (writers.length < pageSize)}
                         onNext={onNext}
                         onPrevious={onPrevious}
                         variant="secondary"
