@@ -14,6 +14,7 @@ import StageAuthors from "./StageAuthors";
 import StageSeries from "./StageSeries";
 import StageStories from "./StageStories";
 import StageWriters from "./StageWriters";
+import { Stage } from "../guide-shared/Stage";
 import SeriesClient from "../../clients/SeriesClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
@@ -26,15 +27,6 @@ import StoryClient from "../../clients/StoryClient";
 
 // Component Details ---------------------------------------------------------
 
-export enum Stage {
-    SERIES,
-    AUTHORS,
-    STORIES,
-    WRITERS,
-}
-
-export type HandleStage = (newStage: Stage) => void;
-
 const GuideSeries = () => {
 
     const libraryContext = useContext(LibraryContext);
@@ -43,7 +35,7 @@ const GuideSeries = () => {
     const [libraryId] = useState<number>(libraryContext.state.library.id);
     const [series, setSeries] = useState<Series>(new Series());
     const [seriesId, setSeriesId] = useState<number>(-1);
-    const [stage, setStage] = useState<Stage>(Stage.SERIES);
+    const [stage, setStage] = useState<Stage>(Stage.PARENT);
     const [story, setStory] = useState<Story>(new Story());
     const [storyId, setStoryId] = useState<number>(-1);
 
@@ -267,7 +259,7 @@ const GuideSeries = () => {
             />
             <hr color="cyan"/>
 
-            {(stage === Stage.SERIES) ? (
+            {(stage === Stage.PARENT) ? (
                 <StageSeries
                     handleRefresh={handleRefresh}
                     handleSeries={handleSeries}

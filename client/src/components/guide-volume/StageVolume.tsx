@@ -13,9 +13,9 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
-import {HandleStage, Stage} from "./GuideVolume";
 import VolumeOptions from "./VolumeOptions";
 import {HandleAction, HandleVolume, OnAction, Scopes} from "../types";
+import {HandleStage, Stage} from "../guide-shared/Stage";
 import VolumeForm from "../volumes/VolumeForm";
 import StoryClient from "../../clients/StoryClient";
 import VolumeClient from "../../clients/VolumeClient";

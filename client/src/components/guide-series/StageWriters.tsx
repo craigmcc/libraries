@@ -13,9 +13,9 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
-import {HandleStage, Stage} from "./GuideSeries";
 import {HandleAction, HandleAuthor, OnAction, Scopes} from "../types";
 import AuthorForm from "../authors/AuthorForm";
+import {HandleStage, Stage} from "../guide-shared/Stage";
 import WriterOptions from "../guide-shared/WriterOptions";
 import AuthorClient from "../../clients/AuthorClient";
 import LibraryContext from "../../contexts/LibraryContext";

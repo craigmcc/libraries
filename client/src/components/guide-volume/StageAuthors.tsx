@@ -14,9 +14,9 @@ import Row from "react-bootstrap/Row";
 // Internal Modules ----------------------------------------------------------
 
 import AuthorOptions from "./AuthorOptions";
-import {HandleStage, Stage} from "./GuideVolume";
 import {HandleAction, HandleAuthor, OnAction, Scopes} from "../types";
 import AuthorForm from "../authors/AuthorForm";
+import {HandleStage, Stage} from "../guide-shared/Stage";
 import AuthorClient from "../../clients/AuthorClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
@@ -268,7 +268,7 @@ const StageAuthors = (props: Props) => {
                         <Col className="text-left">
                             <Button
                                 disabled={false}
-                                onClick={() => props.handleStage(Stage.VOLUME)}
+                                onClick={() => props.handleStage(Stage.PARENT)}
                                 size="sm"
                                 variant="success"
                             >Previous</Button>

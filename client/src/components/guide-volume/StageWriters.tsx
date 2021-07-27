@@ -13,9 +13,9 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
-import {HandleStage, Stage} from "./GuideVolume";
 import {HandleAction, HandleAuthor, OnAction, Scopes} from "../types";
 import AuthorForm from "../authors/AuthorForm";
+import {HandleStage, Stage} from "../guide-shared/Stage";
 import WriterOptions from "../guide-shared/WriterOptions";
 import AuthorClient from "../../clients/AuthorClient";
 import LibraryContext from "../../contexts/LibraryContext";
@@ -147,7 +147,7 @@ const StageWriters = (props: Props) => {
                 context: "StageWriters.handleInsert",
                 msg: "Inserted new Writer",
                 writer: newWriter,
-            })
+            });
             setWriter(null);
 
             // Assume a new Author is included in the current Story
@@ -171,7 +171,7 @@ const StageWriters = (props: Props) => {
                 context: "StageWriters.handleRemove",
                 msg: "Removed existing Writer",
                 writer: newWriter,
-            })
+            });
             setWriter(null);
         } catch (error) {
             ReportError("StageWriters.handleRemove", error);
@@ -183,7 +183,7 @@ const StageWriters = (props: Props) => {
         logger.debug({
             context: "StageWriters.handleUpdate",
             msg: "Updating existing Writer",
-            author: newWriter,
+            writer: newWriter,
         });
         try {
             // Update the Writer itself
@@ -192,7 +192,7 @@ const StageWriters = (props: Props) => {
                 context: "StageWriters.handleUpdate",
                 msg: "Updated existing Writer",
                 writer: newWriter,
-            })
+            });
             // If the principal changed, remove and insert to update it
             if (writer && (newWriter.principal !== writer.principal)) {
                 logger.info({

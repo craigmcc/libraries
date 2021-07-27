@@ -13,8 +13,8 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
-import {HandleStage, Stage} from "./GuideVolume";
 import {HandleAction, HandleStory, OnAction, Scopes} from "../types";
+import {HandleStage, Stage} from "../guide-shared/Stage";
 import StoryOptions from "../guide-shared/StoryOptions";
 import StoryForm from "../stories/StoryForm";
 import AuthorClient from "../../clients/AuthorClient";

@@ -14,6 +14,7 @@ import StageStories from "./StageStories";
 import StageVolume from "./StageVolume";
 import StageWriters from "./StageWriters";
 import VolumeSummary from "./VolumeSummary";
+import { Stage } from "../guide-shared/Stage";
 import VolumeClient from "../../clients/VolumeClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
@@ -26,22 +27,13 @@ import StoryClient from "../../clients/StoryClient";
 
 // Component Details ---------------------------------------------------------
 
-export enum Stage {
-    VOLUME,
-    AUTHORS,
-    STORIES,
-    WRITERS,
-}
-
-export type HandleStage = (newStage: Stage) => void;
-
 const GuideVolume = () => {
 
     const libraryContext = useContext(LibraryContext);
     const loginContext = useContext(LoginContext);
 
     const [libraryId] = useState<number>(libraryContext.state.library.id);
-    const [stage, setStage] = useState<Stage>(Stage.VOLUME);
+    const [stage, setStage] = useState<Stage>(Stage.PARENT);
     const [story, setStory] = useState<Story>(new Story());
     const [storyId, setStoryId] = useState<number>(-1);
     const [volume, setVolume] = useState<Volume>(new Volume());
@@ -258,7 +250,7 @@ const GuideVolume = () => {
             />
             <hr color="cyan"/>
 
-            {(stage === Stage.VOLUME) ? (
+            {(stage === Stage.PARENT) ? (
                 <StageVolume
                     handleRefresh={handleRefresh}
                     handleStage={handleStage}

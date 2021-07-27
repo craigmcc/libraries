@@ -13,9 +13,9 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
-import {HandleStage, Stage} from "./GuideSeries";
 import SeriesOptions from "./SeriesOptions";
 import {HandleAction, HandleSeries, OnAction, Scopes} from "../types";
+import {HandleStage, Stage} from "../guide-shared/Stage";
 import SeriesForm from "../series/SeriesForm";
 import SeriesClient from "../../clients/SeriesClient";
 import LibraryContext from "../../contexts/LibraryContext";
