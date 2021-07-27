@@ -12,8 +12,8 @@ import Container from "react-bootstrap/Container";
 import SeriesSummary from "./SeriesSummary";
 import StageAuthors from "./StageAuthors";
 import StageSeries from "./StageSeries";
-import StageStories from "./StageStories";
 import { Stage } from "../guide-shared/Stage";
+import StageStories from "../guide-shared/StageStories";
 import StageWriters from "../guide-shared/StageWriters";
 import SeriesClient from "../../clients/SeriesClient";
 import LibraryContext from "../../contexts/LibraryContext";
@@ -281,7 +281,7 @@ const GuideSeries = () => {
                     handleRefresh={handleRefresh}
                     handleStage={handleStage}
                     handleStory={handleStory}
-                    series={series}
+                    parent={series}
                 />
             ) : null}
 
