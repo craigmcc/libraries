@@ -20,10 +20,12 @@ import SearchBar from "../SearchBar";
 import {HandleAuthor, HandleValue, OnAction} from "../types";
 import AuthorClient from "../../clients/AuthorClient";
 import SeriesClient from "../../clients/SeriesClient";
+import VolumeClient from "../../clients/VolumeClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
 import Author from "../../models/Author";
 import Series from "../../models/Series";
+import Volume from "../../models/Volume";
 import logger from "../../util/client-logger";
 import ReportError from "../../util/ReportError";
 import {listValue} from "../../util/transformations";
@@ -36,7 +38,7 @@ export interface Props {
     handleExclude: HandleAuthor;        // Handle request to exclude an Author
     handleInclude: HandleAuthor;        // Handle request to include an Author
     included: (author: Author) => boolean; // Is the specified Author included?
-    series: Series;                     // Currently selected Series
+    parent: Series | Volume;            // Currently selected Series/Volume
 }
 
 // Component Details ---------------------------------------------------------
@@ -57,7 +59,7 @@ const AuthorOptions = (props: Props) => {
         const fetchAuthors = async () => {
 
             // Fetch matching (search text) or included (no search text) Authors
-            if (loginContext.state.loggedIn && (libraryId > 0) && (props.series.id > 0)) {
+            if (loginContext.state.loggedIn && (libraryId > 0) && (props.parent.id > 0)) {
                 let newAuthors: Author[] = [];
                 try {
                     if (searchText.length > 0) {
@@ -74,9 +76,10 @@ const AuthorOptions = (props: Props) => {
                             authors: newAuthors,
                         });
                     } else {
-                        // Fetch only Authors included in the current Series
-                        newAuthors =
-                            await SeriesClient.authors(libraryId, props.series.id);
+                        // Fetch only Authors included in the current Series/Volume
+                        newAuthors = (props.parent instanceof Series)
+                            ? await SeriesClient.authors(libraryId, props.parent.id)
+                            : await VolumeClient.authors(libraryId, props.parent.id);
                         logger.debug({
                             context: "AuthorOptions.fetchAuthors",
                             msg: "Select by included",
@@ -109,7 +112,7 @@ const AuthorOptions = (props: Props) => {
 
         fetchAuthors();
 
-    }, [loginContext.state.loggedIn, props.series,
+    }, [loginContext.state.loggedIn, props.parent,
         currentPage, libraryId, pageSize, searchText]);
 
     const handleChange: HandleValue = (newSearchText) => {
@@ -151,7 +154,7 @@ const AuthorOptions = (props: Props) => {
                     <Pagination
                         currentPage={currentPage}
                         lastPage={(authors.length === 0) ||
-                            (authors.length < pageSize)}
+                        (authors.length < pageSize)}
                         onNext={onNext}
                         onPrevious={onPrevious}
                         variant="secondary"

@@ -13,9 +13,9 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
-import AuthorOptions from "./AuthorOptions";
 import {HandleAction, HandleAuthor, OnAction, Scopes} from "../types";
 import AuthorForm from "../authors/AuthorForm";
+import AuthorOptions from "../guide-shared/AuthorOptions";
 import {HandleStage, Stage} from "../guide-shared/Stage";
 import AuthorClient from "../../clients/AuthorClient";
 import LibraryContext from "../../contexts/LibraryContext";
@@ -295,7 +295,7 @@ const StageAuthors = (props: Props) => {
                         handleExclude={handleExclude}
                         handleInclude={handleInclude}
                         included={included}
-                        volume={props.volume}
+                        parent={props.volume}
                     />
                     <Button
                         className="mt-3 ml-1"

@@ -13,7 +13,7 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
-import AuthorOptions from "./AuthorOptions";
+import AuthorOptions from "../guide-shared/AuthorOptions";
 import {HandleStage, Stage} from "../guide-shared/Stage";
 import {HandleAction, HandleAuthor, OnAction, Scopes} from "../types";
 import AuthorForm from "../authors/AuthorForm";
@@ -283,7 +283,7 @@ const StageAuthors = (props: Props) => {
                         handleExclude={handleExclude}
                         handleInclude={handleInclude}
                         included={included}
-                        series={props.series}
+                        parent={props.series}
                     />
                     <Button
                         className="mt-3 ml-1"
