@@ -14,8 +14,8 @@ import Row from "react-bootstrap/Row";
 // Internal Modules ----------------------------------------------------------
 
 import {HandleStage, Stage} from "./GuideSeries";
-import StoryOptions from "./StoryOptions";
 import {HandleAction, HandleStory, OnAction, Scopes} from "../types";
+import StoryOptions from "../guide-shared/StoryOptions";
 import StoryForm from "../stories/StoryForm";
 import AuthorClient from "../../clients/AuthorClient";
 import SeriesClient from "../../clients/SeriesClient";
@@ -304,7 +304,7 @@ const StageStories = (props: Props) => {
                         handleInsert={handleInsert}
                         handleSelect={handleSelect}
                         included={included}
-                        series={props.series}
+                        parent={props.series}
                     />
                     <Button
                         className="mt-3 ml-1"

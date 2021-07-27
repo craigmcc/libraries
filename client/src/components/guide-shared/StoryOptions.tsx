@@ -1,8 +1,8 @@
 // StoryOptions --------------------------------------------------------------
 
 // List Stories that match search criteria, offering callbacks for adding,
-// editing, including (marking this Story as part of this Volume), or
-// excluding (marking this Story as not part of this Volume).
+// editing, including (marking this Story as part of this Series/Volume), or
+// excluding (marking this Story as not part of this Series/Volume).
 
 // External Modules ----------------------------------------------------------
 
@@ -21,6 +21,7 @@ import {HandleStory, HandleValue, OnAction} from "../types";
 import StoryClient from "../../clients/StoryClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
+import Series from "../../models/Series";
 import Story from "../../models/Story";
 import Volume from "../../models/Volume";
 import logger from "../../util/client-logger";
@@ -36,9 +37,8 @@ export interface Props {
     handleInclude: HandleStory;         // Handle request to include a Story
     handleInsert: HandleStory;          // Handle request to insert a Story
     handleSelect: HandleStory;          // Handle request to select a Story
-    included: (story: Story) => boolean;
-                                        // Is the specified Story included?
-    volume: Volume;                     // Currently selected Volume
+    included: (story: Story) => boolean; // Is the specified Story included?
+    parent: Series | Volume;            // Currently selected Series
 }
 
 // Component Details ---------------------------------------------------------
@@ -59,7 +59,7 @@ const StoryOptions = (props: Props) => {
         const fetchStories = async () => {
 
             // Fetch matching (search text) or included (no search text) Stories
-            if (loginContext.state.loggedIn && (libraryId > 0) && (props.volume.id > 0)) {
+            if (loginContext.state.loggedIn && (libraryId > 0) && (props.parent.id > 0)) {
                 let newStories: Story[] = [];
                 try {
                     if (searchText.length > 0) {
@@ -71,7 +71,7 @@ const StoryOptions = (props: Props) => {
                                 offset: (pageSize * (currentPage - 1)),
                                 withAuthors: "",
                             });
-                        logger.info({
+                        logger.debug({
                             context: "StoryOptions.fetchStories",
                             msg: "Select by searchText",
                             searchText: searchText,
@@ -81,10 +81,11 @@ const StoryOptions = (props: Props) => {
                     } else {
 
                         // Fetch currently included Stories
-                        newStories = props.volume.stories;
+                        newStories = props.parent.stories;
 
                     }
                     setStories(newStories);
+
                 } catch (error) {
                     setStories([]);
                     if (error.response && (error.response.status === 403)) {
@@ -108,7 +109,7 @@ const StoryOptions = (props: Props) => {
 
         fetchStories();
 
-    }, [libraryContext.state.library.id, loginContext.state.loggedIn, props.volume,
+    }, [libraryContext.state.library.id, loginContext.state.loggedIn, props.parent,
         currentPage, libraryId, pageSize, searchText]);
 
     const handleChange: HandleValue = (newSearchText) => {
@@ -150,7 +151,7 @@ const StoryOptions = (props: Props) => {
                     <Pagination
                         currentPage={currentPage}
                         lastPage={(stories.length === 0) ||
-                            (stories.length < pageSize)}
+                        (stories.length < pageSize)}
                         onNext={onNext}
                         onPrevious={onPrevious}
                         variant="secondary"
@@ -178,6 +179,9 @@ const StoryOptions = (props: Props) => {
                     <thead>
                     <tr className="table-secondary">
                         <th scope="col">Name</th>
+                        {(props.parent instanceof Series) ? (
+                            <th scope="col">Ordinal</th>
+                        ) : null }
                         <th scope="col">Active</th>
                         <th scope="col">Notes</th>
                         <th scope="col">Actions</th>
@@ -193,10 +197,15 @@ const StoryOptions = (props: Props) => {
                             <td key={1000 + (rowIndex * 100) + 1}>
                                 {story.name}
                             </td>
-                            <td key={1000 + (rowIndex * 100) + 2}>
+                            {(props.parent instanceof Series) ? (
+                                <td key={1000 + (rowIndex * 100) + 2}>
+                                    {story.ordinal}
+                                </td>
+                            ) : null }
+                            <td key={1000 + (rowIndex * 100) + 3}>
                                 {listValue(story.active)}
                             </td>
-                            <td key={1000 + (rowIndex * 100) + 3}>
+                            <td key={1000 + (rowIndex * 100) + 4}>
                                 {story.notes}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 99}>
