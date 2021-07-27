@@ -1,7 +1,7 @@
 // StageAuthors --------------------------------------------------------------
 
-// Select Author(s) for the currently selected Volume, while offering the
-// option to edit existing Authors or create a new one.
+// Select Author(s) for the currently selected Series/Volume, while offering
+// the option to edit existing Authors or create a new one.
 
 // External Modules ----------------------------------------------------------
 
@@ -13,14 +13,15 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
+import AuthorOptions from "./AuthorOptions";
+import {HandleStage, Stage} from "./Stage";
 import {HandleAction, HandleAuthor, OnAction, Scopes} from "../types";
 import AuthorForm from "../authors/AuthorForm";
-import AuthorOptions from "../guide-shared/AuthorOptions";
-import {HandleStage, Stage} from "../guide-shared/Stage";
 import AuthorClient from "../../clients/AuthorClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
 import Author from "../../models/Author";
+import Series from "../../models/Series";
 import Volume from "../../models/Volume";
 import logger from "../../util/client-logger";
 import ReportError from "../../util/ReportError";
@@ -30,7 +31,7 @@ import ReportError from "../../util/ReportError";
 export interface Props {
     handleRefresh: HandleAction;        // Trigger a UI refresh
     handleStage: HandleStage;           // Handle changing guide stage
-    volume: Volume;                     // Currently selected volume
+    parent: Series | Volume;            // Currently selected Series/Volume
 }
 
 // Component Details ---------------------------------------------------------
@@ -48,14 +49,14 @@ const StageAuthors = (props: Props) => {
 
         logger.info({
             context: "StageAuthors.useEffect",
-            volume: props.volume,
+            parent: props.parent,
         });
 
         // Record current permissions
         setCanRemove(loginContext.validateScope(Scopes.SUPERUSER));
 
-    }, [libraryContext.state.library.id, loginContext, loginContext.state.loggedIn,
-        libraryId, props.volume]);
+    }, [loginContext, loginContext.state.loggedIn,
+        libraryId, props.parent]);
 
     const handleAdd: OnAction = () => {
         const newAuthor = new Author({
@@ -83,24 +84,27 @@ const StageAuthors = (props: Props) => {
     const handleExclude: HandleAuthor = async (newAuthor) => {
         logger.debug({
             context: "StageAuthors.handleExclude",
-            msg: "Excluding Author for Volume",
+            msg: "Excluding Author for Series/Volume",
             author: newAuthor,
-            volume: props.volume,
+            parent: props.parent,
         });
         try {
 
-            // Exclude this Author for the current Volume
-            /* const disassociated = */ await AuthorClient.volumesExclude
-               (libraryId, newAuthor.id, props.volume.id);
+            // Exclude this Author for the current Series/Volume
+            if (props.parent instanceof Series) {
+                await AuthorClient.seriesExclude(libraryId, newAuthor.id, props.parent.id);
+            } else {
+                await AuthorClient.volumesExclude(libraryId, newAuthor.id, props.parent.id);
+            }
             logger.info({
                 context: "StageAuthors.handleExclude",
-                msg: "Excluded Author for Volume",
-                volume: props.volume,
+                msg: "Excluded Author for Series/Volume",
+                parent: props.parent,
                 author: newAuthor,
             });
 
-            // For any Story in this Volume, exclude this Author
-            for (const story of props.volume.stories) {
+            // For any Story in this Series/Volume, exclude this Author
+            for (const story of props.parent.stories) {
                 try {
                     await AuthorClient.storiesExclude(libraryId, newAuthor.id, story.id);
                 } catch (error) {
@@ -118,34 +122,25 @@ const StageAuthors = (props: Props) => {
     const handleInclude: HandleAuthor = async (newAuthor) => {
         logger.debug({
             context: "StageAuthors.handleInclude",
-            msg: "Including Author for Volume",
+            msg: "Including Author for Series/Volume",
             author: newAuthor,
-            volume: props.volume,
+            parent: props.parent,
         });
         try {
 
-            // Include this Author for the current Volume
+            // Include this Author for the current Series/Volume
             newAuthor.principal = true; // Assume by default
-            /* const associated = */ await AuthorClient.volumesInclude
-                (libraryId, newAuthor.id, props.volume.id, newAuthor.principal);
+            if (props.parent instanceof Series) {
+                await AuthorClient.seriesInclude(libraryId, newAuthor.id, props.parent.id, newAuthor.principal);
+            } else {
+                await AuthorClient.volumesInclude(libraryId, newAuthor.id, props.parent.id, newAuthor.principal);
+            }
             logger.info({
                 context: "StageAuthors.handleInclude",
-                msg: "Included Author for Volume",
-                volume: props.volume,
+                msg: "Included Author for Series/Volume",
+                parent: props.parent,
                 author: newAuthor,
             });
-
-            // For "Single" or "Collection" Volume, add to Authors for each Story
-            if ((props.volume.type === "Single") || (props.volume.type === "Collection")) {
-                logger.info({
-                    context: "StageAuthors.handleInclude",
-                    msg: `Adding Author to ${props.volume.stories.length} Stories`,
-                });
-                for (const story of props.volume.stories) {
-                    await AuthorClient.storiesInclude(libraryId, newAuthor.id, story.id, newAuthor.principal);
-                }
-            }
-
 
         } catch (error) {
             ReportError("StageAuthors.handleInclude", error);
@@ -170,7 +165,7 @@ const StageAuthors = (props: Props) => {
             })
             setAuthor(null);
 
-            // Assume a new Author is included in the current Volume
+            // Assume a new Author is included in the current Series/Volume
             await handleInclude(inserted);
 
         } catch (error) {
@@ -192,6 +187,7 @@ const StageAuthors = (props: Props) => {
                 msg: "Removed existing Author",
                 author: newAuthor,
             });
+            // Database constraints will deal with any join tables
             setAuthor(null);
         } catch (error) {
             ReportError("StageAuthors.handleRemove", error);
@@ -206,50 +202,58 @@ const StageAuthors = (props: Props) => {
             author: newAuthor,
         });
         try {
+
             // Update the Author itself
             await AuthorClient.update(libraryId, newAuthor.id, newAuthor);
             logger.info({
                 context: "StageAuthors.handleUpdate",
                 msg: "Updated existing Author",
                 author: newAuthor,
-            })
+            });
+
+            // If the principal changed, remove and insert to update it
+            if (author && (newAuthor.principal !== author.principal)) {
+                logger.info({
+                    context: "StageAuthors.handleUpdate",
+                    msg: "Reregister Author-Series/Author-Volume for new principal",
+                    author: newAuthor,
+                });
+                try {
+                    if (props.parent instanceof Series) {
+                        await AuthorClient.seriesExclude(libraryId, newAuthor.id, props.parent.id);
+                    } else {
+                        await AuthorClient.volumesExclude(libraryId, newAuthor.id, props.parent.id);
+                    }
+                } catch (error) {
+                    // Ignore error if not previously included
+                }
+                try {
+                    if (props.parent instanceof Series) {
+                        await AuthorClient.seriesInclude(libraryId, newAuthor.id, props.parent.id, newAuthor.principal);
+                    } else {
+                        await AuthorClient.volumesInclude(libraryId, newAuthor.id, props.parent.id, newAuthor.principal);
+                    }
+                } catch (error) {
+                    ReportError("StageAuthors.handleUpdate.include", error);
+                }
+            } else {
+                logger.info({
+                    context: "StageAuthors.handleUpdate",
+                    msg: "No reregister is required",
+                    author: newAuthor,
+                });
+            }
             setAuthor(null);
         } catch (error) {
             ReportError("StageAuthors.handleUpdate", error);
         }
-        // If the principal changed, remove and insert to update it
-        if (author && (newAuthor.principal !== author.principal)) {
-            logger.info({
-                context: "StageAuthors.handleUpdate",
-                msg: "Reregister Author-Series for new principal",
-                author: newAuthor,
-            });
-            try {
-                await AuthorClient.volumesExclude
-                    (libraryId, newAuthor.id, props.volume.id);
-            } catch (error) {
-                // Ignore error if not previously included
-            }
-            try {
-                await AuthorClient.volumesInclude
-                (libraryId, newAuthor.id, props.volume.id, newAuthor.principal);
-            } catch (error) {
-                ReportError("StageAuthors.handleUpdate.include", error);
-            }
-        } else {
-            logger.info({
-                context: "StageAuthors.handleUpdate",
-                msg: "No reregister is required",
-                author: newAuthor,
-            });
-        }
         props.handleRefresh();
     }
 
-    // Is the specified Author currently included for this Volume?
+    // Is the specified Author currently included for this Series/Volume?
     const included = (author: Author): boolean => {
         let result = false;
-        props.volume.authors.forEach(includedAuthor => {
+        props.parent.authors.forEach(includedAuthor => {
             if (author.id === includedAuthor.id) {
                 result = true;
             }
@@ -274,17 +278,21 @@ const StageAuthors = (props: Props) => {
                             >Previous</Button>
                         </Col>
                         <Col className="text-center">
-                            <span>Manage Authors for Volume:&nbsp;</span>
+                            {(props.parent instanceof Series) ? (
+                                <span>Manage Authors for Series:&nbsp;</span>
+                            ) : (
+                                <span>Manage Authors for Volume:&nbsp;</span>
+                            )}
                             <span className="text-info">
-                                {props.volume.name}
+                                {props.parent.name}
                             </span>
                         </Col>
                         <Col className="text-right">
                             <Button
-                                disabled={props.volume.authors.length < 1}
+                                disabled={props.parent.authors.length < 1}
                                 onClick={() => props.handleStage(Stage.STORIES)}
                                 size="sm"
-                                variant={(props.volume.authors.length < 1) ? "outline-success" : "success"}
+                                variant={(props.parent.authors.length < 1) ? "outline-success" : "success"}
                             >Next</Button>
                         </Col>
                     </Row>
@@ -295,7 +303,7 @@ const StageAuthors = (props: Props) => {
                         handleExclude={handleExclude}
                         handleInclude={handleInclude}
                         included={included}
-                        parent={props.volume}
+                        parent={props.parent}
                     />
                     <Button
                         className="mt-3 ml-1"
@@ -318,9 +326,13 @@ const StageAuthors = (props: Props) => {
                             ) : (
                                 <span>Add New&nbsp;</span>
                             )}
-                            <span>Author for Volume:&nbsp;</span>
+                            {(props.parent instanceof Series) ? (
+                                <span>Author for Series:&nbsp;</span>
+                            ) : (
+                                <span>Author for Volume:&nbsp;</span>
+                            )}
                             <span className="text-info">
-                                {props.volume.name}
+                                {props.parent.name}
                             </span>
                         </Col>
                         <Col className="text-right">

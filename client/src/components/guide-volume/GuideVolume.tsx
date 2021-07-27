@@ -9,10 +9,10 @@ import Container from "react-bootstrap/Container";
 
 // Internal Modules ----------------------------------------------------------
 
-import StageAuthors from "./StageAuthors";
 import StageVolume from "./StageVolume";
 import VolumeSummary from "./VolumeSummary";
 import { Stage } from "../guide-shared/Stage";
+import StageAuthors from "../guide-shared/StageAuthors";
 import StageStories from "../guide-shared/StageStories";
 import StageWriters from "../guide-shared/StageWriters";
 import VolumeClient from "../../clients/VolumeClient";
@@ -263,7 +263,7 @@ const GuideVolume = () => {
                 <StageAuthors
                     handleRefresh={handleRefresh}
                     handleStage={handleStage}
-                    volume={volume}
+                    parent={volume}
                 />
             ) : null}
 

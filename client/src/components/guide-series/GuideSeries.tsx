@@ -10,8 +10,8 @@ import Container from "react-bootstrap/Container";
 // Internal Modules ----------------------------------------------------------
 
 import SeriesSummary from "./SeriesSummary";
-import StageAuthors from "./StageAuthors";
 import StageSeries from "./StageSeries";
+import StageAuthors from "../guide-shared/StageAuthors";
 import { Stage } from "../guide-shared/Stage";
 import StageStories from "../guide-shared/StageStories";
 import StageWriters from "../guide-shared/StageWriters";
@@ -272,7 +272,7 @@ const GuideSeries = () => {
                 <StageAuthors
                     handleRefresh={handleRefresh}
                     handleStage={handleStage}
-                    series={series}
+                    parent={series}
                 />
             ) : null}
 
