@@ -19,7 +19,7 @@ import * as SortOrder from "../models/SortOrder";
 import Story from "../models/Story";
 import Volume from "../models/Volume";
 import {NotFound} from "../util/http-errors";
-import {appendPagination} from "../util/query-parameters";
+import {appendQuery, appendQueryWithNames} from "../util/query-parameters";
 import logger from "../util/server-logger";
 
 // Public Objects ------------------------------------------------------------
@@ -602,77 +602,6 @@ export class AuthorServices {
 export default new AuthorServices();
 
 // Private Objects -----------------------------------------------------------
-
-const appendQuery = (options: FindOptions, query?: any): FindOptions => {
-
-    if (!query) {
-        return options;
-    }
-    options = appendPagination(options, query);
-
-    // Inclusion parameters
-    let include = [];
-    if ("" === query.withLibrary) {
-        include.push(Library);
-    }
-    if ("" === query.withSeries) {
-        include.push(Series);
-    }
-    if ("" === query.withStories) {
-        include.push(Story);
-    }
-    if ("" === query.withVolumes) {
-        include.push(Volume);
-    }
-    if (include.length > 0) {
-        options.include = include;
-    }
-
-    return options;
-
-}
-
-const appendQueryWithName = (options: FindOptions, query?: any): FindOptions => {
-    options = appendQuery(options, query);
-    if (query.name) {
-        options = {
-            ...options,
-            where: {
-                name: {[Op.iLike]: `%${query.name}%`}
-            },
-        }
-    }
-    return options;
-}
-
-const appendQueryWithNames = (options: FindOptions, query?: any): FindOptions => {
-    options = appendQuery(options, query);
-    if (query.name) {
-        const names = query.name.trim().split(" ");
-        if (names.length < 2) {
-            options = {
-                ...options,
-                where: {
-                    [Op.or]: {
-                        first_name: {[Op.iLike]: `%${names[0]}%`},
-                        last_name: {[Op.iLike]: `%${names[0]}%`},
-                    }
-                },
-            };
-        } else {
-            options = {
-                ...options,
-                where: {
-                    [Op.and]: {
-                        first_name: {[Op.iLike]: `%${names[0]}%`},
-                        last_name: {[Op.iLike]: `%${names[1]}%`},
-                    }
-                },
-            };
-        }
-    }
-    return options;
-}
 
 const fields: string[] = [
     "active",

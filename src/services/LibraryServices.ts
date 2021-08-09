@@ -17,7 +17,7 @@ import * as SortOrder from "../models/SortOrder";
 import Story from "../models/Story";
 import Volume from "../models/Volume";
 import {NotFound} from "../util/http-errors";
-import {appendPagination} from "../util/query-parameters";
+import {appendQuery, appendQueryWithName} from "../util/query-parameters";
 
 // Public Classes ------------------------------------------------------------
 
@@ -210,48 +210,6 @@ export class LibraryServices extends AbstractServices<Library> {
 export default new LibraryServices();
 
 // Private Objects -----------------------------------------------------------
-
-const appendQuery = (options: FindOptions, query?: any): FindOptions => {
-
-    if (!query) {
-        return options;
-    }
-    options = appendPagination(options, query);
-
-    // Inclusion parameters
-    let include = [];
-    if ("" === query.withAuthors) {
-        include.push(Author);
-    }
-    if ("" === query.withSeries) {
-        include.push(Series);
-    }
-    if ("" === query.withStories) {
-        include.push(Story);
-    }
-    if ("" === query.withVolumes) {
-        include.push(Volume);
-    }
-    if (include.length > 0) {
-        options.include = include;
-    }
-
-    return options;
-
-}
-
-const appendQueryWithName = (options: FindOptions, query?: any): FindOptions => {
-    options = appendQuery(options, query);
-    if (query.name) {
-        options = {
-            ...options,
-            where: {
-                name: {[Op.iLike]: `%${query.name}%`}
-            },
-        }
-    }
-    return options;
-}
 
 const fields: string[] = [
     "active",
