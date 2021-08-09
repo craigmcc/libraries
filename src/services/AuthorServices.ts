@@ -36,7 +36,7 @@ export class AuthorServices {
                 "AuthorServices.all"
             );
         }
-        let options: FindOptions = appendQuery({
+        let options: FindOptions = appendQueryWithNames({
             order: SortOrder.AUTHORS,
         }, query);
         return await library.$get("authors", options);
@@ -630,6 +630,48 @@ const appendQuery = (options: FindOptions, query?: any): FindOptions => {
 
     return options;
 
+}
+
+const appendQueryWithName = (options: FindOptions, query?: any): FindOptions => {
+    options = appendQuery(options, query);
+    if (query.name) {
+        options = {
+            ...options,
+            where: {
+                name: {[Op.iLike]: `%${query.name}%`}
+            },
+        }
+    }
+    return options;
+}
+
+const appendQueryWithNames = (options: FindOptions, query?: any): FindOptions => {
+    options = appendQuery(options, query);
+    if (query.name) {
+        const names = query.name.trim().split(" ");
+        if (names.length < 2) {
+            options = {
+                ...options,
+                where: {
+                    [Op.or]: {
+                        first_name: {[Op.iLike]: `%${names[0]}%`},
+                        last_name: {[Op.iLike]: `%${names[0]}%`},
+                    }
+                },
+            };
+        } else {
+            options = {
+                ...options,
+                where: {
+                    [Op.and]: {
+                        first_name: {[Op.iLike]: `%${names[0]}%`},
+                        last_name: {[Op.iLike]: `%${names[1]}%`},
+                    }
+                },
+            };
+        }
+    }
+    return options;
 }
 
 const fields: string[] = [

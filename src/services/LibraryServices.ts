@@ -26,7 +26,7 @@ export class LibraryServices extends AbstractServices<Library> {
     // Standard CRUD Methods -------------------------------------------------
 
     public async all(query?: any): Promise<Library[]> {
-        let options: FindOptions = appendQuery({
+        let options: FindOptions = appendQueryWithName({
             order: SortOrder.LIBRARIES
         }, query);
         return Library.findAll(options);
@@ -238,6 +238,19 @@ const appendQuery = (options: FindOptions, query?: any): FindOptions => {
 
     return options;
 
+}
+
+const appendQueryWithName = (options: FindOptions, query?: any): FindOptions => {
+    options = appendQuery(options, query);
+    if (query.name) {
+        options = {
+            ...options,
+            where: {
+                name: {[Op.iLike]: `%${query.name}%`}
+            },
+        }
+    }
+    return options;
 }
 
 const fields: string[] = [

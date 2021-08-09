@@ -32,7 +32,7 @@ export class StoryServices {
                 "StoryServices.all"
             );
         }
-        let options: FindOptions = appendQuery({
+        let options: FindOptions = appendQueryWithName({
             order: SortOrder.STORIES,
         }, query);
         return await library.$get("stories", options);
@@ -334,6 +334,19 @@ const appendQuery = (options: FindOptions, query?: any): FindOptions => {
 
     return options;
 
+}
+
+const appendQueryWithName = (options: FindOptions, query?: any): FindOptions => {
+    options = appendQuery(options, query);
+    if (query.name) {
+        options = {
+            ...options,
+            where: {
+                name: {[Op.iLike]: `%${query.name}%`}
+            },
+        }
+    }
+    return options;
 }
 
 const fields: string[] = [
