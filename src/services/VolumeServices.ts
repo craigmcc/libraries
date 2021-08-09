@@ -16,7 +16,7 @@ import Volume from "../models/Volume";
 import VolumeStory from "../models/VolumeStory";
 import * as SortOrder from "../models/SortOrder";
 import {NotFound} from "../util/http-errors";
-import {appendQuery, appendQueryWithName} from "../util/query-parameters";
+import {appendQuery, appendQueryWithName, appendQueryWithNames} from "../util/query-parameters";
 import logger from "../util/server-logger";
 
 // Public Objects ------------------------------------------------------------
@@ -240,7 +240,7 @@ export class VolumeServices {
                 "VolumeServices.authors"
             );
         }
-        let options: FindOptions = appendQuery({
+        let options: FindOptions = appendQueryWithNames({
             order: SortOrder.AUTHORS,
         }, query);
         return await volume.$get("authors", options);
@@ -268,7 +268,7 @@ export class VolumeServices {
                 "VolumeServices.stories"
             );
         }
-        let options: FindOptions = appendQuery({
+        let options: FindOptions = appendQueryWithName({
             order: SortOrder.STORIES,
         }, query);
         return await volume.$get("stories", options);

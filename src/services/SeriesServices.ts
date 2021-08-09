@@ -16,7 +16,7 @@ import SeriesStory from "../models/SeriesStory";
 import * as SortOrder from "../models/SortOrder";
 import Story from "../models/Story";
 import {NotFound} from "../util/http-errors";
-import {appendQuery, appendQueryWithName} from "../util/query-parameters";
+import {appendQuery, appendQueryWithName, appendQueryWithNames} from "../util/query-parameters";
 import logger from "../util/server-logger";
 
 // Public Objects ------------------------------------------------------------
@@ -240,7 +240,7 @@ export class SeriesServices {
                 "SeriesServices.authors"
             );
         }
-        let options: FindOptions = appendQuery({
+        let options: FindOptions = appendQueryWithNames({
             order: SortOrder.AUTHORS,
         }, query);
         return await series.$get("authors", options);
@@ -268,7 +268,7 @@ export class SeriesServices {
                 "SeriesServices.stories"
             );
         }
-        let options: FindOptions = appendQuery({
+        let options: FindOptions = appendQueryWithName({
             order: SortOrder.VOLUMES,
         }, query);
         return await series.$get("stories", options);

@@ -17,7 +17,7 @@ import * as SortOrder from "../models/SortOrder";
 import Story from "../models/Story";
 import Volume from "../models/Volume";
 import {NotFound} from "../util/http-errors";
-import {appendQuery, appendQueryWithName} from "../util/query-parameters";
+import {appendQuery, appendQueryWithName, appendQueryWithNames} from "../util/query-parameters";
 
 // Public Classes ------------------------------------------------------------
 
@@ -157,7 +157,7 @@ export class LibraryServices extends AbstractServices<Library> {
                 "LibraryServices.authors"
             );
         }
-        let options: FindOptions = appendQuery({
+        let options: FindOptions = appendQueryWithNames({
             order: SortOrder.AUTHORS,
         }, query);
         return await library.$get("authors", options);
@@ -171,7 +171,7 @@ export class LibraryServices extends AbstractServices<Library> {
                 "LibraryServices.series"
             );
         }
-        let options: FindOptions = appendQuery({
+        let options: FindOptions = appendQueryWithName({
             order: SortOrder.SERIES,
         }, query);
         return await library.$get("series", options);
@@ -185,7 +185,7 @@ export class LibraryServices extends AbstractServices<Library> {
                 "LibraryServices.stories"
             );
         }
-        let options: FindOptions = appendQuery({
+        let options: FindOptions = appendQueryWithName({
             order: SortOrder.STORIES,
         }, query);
         return await library.$get("stories", options);
@@ -199,7 +199,7 @@ export class LibraryServices extends AbstractServices<Library> {
                 "LibraryServices.volumes"
             );
         }
-        let options: FindOptions = appendQuery({
+        let options: FindOptions = appendQueryWithName({
             order: SortOrder.VOLUMES,
         }, query);
         return await library.$get("volumes", options);
