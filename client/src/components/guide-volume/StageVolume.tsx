@@ -23,6 +23,7 @@ import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
 import Story from "../../models/Story";
 import Volume from "../../models/Volume";
+import * as Abridgers from "../../util/abridgers";
 import logger from "../../util/client-logger";
 import ReportError from "../../util/ReportError";
 
@@ -50,7 +51,7 @@ const StageVolume = (props: Props) => {
 
         logger.info({
             context: "StageVolume.useEffect",
-            volume: props.volume,
+            volume: Abridgers.VOLUME(props.volume),
         });
 
         // Record current permissions

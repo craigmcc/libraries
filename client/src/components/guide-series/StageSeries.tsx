@@ -21,6 +21,7 @@ import SeriesClient from "../../clients/SeriesClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
 import Series from "../../models/Series";
+import * as Abridgers from "../../util/abridgers";
 import logger from "../../util/client-logger";
 import ReportError from "../../util/ReportError";
 
@@ -48,7 +49,7 @@ const StageSeries = (props: Props) => {
 
         logger.info({
             context: "StageSeries.useEffect",
-            series: props.series,
+            series: Abridgers.SERIES(props.series),
         });
 
         // Record current permissions

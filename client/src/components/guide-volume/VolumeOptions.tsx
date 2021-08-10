@@ -131,7 +131,6 @@ const VolumeOptions = (props: Props) => {
                         <tr
                             className="table-default"
                             key={1000 + (rowIndex * 100)}
-                            onClick={() => props.handleSelect(volume)}
                         >
                             <td key={1000 + (rowIndex * 100) + 1}>
                                 {volume.name}

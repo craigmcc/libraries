@@ -130,7 +130,6 @@ const SeriesOptions = (props: Props) => {
                         <tr
                             className="table-default"
                             key={1000 + (rowIndex * 100)}
-                            onClick={() => props.handleSelect(series)}
                         >
                             <td key={1000 + (rowIndex * 100) + 1}>
                                 {series.name}
