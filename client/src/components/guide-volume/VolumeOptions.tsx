@@ -18,7 +18,7 @@ import Pagination from "../Pagination";
 import SearchBar from "../SearchBar";
 import {HandleValue, HandleVolume, OnAction} from "../types";
 import LibraryContext from "../../contexts/LibraryContext";
-import useFetchVolume from "../../hooks/useFetchVolumes";
+import useFetchVolumes from "../../hooks/useFetchVolumes";
 import {listValue} from "../../util/transformations";
 
 // Incoming Properties -------------------------------------------------------
@@ -39,7 +39,7 @@ const VolumeOptions = (props: Props) => {
     const [pageSize] = useState<number>(25);
     const [searchText, setSearchText] = useState<string>("");
 
-    const [{volumes, error, loading}] = useFetchVolume({
+    const [{volumes, error, loading}] = useFetchVolumes({
         currentPage: currentPage,
         library: libraryContext.state.library,
         pageSize: pageSize,
@@ -131,6 +131,7 @@ const VolumeOptions = (props: Props) => {
                         <tr
                             className="table-default"
                             key={1000 + (rowIndex * 100)}
+                            onClick={() => props.handleSelect(volume)}
                         >
                             <td key={1000 + (rowIndex * 100) + 1}>
                                 {volume.name}
@@ -150,14 +151,14 @@ const VolumeOptions = (props: Props) => {
                             <td key={1000 + (rowIndex * 100) + 99}>
                                 <Button
                                     className="mr-1"
-                                    onClick={() => props.handleEdit(volumes[rowIndex])}
+                                    onClick={() => props.handleEdit(volume)}
                                     size="sm"
                                     type="button"
                                     variant="secondary"
                                 >Edit</Button>
                                 <Button
                                     className="mr-1"
-                                    onClick={() => props.handleSelect(volumes[rowIndex])}
+                                    onClick={() => props.handleSelect(volume)}
                                     size="sm"
                                     type="button"
                                     variant="primary"

@@ -1,6 +1,7 @@
-// useFetchVolumes -----------------------------------------------------------
+// useFetchSerieses ----------------------------------------------------------
 
-// Custom hook to fetch Volumes that correspond to input properties.
+// Custom hook to fetch Series objects that correspond to input properties.
+// (Yes, English pluralization rules are weird, but need to disambiguate.)
 
 // External Modules ----------------------------------------------------------
 
@@ -9,9 +10,8 @@ import {useEffect, useState} from "react";
 // Internal Modules ----------------------------------------------------------
 
 import LibraryClient from "../clients/LibraryClient";
-import VolumeClient from "../clients/VolumeClient";
 import Library from "../models/Library";
-import Volume from "../models/Volume";
+import Series from "../models/Series";
 import * as Abridgers from "../util/abridgers";
 import logger from "../util/client-logger";
 
@@ -24,65 +24,67 @@ export interface Props {
     searchText: string;                 // Name match text (or "" for all)
 }
 
-const useFetchVolume = (props: Props) => {
+// Component Details ---------------------------------------------------------
+
+const useFetchSerieses = (props: Props) => {
 
     const [error, setError] = useState<Error | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
-    const [volumes, setVolumes] = useState<Volume[]>([]);
+    const [serieses, setSerieses] = useState<Series[]>([]);
 
     useEffect(() => {
 
-        const fetchVolumes = async () => {
+        const fetchSerieses = async () => {
 
             setError(null);
             setLoading(true);
 
             try {
-                let newVolumes: Volume[] = [];
-                const params = {
-                    limit: props.pageSize,
-                    offset: (props.pageSize * (props.currentPage - 1)),
-                }
+                let newSerieses: Series[] = [];
                 if (props.library.id > 0) {
+                    const params = {
+                        limit: props.pageSize,
+                        offset: (props.pageSize * (props.currentPage - 1)),
+                    }
                     if (props.searchText.length > 0) {
-                        newVolumes = await VolumeClient.all(props.library.id, {
+                        newSerieses = await LibraryClient.series(props.library.id, {
                             ...params,
                             name: props.searchText,
                         });
                     } else {
-                        newVolumes = await LibraryClient.volumes(props.library.id, params);
+                        newSerieses = await LibraryClient.series(props.library.id, params);
                     }
+                    logger.info({
+                        context: "useFetchSerieses.fetchSerieses",
+                        library: Abridgers.LIBRARY(props.library),
+                        currentPage: props.currentPage,
+                        searchText: props.searchText,
+                        serieses: Abridgers.SERIESES(newSerieses),
+                    });
+                    setSerieses(newSerieses);
                 }
-                logger.debug({
-                    context: "useFetchVolumes.fetchVolumes",
-                    library: Abridgers.LIBRARY(props.library),
-                    currentPage: props.currentPage,
-                    searchText: props.searchText,
-                    volumes: Abridgers.VOLUMES(newVolumes),
-                });
-                setVolumes(newVolumes);
             } catch (error) {
                 logger.error({
-                    context: "useFetchVolumes.fetchVolumes",
+                    context: "useFetchSerieses.fetchSerieses",
                     library: Abridgers.LIBRARY(props.library),
                     currentPage: props.currentPage,
                     searchText: props.searchText,
                     error: error,
                 });
                 setError(error);
-                setVolumes([]);
+                setSerieses([]);
             }
 
             setLoading(false);
 
         }
 
-        fetchVolumes();
+        fetchSerieses();
 
     }, [props.currentPage, props.library, props.pageSize, props.searchText]);
 
-    return [{volumes, error, loading}];
+    return [{serieses, error, loading}];
 
 }
 
-export default useFetchVolume;
+export default useFetchSerieses;

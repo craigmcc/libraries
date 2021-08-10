@@ -37,6 +37,14 @@ export const SERIES = (series: Series): any => {
     }
 }
 
+export const SERIESES = (serieses: Series[]): any => {
+    const results: Series[] = [];
+    serieses.forEach(series => {
+        results.push(SERIES(series));
+    });
+    return results;
+}
+
 export const STORY = (story: Story): any => {
     return {
         id: story.id,
