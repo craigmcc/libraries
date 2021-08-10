@@ -81,8 +81,9 @@ const SeriesList = (props: Props) => {
                             });
                     } else if (searchText.length > 0) {
                         newSeries =
-                            await SeriesClient.name(libraryId, searchText, {
+                            await SeriesClient.all(libraryId, {
                                 limit: pageSize,
+                                name: searchText,
                                 offset: (pageSize * (currentPage - 1))
                             });
                     } else {

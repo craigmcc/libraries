@@ -88,8 +88,9 @@ const StoryList = (props: Props) => {
                             });
                     } else if (searchText.length > 0) {
                         newStories =
-                            await StoryClient.name(libraryId, searchText, {
+                            await StoryClient.all(libraryId, {
                                 limit: pageSize,
+                                name: searchText,
                                 offset: (pageSize * (currentPage - 1))
                             });
                     } else {

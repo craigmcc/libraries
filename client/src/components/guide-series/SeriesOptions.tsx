@@ -57,8 +57,9 @@ const SeriesOptions = (props: Props) => {
                 try {
                     if (searchText.length > 0) {
                         newSerieses =
-                            await SeriesClient.name(libraryId, searchText, {
+                            await SeriesClient.all(libraryId, {
                                 limit: pageSize,
+                                name: searchText,
                                 offset: (pageSize * (currentPage - 1)),
                             });
                         logger.debug({

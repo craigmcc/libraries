@@ -64,8 +64,9 @@ const WriterOptions = (props: Props) => {
                     if (searchText.length > 0) {
                         // Fetch all Library Authors matching searchText
                         newWriters =
-                            await AuthorClient.name(libraryId, searchText, {
+                            await AuthorClient.all(libraryId, {
                                 limit: pageSize,
+                                name: searchText,
                                 offset: (pageSize * (currentPage - 1)),
                             });
                         logger.debug({

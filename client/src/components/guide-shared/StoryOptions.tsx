@@ -66,8 +66,9 @@ const StoryOptions = (props: Props) => {
 
                         // Fetch matching Stories
                         newStories =
-                            await StoryClient.name(libraryId, searchText, {
+                            await StoryClient.all(libraryId, {
                                 limit: pageSize,
+                                name: searchText,
                                 offset: (pageSize * (currentPage - 1)),
                                 withAuthors: "",
                             });

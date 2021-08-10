@@ -88,8 +88,9 @@ const AuthorList = (props: Props) => {
                             });
                     } else if (searchText.length > 0) {
                         newAuthors =
-                            await AuthorClient.name(libraryId, searchText, {
+                            await AuthorClient.all(libraryId, {
                                 limit: pageSize,
+                                name: searchText,
                                 offset: (pageSize * (currentPage - 1))
                             });
                     } else {

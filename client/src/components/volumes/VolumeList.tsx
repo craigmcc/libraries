@@ -81,8 +81,9 @@ const VolumeList = (props: Props) => {
                             });
                     } else if (searchText.length > 0) {
                         newVolumes =
-                            await VolumeClient.name(libraryId, searchText, {
+                            await VolumeClient.all(libraryId, {
                                 limit: pageSize,
+                                name: searchText,
                                 offset: (pageSize * (currentPage - 1))
                             });
                     } else {
