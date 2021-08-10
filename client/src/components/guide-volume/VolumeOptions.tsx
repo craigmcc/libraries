@@ -5,7 +5,7 @@
 
 // External Modules ----------------------------------------------------------
 
-import React, {useContext, useEffect, useState} from "react";
+import React, {useContext, useState} from "react";
 import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/Container";
 import Col from "react-bootstrap/Col";
@@ -17,12 +17,8 @@ import Table from "react-bootstrap/Table";
 import Pagination from "../Pagination";
 import SearchBar from "../SearchBar";
 import {HandleValue, HandleVolume, OnAction} from "../types";
-import VolumeClient from "../../clients/VolumeClient";
 import LibraryContext from "../../contexts/LibraryContext";
-import LoginContext from "../../contexts/LoginContext";
-import Volume from "../../models/Volume";
-import logger from "../../util/client-logger";
-import ReportError from "../../util/ReportError";
+import useFetchVolume from "../../hooks/useFetchVolumes";
 import {listValue} from "../../util/transformations";
 
 // Incoming Properties -------------------------------------------------------
@@ -38,74 +34,17 @@ export interface Props {
 const VolumeOptions = (props: Props) => {
 
     const libraryContext = useContext(LibraryContext);
-    const loginContext = useContext(LoginContext);
 
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [libraryId] = useState<number>(libraryContext.state.library.id);
     const [pageSize] = useState<number>(25);
     const [searchText, setSearchText] = useState<string>("");
-    const [volumes, setVolumes] = useState<Volume[]>([]);
 
-    useEffect(() => {
-
-        const fetchVolumes = async () => {
-
-            // Fetch matching or first N volumes
-            if (loginContext.state.loggedIn && (libraryId > 0)) {
-                let newVolumes: Volume[] = [];
-                try {
-                    if (searchText.length > 0) {
-                        newVolumes =
-                            await VolumeClient.all(libraryId, {
-                                limit: pageSize,
-                                name: searchText,
-                                offset: (pageSize * (currentPage - 1)),
-                            });
-                        logger.debug({
-                            context: "VolumeOptions.fetchVolumes",
-                            msg: "Select by searchText",
-                            searchText: searchText,
-                            volumes: newVolumes,
-                        })
-                    } else {
-                        newVolumes =
-                            await VolumeClient.all(libraryId, {
-                                limit: pageSize,
-                                offset: (pageSize * (currentPage - 1)),
-                            });
-                        logger.debug({
-                            context: "VolumeOptions.fetchVolumes",
-                            msg: "Select by library",
-                            volumes: newVolumes,
-                        })
-                    }
-                    setVolumes(newVolumes);
-                } catch (error) {
-                    setVolumes([]);
-                    if (error.response && (error.response.status === 403)) {
-                        logger.debug({
-                            context: "VolumeOptions.fetchVolumes",
-                            msg: "FORBIDDEN",
-                        });
-                    } else {
-                        ReportError("VolumeOptions.fetchVolumes", error);
-                    }
-
-                }
-            } else {
-                setVolumes([]);
-                logger.debug({
-                    context: "VolumeOptions.fetchVolumes",
-                    msg: "SKIPPED",
-                });
-            }
-
-        }
-
-        fetchVolumes();
-
-    }, [libraryContext.state.library.id, loginContext.state.loggedIn,
-        currentPage, libraryId, pageSize, searchText]);
+    const [{volumes, error, loading}] = useFetchVolume({
+        currentPage: currentPage,
+        library: libraryContext.state.library,
+        pageSize: pageSize,
+        searchText: searchText,
+    });
 
     const handleChange: HandleValue = (newSearchText) => {
         setSearchText(newSearchText);
@@ -174,6 +113,20 @@ const VolumeOptions = (props: Props) => {
                     </thead>
 
                     <tbody>
+                    {(error) ? (
+                        <tr>
+                            <td className="text-center" rowSpan={6}>
+                                Database Access Error: {error.message}
+                            </td>
+                        </tr>
+                    ) : null}
+                    {(loading) ? (
+                        <tr>
+                            <td className="text-center" rowSpan={6}>
+                                Database Fetch In Progress
+                            </td>
+                        </tr>
+                    ) : null}
                     {volumes.map((volume, rowIndex) => (
                         <tr
                             className="table-default"

@@ -60,3 +60,11 @@ export const VOLUME = (volume: Volume): any => {
     }
 }
 
+export const VOLUMES = (volumes: Volume[]): any => {
+    const results: Volume[] = [];
+    volumes.forEach(volume => {
+        results.push(VOLUME(volume));
+    });
+    return results;
+}
+
