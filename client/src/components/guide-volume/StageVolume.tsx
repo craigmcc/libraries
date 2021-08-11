@@ -72,6 +72,7 @@ const StageVolume = (props: Props) => {
         });
         logger.debug({
             context: "StageVolume.handleAdd",
+            msg: "Adding new Volume",
             volume: newVolume,
         });
         setVolume(newVolume);
@@ -81,7 +82,7 @@ const StageVolume = (props: Props) => {
         logger.debug({
             context: "StageVolume.handleEdit",
             msg: "Editing existing Volume",
-            volume: Abridgers.VOLUME(newVolume),
+            volume: newVolume,
         });
         setVolume(newVolume);
     }
@@ -90,12 +91,17 @@ const StageVolume = (props: Props) => {
         logger.debug({
             context: "StageVolume.handleInsert",
             msg: "Inserting new Volume",
-            volume: Abridgers.VOLUME(newVolume),
+            volume: newVolume,
         });
         try {
 
             // Persist the requested Volume
             const inserted = await VolumeClient.insert(libraryId, newVolume);
+            logger.info({
+                context: "StageVolume.handleInsert",
+                msg: "Inserted new Volume",
+                volume: Abridgers.VOLUME(inserted),
+            })
             setVolume(null);
 
             // If the Volume is of type "Single", create a Story with the same name
@@ -112,8 +118,8 @@ const StageVolume = (props: Props) => {
                 logger.info({
                     context: "StageVolume.handleInsert",
                     msg: "Added Story for Volume of type Single",
-                    volume: inserted,
-                    story: addedStory,
+                    volume: Abridgers.VOLUME(inserted),
+                    story: Abridgers.STORY(addedStory),
                 })
             }
 
@@ -129,14 +135,14 @@ const StageVolume = (props: Props) => {
         logger.debug({
             context: "StageVolume.handleRemove",
             msg: "Removing existing Volume",
-            volume: Abridgers.VOLUME(newVolume),
+            volume: newVolume,
         });
         try {
             await VolumeClient.remove(libraryId, newVolume.id);
             logger.info({
                 context: "StageVolume.handleRemove",
                 msg: "Removed existing Volume",
-                volume: newVolume,
+                volume: Abridgers.VOLUME(newVolume),
             });
             setVolume(null);
             if (newVolume.id === props.volume.id) {
@@ -152,7 +158,7 @@ const StageVolume = (props: Props) => {
         logger.debug({
             context: "StageVolume.handleSelect",
             msg: "Selecting existing Volume",
-            volume: Abridgers.VOLUME(newVolume),
+            volume: newVolume,
         });
         props.handleVolume(newVolume);
         props.handleStage(Stage.AUTHORS);
@@ -162,20 +168,20 @@ const StageVolume = (props: Props) => {
         logger.debug({
             context: "StageVolume.handleUpdate",
             msg: "Updating existing Volume",
-            volume: Abridgers.VOLUME(newVolume),
+            volume: newVolume,
         });
         try {
             await VolumeClient.update(libraryId, newVolume.id, newVolume);
             logger.info({
                 context: "StageVolume.handleUpdate",
                 msg: "Updated existing Volume",
-                volume: newVolume,
+                volume: Abridgers.VOLUME(newVolume),
             })
             setVolume(null);
         } catch (error) {
             ReportError("StageVolume.handleUpdate", error);
         }
-        // If we updated the currently selected volume, propagate to summary
+        // If we updated the currently selected Volume, propagate to summary
         if (newVolume.id === props.volume.id) {
             props.handleVolume(newVolume);
         }

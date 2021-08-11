@@ -95,7 +95,7 @@ const StageSeries = (props: Props) => {
             logger.info({
                 context: "StageSeries.handleInsert",
                 msg: "Inserted new Series",
-                series: inserted,
+                series: Abridgers.SERIES(inserted),
             });
             setSeries(null);
 
@@ -118,7 +118,7 @@ const StageSeries = (props: Props) => {
             logger.info({
                 context: "StageSeries.handleRemove",
                 msg: "Removed existing Series",
-                series: newSeries,
+                series: Abridgers.SERIES(newSeries),
             });
             setSeries(null);
             if (newSeries.id === props.series.id) {
@@ -151,7 +151,7 @@ const StageSeries = (props: Props) => {
             logger.info({
                 context: "StageSeries.handleUpdate",
                 msg: "Updated existing Series",
-                series: newSeries,
+                series: Abridgers.SERIES(newSeries),
             });
             setSeries(null);
         } catch (error) {

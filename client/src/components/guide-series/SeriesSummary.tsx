@@ -16,6 +16,7 @@ import Table from "react-bootstrap/Table";
 import {HandleAction} from "../types";
 import Author from "../../models/Author";
 import Series from "../../models/Series";
+import * as Abridgers from "../../util/abridgers";
 import logger from "../../util/client-logger";
 
 // Incoming Properties ------------------------------------------------------
@@ -34,7 +35,7 @@ const SeriesSummary = (props: Props) => {
 
         logger.info({
             context: "SeriesSummary.useEffect",
-            series: props.series,
+            series: Abridgers.SERIES(props.series),
         });
 
     }, [props.series]);
