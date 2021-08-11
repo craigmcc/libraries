@@ -60,6 +60,7 @@ const GuideVolume = () => {
             story: Abridgers.STORY(newStory),
         });
         setStoryId(newStory.id);
+        setStage(Stage.WRITERS);
     }
 
     const handleVolume = async (newVolume: Volume): Promise<void> => {

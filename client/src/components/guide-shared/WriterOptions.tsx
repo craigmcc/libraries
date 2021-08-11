@@ -153,23 +153,23 @@ const WriterOptions = (props: Props) => {
                             <td key={1000 + (rowIndex * 100) + 99}>
                                 <Button
                                     className="mr-1"
-                                    onClick={() => props.handleEdit(writers[rowIndex])}
+                                    onClick={() => props.handleEdit(writer)}
                                     size="sm"
                                     type="button"
                                     variant="secondary"
                                 >Edit</Button>
                                 <Button
                                     className="mr-1"
-                                    disabled={props.included(writers[rowIndex])}
-                                    onClick={() => handleInclude(writers[rowIndex])}
+                                    disabled={props.included(writer)}
+                                    onClick={() => handleInclude(writer)}
                                     size="sm"
                                     type="button"
                                     variant="primary"
                                 >Include</Button>
                                 <Button
                                     className="mr-1"
-                                    disabled={!props.included(writers[rowIndex])}
-                                    onClick={() => handleExclude(writers[rowIndex])}
+                                    disabled={!props.included(writer)}
+                                    onClick={() => handleExclude(writer)}
                                     size="sm"
                                     type="button"
                                     variant="primary"

@@ -68,6 +68,7 @@ const GuideSeries = () => {
             story: Abridgers.STORY(newStory),
         });
         setStoryId(newStory.id);
+        setStage(Stage.WRITERS);
     }
 
     return (

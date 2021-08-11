@@ -153,23 +153,23 @@ const AuthorOptions = (props: Props) => {
                             <td key={1000 + (rowIndex * 100) + 99}>
                                 <Button
                                     className="mr-1"
-                                    onClick={() => props.handleEdit(authors[rowIndex])}
+                                    onClick={() => props.handleEdit(author)}
                                     size="sm"
                                     type="button"
                                     variant="secondary"
                                 >Edit</Button>
                                 <Button
                                     className="mr-1"
-                                    disabled={props.included(authors[rowIndex])}
-                                    onClick={() => handleInclude(authors[rowIndex])}
+                                    disabled={props.included(author)}
+                                    onClick={() => handleInclude(author)}
                                     size="sm"
                                     type="button"
                                     variant="primary"
                                 >Include</Button>
                                 <Button
                                     className="mr-1"
-                                    disabled={!props.included(authors[rowIndex])}
-                                    onClick={() => handleExclude(authors[rowIndex])}
+                                    disabled={!props.included(author)}
+                                    onClick={() => handleExclude(author)}
                                     size="sm"
                                     type="button"
                                     variant="primary"

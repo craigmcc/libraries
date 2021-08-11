@@ -131,7 +131,9 @@ const SeriesOptions = (props: Props) => {
                             className="table-default"
                             key={1000 + (rowIndex * 100)}
                         >
-                            <td key={1000 + (rowIndex * 100) + 1}>
+                            <td key={1000 + (rowIndex * 100) + 1}
+                                onClick={() => props.handleSelect(series)}
+                            >
                                 {series.name}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 2}>
@@ -146,7 +148,7 @@ const SeriesOptions = (props: Props) => {
                             <td key={1000 + (rowIndex * 100) + 99}>
                                 <Button
                                     className="mr-1"
-                                    onClick={() => props.handleEdit(serieses[rowIndex])}
+                                    onClick={() => props.handleEdit(series)}
                                     size="sm"
                                     type="button"
                                     variant="secondary"

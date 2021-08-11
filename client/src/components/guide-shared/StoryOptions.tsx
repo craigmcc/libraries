@@ -212,30 +212,30 @@ const StoryOptions = (props: Props) => {
                             <td key={1000 + (rowIndex * 100) + 99}>
                                 <Button
                                     className="mr-1"
-                                    onClick={() => props.handleEdit(stories[rowIndex])}
+                                    onClick={() => props.handleEdit(story)}
                                     size="sm"
                                     type="button"
                                     variant="secondary"
                                 >Edit</Button>
                                 <Button
                                     className="mr-1"
-                                    disabled={props.included(stories[rowIndex])}
-                                    onClick={() => handleInclude(stories[rowIndex])}
+                                    disabled={props.included(story)}
+                                    onClick={() => handleInclude(story)}
                                     size="sm"
                                     type="button"
                                     variant="primary"
                                 >Include</Button>
                                 <Button
                                     className="mr-1"
-                                    disabled={!props.included(stories[rowIndex])}
-                                    onClick={() => handleExclude(stories[rowIndex])}
+                                    disabled={!props.included(story)}
+                                    onClick={() => handleExclude(story)}
                                     size="sm"
                                     type="button"
                                     variant="primary"
                                 >Exclude</Button>
                                 <Button
                                     className="mr-1"
-                                    onClick={() => props.handleSelect(stories[rowIndex])}
+                                    onClick={() => props.handleSelect(story)}
                                     size="sm"
                                     type="button"
                                     variant="secondary"
