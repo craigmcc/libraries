@@ -61,7 +61,6 @@ const useFetchSerieses = (props: Props) => {
                         searchText: props.searchText,
                         serieses: Abridgers.SERIESES(newSerieses),
                     });
-                    setError(null);
                     setSerieses(newSerieses);
                 }
             } catch (error) {

@@ -42,7 +42,7 @@ const useFetchVolume = (props: Props) => {
             try {
                 if ((props.library.id > 0) && (props.volumeId > 0)) {
 
-                    // Select the requested Volume with nested authors and stories
+                    // Fetch the requested Volume with nested authors and stories
                     const newVolume = await VolumeClient.find(props.library.id, props.volumeId, {
                         withAuthors: "",
                         withStories: "",
@@ -62,22 +62,22 @@ const useFetchVolume = (props: Props) => {
                     logger.info({
                         context: "useFetchVolume.fetchVolume",
                         msg: "Return fetched Volume with nested Author and Story objects",
+                        library: Abridgers.LIBRARY(props.library),
                         volumeId: props.volumeId,
                         volume: Abridgers.VOLUME(newVolume),
                     });
-                    setError(null);
                     setVolume(newVolume);
 
                 } else {
 
                     const newVolume = new Volume();
-                    logger.debug({
+                    logger.info({
                         context: "useFetchVolume.fetchVolume",
-                        msg: "Return empty volume because none selected",
+                        msg: "Return empty Volume because none selected",
+                        library: Abridgers.LIBRARY(props.library),
                         volumeId: props.volumeId,
                         volume: Abridgers.VOLUME(newVolume),
                     });
-                    setError(null);
                     setVolume(newVolume);
 
                 }

@@ -62,7 +62,6 @@ const useFetchVolumes = (props: Props) => {
                     searchText: props.searchText,
                     volumes: Abridgers.VOLUMES(newVolumes),
                 });
-                setError(null);
                 setVolumes(newVolumes);
             } catch (error) {
                 logger.error({
