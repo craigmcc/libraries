@@ -55,13 +55,14 @@ const useFetchVolumes = (props: Props) => {
                         newVolumes = await LibraryClient.volumes(props.library.id, params);
                     }
                 }
-                logger.debug({
+                logger.info({
                     context: "useFetchVolumes.fetchVolumes",
                     library: Abridgers.LIBRARY(props.library),
                     currentPage: props.currentPage,
                     searchText: props.searchText,
                     volumes: Abridgers.VOLUMES(newVolumes),
                 });
+                setError(null);
                 setVolumes(newVolumes);
             } catch (error) {
                 logger.error({

@@ -15,15 +15,17 @@ import { Stage } from "../guide-shared/Stage";
 import StageAuthors from "../guide-shared/StageAuthors";
 import StageStories from "../guide-shared/StageStories";
 import StageWriters from "../guide-shared/StageWriters";
-import VolumeClient from "../../clients/VolumeClient";
+//import VolumeClient from "../../clients/VolumeClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
 import Author from "../../models/Author";
 import Story from "../../models/Story";
 import Volume from "../../models/Volume";
+import * as Abridgers from "../../util/abridgers";
 import logger from "../../util/client-logger";
 import ReportError from "../../util/ReportError";
 import StoryClient from "../../clients/StoryClient";
+import useFetchVolume from "../../hooks/useFetchVolume";
 
 // Component Details ---------------------------------------------------------
 
@@ -36,9 +38,15 @@ const GuideVolume = () => {
     const [stage, setStage] = useState<Stage>(Stage.PARENT);
     const [story, setStory] = useState<Story>(new Story());
     const [storyId, setStoryId] = useState<number>(-1);
-    const [volume, setVolume] = useState<Volume>(new Volume());
+//    const [volume, setVolume] = useState<Volume>(new Volume());
     const [volumeId, setVolumeId] = useState<number>(-1);
 
+    const [{volume/*, error, loading*/}] = useFetchVolume({ // TODO error/loading?
+        library: libraryContext.state.library,
+        volumeId: volumeId,
+    });
+
+/*
     useEffect(() => {
 
         const fetchVolume = async () => {
@@ -126,6 +134,7 @@ const GuideVolume = () => {
 
     }, [libraryContext.state.library.id, loginContext.state.loggedIn,
               libraryId, stage, volume, volumeId]);
+*/
 
     useEffect(() => {
 
@@ -203,7 +212,7 @@ const GuideVolume = () => {
     const handleRefresh = (): void => {
         logger.info({
             context: "GuideVolume.handleRefresh",
-            volume: volume,
+            volume: Abridgers.VOLUME(volume),
         });
         setVolumeId(volume.id);
     }
@@ -215,7 +224,7 @@ const GuideVolume = () => {
     const handleStory = (newStory: Story): void => {
         logger.info({
             context: "GuideVolume.handleStory",
-            story: newStory,
+            story: Abridgers.STORY(newStory),
         });
         setStoryId(newStory.id);
     }
@@ -223,9 +232,9 @@ const GuideVolume = () => {
     const handleVolume = async (newVolume: Volume): Promise<void> => {
         logger.info({
             context: "GuideVolume.handleVolume",
-            volume: newVolume,
+            volume: Abridgers.VOLUME(newVolume),
         });
-        setVolumeId(newVolume.id);  // Trigger (re)fetch of the specified Volume
+        setVolumeId(newVolume.id);
     }
 
     const sortAuthors = (authors: Author[]): Author[] => {

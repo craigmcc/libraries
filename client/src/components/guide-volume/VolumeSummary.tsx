@@ -15,6 +15,7 @@ import Table from "react-bootstrap/Table";
 
 import Author from "../../models/Author";
 import Volume from "../../models/Volume";
+import * as Abridgers from "../../util/abridgers";
 import logger from "../../util/client-logger";
 import {HandleAction} from "../types";
 
@@ -34,7 +35,7 @@ const VolumeSummary = (props: Props) => {
 
         logger.info({
             context: "VolumeSummary.useEffect",
-            volume: props.volume,
+            volume: Abridgers.VOLUME(props.volume),
         });
 
     }, [props.volume]);

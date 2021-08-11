@@ -81,7 +81,7 @@ const StageVolume = (props: Props) => {
         logger.debug({
             context: "StageVolume.handleEdit",
             msg: "Editing existing Volume",
-            volume: newVolume,
+            volume: Abridgers.VOLUME(newVolume),
         });
         setVolume(newVolume);
     }
@@ -90,7 +90,7 @@ const StageVolume = (props: Props) => {
         logger.debug({
             context: "StageVolume.handleInsert",
             msg: "Inserting new Volume",
-            volume: newVolume,
+            volume: Abridgers.VOLUME(newVolume),
         });
         try {
 
@@ -129,7 +129,7 @@ const StageVolume = (props: Props) => {
         logger.debug({
             context: "StageVolume.handleRemove",
             msg: "Removing existing Volume",
-            volume: newVolume,
+            volume: Abridgers.VOLUME(newVolume),
         });
         try {
             await VolumeClient.remove(libraryId, newVolume.id);
@@ -152,7 +152,7 @@ const StageVolume = (props: Props) => {
         logger.debug({
             context: "StageVolume.handleSelect",
             msg: "Selecting existing Volume",
-            volume: newVolume,
+            volume: Abridgers.VOLUME(newVolume),
         });
         props.handleVolume(newVolume);
         props.handleStage(Stage.AUTHORS);
@@ -162,7 +162,7 @@ const StageVolume = (props: Props) => {
         logger.debug({
             context: "StageVolume.handleUpdate",
             msg: "Updating existing Volume",
-            volume: newVolume,
+            volume: Abridgers.VOLUME(newVolume),
         });
         try {
             await VolumeClient.update(libraryId, newVolume.id, newVolume);
