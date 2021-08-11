@@ -1,6 +1,6 @@
 // StageAuthors --------------------------------------------------------------
 
-// Select Author(s) for the currently selected Series/Volume, while offering
+// Select Author(s) for the currently selected Series/Story/Volume, while offering
 // the option to edit existing Authors or create a new one.
 
 // External Modules ----------------------------------------------------------
@@ -23,6 +23,7 @@ import LoginContext from "../../contexts/LoginContext";
 import Author from "../../models/Author";
 import Series from "../../models/Series";
 import Volume from "../../models/Volume";
+import * as Abridgers from "../../util/abridgers";
 import logger from "../../util/client-logger";
 import ReportError from "../../util/ReportError";
 
@@ -58,6 +59,14 @@ const StageAuthors = (props: Props) => {
     }, [loginContext, loginContext.state.loggedIn,
         libraryId, props.parent]);
 
+    const abridged = (parent: Series | Volume): Series | Volume => {
+        if (parent instanceof Series) {
+            return Abridgers.SERIES(parent);
+        } else /* if (parent instanceof Volume) */ {
+            return Abridgers.VOLUME(parent);
+        }
+    }
+
     const handleAdd: OnAction = () => {
         const newAuthor = new Author({
             first_name: null,
@@ -82,15 +91,7 @@ const StageAuthors = (props: Props) => {
     }
 
     const handleExclude: HandleAuthor = async (newAuthor) => {
-        logger.debug({
-            context: "StageAuthors.handleExclude",
-            msg: "Excluding Author for Series/Volume",
-            author: newAuthor,
-            parent: props.parent,
-        });
         try {
-
-            // Exclude this Author for the current Series/Volume
             if (props.parent instanceof Series) {
                 await AuthorClient.seriesExclude(libraryId, newAuthor.id, props.parent.id);
             } else {
@@ -99,20 +100,9 @@ const StageAuthors = (props: Props) => {
             logger.info({
                 context: "StageAuthors.handleExclude",
                 msg: "Excluded Author for Series/Volume",
-                parent: props.parent,
-                author: newAuthor,
+                parent: abridged(props.parent),
+                author: Abridgers.AUTHOR(newAuthor),
             });
-
-            // For any Story in this Series/Volume, exclude this Author
-            for (const story of props.parent.stories) {
-                try {
-                    await AuthorClient.storiesExclude(libraryId, newAuthor.id, story.id);
-                } catch (error) {
-                    // Ignore errors if already excluded
-
-                }
-            }
-
         } catch (error) {
             ReportError("StageAuthors.handleExclude", error);
         }
@@ -120,15 +110,7 @@ const StageAuthors = (props: Props) => {
     }
 
     const handleInclude: HandleAuthor = async (newAuthor) => {
-        logger.debug({
-            context: "StageAuthors.handleInclude",
-            msg: "Including Author for Series/Volume",
-            author: newAuthor,
-            parent: props.parent,
-        });
         try {
-
-            // Include this Author for the current Series/Volume
             newAuthor.principal = true; // Assume by default
             if (props.parent instanceof Series) {
                 await AuthorClient.seriesInclude(libraryId, newAuthor.id, props.parent.id, newAuthor.principal);
@@ -138,10 +120,9 @@ const StageAuthors = (props: Props) => {
             logger.info({
                 context: "StageAuthors.handleInclude",
                 msg: "Included Author for Series/Volume",
-                parent: props.parent,
-                author: newAuthor,
+                parent: abridged(props.parent),
+                author: Abridgers.AUTHOR(newAuthor),
             });
-
         } catch (error) {
             ReportError("StageAuthors.handleInclude", error);
         }
@@ -149,11 +130,6 @@ const StageAuthors = (props: Props) => {
     }
 
     const handleInsert: HandleAuthor = async (newAuthor) => {
-        logger.debug({
-            context: "StageAuthors.handleInsert",
-            msg: "Inserting new Author",
-            author: newAuthor,
-        });
         try {
 
             // Persist the new Author
@@ -161,7 +137,7 @@ const StageAuthors = (props: Props) => {
             logger.info({
                 context: "StageAuthors.insert",
                 msg: "Inserted new Author",
-                author: inserted,
+                author: Abridgers.AUTHOR(inserted),
             })
             setAuthor(null);
 
@@ -175,17 +151,12 @@ const StageAuthors = (props: Props) => {
     }
 
     const handleRemove: HandleAuthor = async (newAuthor) => {
-        logger.debug({
-            context: "StageAuthors.handleRemove",
-            msg: "Removing existing Author",
-            author: newAuthor,
-        });
         try {
             AuthorClient.remove(libraryId, newAuthor.id);
             logger.info({
                 context: "StageAuthors.handleRemove",
                 msg: "Removed existing Author",
-                author: newAuthor,
+                author: Abridgers.AUTHOR(newAuthor),
             });
             // Database constraints will deal with any join tables
             setAuthor(null);
@@ -196,11 +167,6 @@ const StageAuthors = (props: Props) => {
     }
 
     const handleUpdate: HandleAuthor = async (newAuthor) => {
-        logger.debug({
-            context: "StageAuthors.handleUpdate",
-            msg: "Updating existing Author",
-            author: newAuthor,
-        });
         try {
 
             // Update the Author itself
@@ -208,7 +174,7 @@ const StageAuthors = (props: Props) => {
             logger.info({
                 context: "StageAuthors.handleUpdate",
                 msg: "Updated existing Author",
-                author: newAuthor,
+                author: Abridgers.AUTHOR(newAuthor),
             });
 
             // If the principal changed, remove and insert to update it
@@ -216,12 +182,12 @@ const StageAuthors = (props: Props) => {
                 logger.info({
                     context: "StageAuthors.handleUpdate",
                     msg: "Reregister Author-Series/Author-Volume for new principal",
-                    author: newAuthor,
+                    author: Abridgers.AUTHOR(newAuthor),
                 });
                 try {
                     if (props.parent instanceof Series) {
                         await AuthorClient.seriesExclude(libraryId, newAuthor.id, props.parent.id);
-                    } else {
+                    } else /* if (props.parent instanceof Volume) */ {
                         await AuthorClient.volumesExclude(libraryId, newAuthor.id, props.parent.id);
                     }
                 } catch (error) {
@@ -230,7 +196,7 @@ const StageAuthors = (props: Props) => {
                 try {
                     if (props.parent instanceof Series) {
                         await AuthorClient.seriesInclude(libraryId, newAuthor.id, props.parent.id, newAuthor.principal);
-                    } else {
+                    } else /* if (props.parent instanceof Volume) */ {
                         await AuthorClient.volumesInclude(libraryId, newAuthor.id, props.parent.id, newAuthor.principal);
                     }
                 } catch (error) {
@@ -240,17 +206,18 @@ const StageAuthors = (props: Props) => {
                 logger.info({
                     context: "StageAuthors.handleUpdate",
                     msg: "No reregister is required",
-                    author: newAuthor,
+                    author: Abridgers.AUTHOR(newAuthor),
                 });
             }
             setAuthor(null);
+
         } catch (error) {
             ReportError("StageAuthors.handleUpdate", error);
         }
         props.handleRefresh();
     }
 
-    // Is the specified Author currently included for this Series/Volume?
+    // Is the specified Author currently included for this Series/Story/Volume?
     const included = (author: Author): boolean => {
         let result = false;
         props.parent.authors.forEach(includedAuthor => {

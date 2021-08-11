@@ -7,7 +7,7 @@
 
 // External Modules ----------------------------------------------------------
 
-import React, {useContext, useEffect, useState} from "react";
+import React, {useContext, useState} from "react";
 import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/Container";
 import Col from "react-bootstrap/Col";
@@ -19,14 +19,10 @@ import Table from "react-bootstrap/Table";
 import Pagination from "../Pagination";
 import SearchBar from "../SearchBar";
 import {HandleAuthor, HandleValue, OnAction} from "../types";
-import AuthorClient from "../../clients/AuthorClient";
-import StoryClient from "../../clients/StoryClient";
 import LibraryContext from "../../contexts/LibraryContext";
-import LoginContext from "../../contexts/LoginContext";
+import useFetchAuthors from "../../hooks/useFetchAuthors";
 import Author from "../../models/Author";
 import Story from "../../models/Story";
-import logger from "../../util/client-logger";
-import ReportError from "../../util/ReportError";
 import {listValue} from "../../util/transformations";
 
 // Incoming Properties -------------------------------------------------------
@@ -45,74 +41,18 @@ export interface Props {
 const WriterOptions = (props: Props) => {
 
     const libraryContext = useContext(LibraryContext);
-    const loginContext = useContext(LoginContext);
 
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [libraryId] = useState<number>(libraryContext.state.library.id);
     const [pageSize] = useState<number>(25);
     const [searchText, setSearchText] = useState<string>("");
-    const [writers, setWriters] = useState<Author[]>([]);
 
-    useEffect(() => {
-
-        const fetchWriters = async () => {
-
-            // Fetch matching (search text) or included (no search text) Authors
-            if (loginContext.state.loggedIn && (libraryId > 0) && (props.story.id > 0)) {
-                let newWriters: Author[] = [];
-                try {
-                    if (searchText.length > 0) {
-                        // Fetch all Library Authors matching searchText
-                        newWriters =
-                            await AuthorClient.all(libraryId, {
-                                limit: pageSize,
-                                name: searchText,
-                                offset: (pageSize * (currentPage - 1)),
-                            });
-                        logger.debug({
-                            context: "WriterOptions.fetchWriters",
-                            msg: "Select by searchText",
-                            searchText: searchText,
-                            writers: newWriters,
-                        });
-                    } else {
-                        // Fetch only Authors included in the current Story
-                        newWriters =
-                            await StoryClient.authors(libraryId, props.story.id);
-                        logger.debug({
-                            context: "WriterOptions.fetchWriters",
-                            msg: "Select by included",
-                            searchText: searchText,
-                            writers: newWriters,
-                        });
-                    }
-                    setWriters(newWriters);
-                } catch (error) {
-                    setWriters([]);
-                    if (error.response && (error.response.status === 403)) {
-                        logger.debug({
-                            context: "WriterOptions.fetchWriters",
-                            msg: "FORBIDDEN",
-                        });
-                    } else {
-                        ReportError("WriterOptions.fetchWriters", error);
-                    }
-
-                }
-            } else {
-                setWriters([]);
-                logger.debug({
-                    context: "WriterOptions.fetchWriters",
-                    msg: "SKIPPED",
-                });
-            }
-
-        }
-
-        fetchWriters();
-
-    }, [libraryContext.state.library.id, loginContext.state.loggedIn, props.story,
-        currentPage, libraryId, pageSize, searchText]);
+    const [{authors: writers/*, error, loading*/}] = useFetchAuthors({ // TODO error/loading
+        currentPage: currentPage,
+        library: libraryContext.state.library,
+        pageSize: pageSize,
+        parent: props.story,
+        searchText: searchText,
+    });
 
     const handleChange: HandleValue = (newSearchText) => {
         setSearchText(newSearchText);
@@ -153,7 +93,7 @@ const WriterOptions = (props: Props) => {
                     <Pagination
                         currentPage={currentPage}
                         lastPage={(writers.length === 0) ||
-                        (writers.length < pageSize)}
+                            (writers.length < pageSize)}
                         onNext={onNext}
                         onPrevious={onPrevious}
                         variant="secondary"

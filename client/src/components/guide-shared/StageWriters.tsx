@@ -22,6 +22,7 @@ import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
 import Author from "../../models/Author";
 import Story from "../../models/Story";
+import * as Abridgers from "../../util/abridgers";
 import logger from "../../util/client-logger";
 import ReportError from "../../util/ReportError";
 
@@ -67,7 +68,6 @@ const StageWriters = (props: Props) => {
         });
         logger.debug({
             context: "StageWriters.handleAdd",
-            msg: "Adding new Writer",
             writer: newWriter,
         });
         setWriter(newWriter);
@@ -76,31 +76,20 @@ const StageWriters = (props: Props) => {
     const handleEdit: HandleAuthor = async (newWriter) => {
         logger.debug({
             context: "StageWriters.handleEdit",
-            msg: "Editing existing Writer",
             writer: newWriter,
         });
         setWriter(newWriter);
     }
 
     const handleExclude: HandleAuthor = async (newWriter) => {
-        logger.debug({
-            context: "StageWriters.handleExclude",
-            msg: "Excluding Writer for Story",
-            writer: newWriter,
-            story: props.story,
-        });
         try {
-
-            // Exclude this Writer for the current Story
-            /* const disassociated = */ await AuthorClient.storiesExclude
-            (libraryId, newWriter.id, props.story.id);
+            await AuthorClient.storiesExclude(libraryId, newWriter.id, props.story.id);
             logger.info({
                 context: "StageWriters.handleExclude",
                 msg: "Excluded Writer for Story",
-                story: props.story,
-                writer: newWriter,
+                story: Abridgers.STORY(props.story),
+                writer: Abridgers.AUTHOR(newWriter),
             });
-
         } catch (error) {
             ReportError("StageWriters.handleExclude", error);
         }
@@ -108,25 +97,15 @@ const StageWriters = (props: Props) => {
     }
 
     const handleInclude: HandleAuthor = async (newWriter) => {
-        logger.debug({
-            context: "StageWriters.handleInclude",
-            msg: "Including Author for Story",
-            writer: newWriter,
-            story: props.story,
-        });
         try {
-
-            // Include this Writer for the current Story
             newWriter.principal = true; // Assume by default
-            /* const associated = */ await AuthorClient.storiesInclude
-            (libraryId, newWriter.id, props.story.id, newWriter.principal);
+            await AuthorClient.storiesInclude(libraryId, newWriter.id, props.story.id, newWriter.principal);
             logger.info({
                 context: "StageWriters.handleInclude",
                 msg: "Included Writer for Story",
-                story: props.story,
-                writer: newWriter,
+                story: Abridgers.STORY(props.story),
+                writer: Abridgers.AUTHOR(newWriter),
             });
-
         } catch (error) {
             ReportError("StageWriters.handleInclude", error);
         }
@@ -134,11 +113,6 @@ const StageWriters = (props: Props) => {
     }
 
     const handleInsert: HandleAuthor = async (newWriter) => {
-        logger.debug({
-            context: "StageWriters.handleInsert",
-            msg: "Inserting new Writer",
-            writer: newWriter,
-        });
         try {
 
             // Persist the new Writer
@@ -146,11 +120,11 @@ const StageWriters = (props: Props) => {
             logger.info({
                 context: "StageWriters.handleInsert",
                 msg: "Inserted new Writer",
-                writer: newWriter,
+                writer: Abridgers.AUTHOR(newWriter),
             });
             setWriter(null);
 
-            // Assume a new Author is included in the current Story
+            // Assume a new Writer is included in the current Story
             await handleInclude(inserted);
 
         } catch (error) {
@@ -160,18 +134,14 @@ const StageWriters = (props: Props) => {
     }
 
     const handleRemove: HandleAuthor = async (newWriter) => {
-        logger.debug({
-            context: "StageWriters.handleRemove",
-            msg: "Removing existing Writer",
-            writer: newWriter,
-        });
         try {
             AuthorClient.remove(libraryId, newWriter.id);
             logger.info({
                 context: "StageWriters.handleRemove",
                 msg: "Removed existing Writer",
-                writer: newWriter,
+                writer: Abridgers.AUTHOR(newWriter),
             });
+            // Database constraints will deal with any join tables
             setWriter(null);
         } catch (error) {
             ReportError("StageWriters.handleRemove", error);
@@ -180,29 +150,25 @@ const StageWriters = (props: Props) => {
     }
 
     const handleUpdate: HandleAuthor = async (newWriter) => {
-        logger.debug({
-            context: "StageWriters.handleUpdate",
-            msg: "Updating existing Writer",
-            writer: newWriter,
-        });
         try {
+
             // Update the Writer itself
             await AuthorClient.update(libraryId, newWriter.id, newWriter);
             logger.info({
                 context: "StageWriters.handleUpdate",
                 msg: "Updated existing Writer",
-                writer: newWriter,
+                writer: Abridgers.AUTHOR(newWriter),
             });
+
             // If the principal changed, remove and insert to update it
             if (writer && (newWriter.principal !== writer.principal)) {
                 logger.info({
                     context: "StageWriters.handleUpdate",
                     msg: "Reregister Author-Story for new principal",
-                    writer: newWriter,
+                    writer: Abridgers.AUTHOR(newWriter),
                 });
                 try {
-                    await AuthorClient.storiesExclude
-                    (libraryId, newWriter.id, props.story.id);
+                    await AuthorClient.storiesExclude(libraryId, newWriter.id, props.story.id);
                 } catch (error) {
                     // Ignore error if not previously included
                 }
@@ -216,10 +182,11 @@ const StageWriters = (props: Props) => {
                 logger.info({
                     context: "StageWriters.handleUpdate",
                     msg: "No reregister is required",
-                    writer: newWriter,
+                    writer: Abridgers.AUTHOR(newWriter),
                 });
             }
             setWriter(null);
+
         } catch (error) {
             ReportError("StageWriters.handleUpdate", error);
         }

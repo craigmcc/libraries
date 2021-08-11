@@ -9,7 +9,6 @@ import {useEffect, useState} from "react";
 // Internal Modules ----------------------------------------------------------
 
 import LibraryClient from "../clients/LibraryClient";
-import VolumeClient from "../clients/VolumeClient";
 import Library from "../models/Library";
 import Volume from "../models/Volume";
 import * as Abridgers from "../util/abridgers";
@@ -38,22 +37,15 @@ const useFetchVolumes = (props: Props) => {
 
             setError(null);
             setLoading(true);
+            let newVolumes: Volume[] = [];
 
             try {
-                let newVolumes: Volume[] = [];
                 if (props.library.id > 0) {
-                    const params = {
+                    newVolumes = await LibraryClient.volumes(props.library.id, {
                         limit: props.pageSize,
+                        name: (props.searchText.length > 0) ? props.searchText : null,
                         offset: (props.pageSize * (props.currentPage - 1)),
-                    }
-                    if (props.searchText.length > 0) {
-                        newVolumes = await VolumeClient.all(props.library.id, {
-                            ...params,
-                            name: props.searchText,
-                        });
-                    } else {
-                        newVolumes = await LibraryClient.volumes(props.library.id, params);
-                    }
+                    });
                 }
                 logger.info({
                     context: "useFetchVolumes.fetchVolumes",
@@ -62,7 +54,6 @@ const useFetchVolumes = (props: Props) => {
                     searchText: props.searchText,
                     volumes: Abridgers.VOLUMES(newVolumes),
                 });
-                setVolumes(newVolumes);
             } catch (error) {
                 logger.error({
                     context: "useFetchVolumes.fetchVolumes",
@@ -72,10 +63,10 @@ const useFetchVolumes = (props: Props) => {
                     error: error,
                 });
                 setError(error);
-                setVolumes([]);
             }
 
             setLoading(false);
+            setVolumes(newVolumes);
 
         }
 

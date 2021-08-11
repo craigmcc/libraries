@@ -14,15 +14,17 @@ export const queryParameters = (params?: any): string => {
         return result;
     }
     for (let [key, value] of Object.entries(params)) {
-        if (result.length === 0) {
-            result += "?";
-        } else {
-            result += "&";
-        }
-        if (value === "") {
-            result += key;
-        } else {
-            result += key + "=" + value;
+        if (value || (value === "")) {
+            if (result.length === 0) {
+                result += "?";
+            } else {
+                result += "&";
+            }
+            if (value === "") {
+                result += key;
+            } else {
+                result += key + "=" + value;
+            }
         }
     }
     return result;

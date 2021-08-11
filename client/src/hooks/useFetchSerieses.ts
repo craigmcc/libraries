@@ -38,22 +38,17 @@ const useFetchSerieses = (props: Props) => {
 
             setError(null);
             setLoading(true);
+            let newSerieses: Series[] = [];
 
             try {
-                let newSerieses: Series[] = [];
                 if (props.library.id > 0) {
-                    const params = {
+                    newSerieses = await LibraryClient.series(props.library.id, {
                         limit: props.pageSize,
+                        name: (props.searchText.length > 0) ? props.searchText : null,
                         offset: (props.pageSize * (props.currentPage - 1)),
-                    }
-                    if (props.searchText.length > 0) {
-                        newSerieses = await LibraryClient.series(props.library.id, {
-                            ...params,
-                            name: props.searchText,
-                        });
-                    } else {
-                        newSerieses = await LibraryClient.series(props.library.id, params);
-                    }
+                        withAuthors: "",
+                        withStories: "",
+                    });
                     logger.info({
                         context: "useFetchSerieses.fetchSerieses",
                         library: Abridgers.LIBRARY(props.library),
@@ -61,7 +56,6 @@ const useFetchSerieses = (props: Props) => {
                         searchText: props.searchText,
                         serieses: Abridgers.SERIESES(newSerieses),
                     });
-                    setSerieses(newSerieses);
                 }
             } catch (error) {
                 logger.error({
@@ -72,10 +66,10 @@ const useFetchSerieses = (props: Props) => {
                     error: error,
                 });
                 setError(error);
-                setSerieses([]);
             }
 
             setLoading(false);
+            setSerieses(newSerieses);
 
         }
 

@@ -22,6 +22,14 @@ export const AUTHOR = (author: Author): any => {
     }
 }
 
+export const AUTHORS = (authors: Author[]): any => {
+    const results: Author[] = [];
+    authors.forEach(author => {
+        results.push(AUTHOR(author));
+    });
+    return results;
+}
+
 export const LIBRARY = (library: Library): any => {
     return {
         id: library.id,
