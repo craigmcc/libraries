@@ -48,7 +48,7 @@ const useFetchAuthors = (props: Props) => {
             let newAuthors: Author[] = [];
 
             try {
-                if (props.library.id > 0) {
+                if ((props.library.id > 0) && (props.parent.id > 0)) {
                     if (props.searchText.length > 0) {
                         abridged = Abridgers.LIBRARY(props.library);
                         newAuthors = await LibraryClient.authors(props.library.id, {
@@ -82,6 +82,15 @@ const useFetchAuthors = (props: Props) => {
                         searchText: props.searchText,
                         parent: abridged,
                         authors: Abridgers.AUTHORS(newAuthors),
+                    });
+                } else {
+                    logger.info({
+                        context: "useFetchAuthors.fetchAuthors",
+                        msg: "Nothing to select",
+                        library: Abridgers.LIBRARY(props.library),
+                        currentPage: props.currentPage,
+                        searchText: props.searchText,
+                        parent: abridged,
                     });
                 }
             } catch (error) {
