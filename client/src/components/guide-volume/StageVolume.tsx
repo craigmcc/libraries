@@ -17,15 +17,12 @@ import VolumeOptions from "./VolumeOptions";
 import {HandleAction, HandleVolume, OnAction, Scopes} from "../types";
 import {HandleStage, Stage} from "../guide-shared/Stage";
 import VolumeForm from "../volumes/VolumeForm";
-import StoryClient from "../../clients/StoryClient";
-import VolumeClient from "../../clients/VolumeClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
-import Story from "../../models/Story";
+import useMutateVolume from "../../hooks/useMutateVolume";
 import Volume from "../../models/Volume";
 import * as Abridgers from "../../util/abridgers";
 import logger from "../../util/client-logger";
-import ReportError from "../../util/ReportError";
 
 // Incoming Properties -------------------------------------------------------
 
@@ -46,6 +43,11 @@ const StageVolume = (props: Props) => {
     const [canRemove, setCanRemove] = useState<boolean>(false);
     const [libraryId] = useState<number>(libraryContext.state.library.id);
     const [volume, setVolume] = useState<Volume | null>(null);
+
+    const [{performInsert, performRemove, performUpdate/*, error, processing*/}]
+        = useMutateVolume({ // TODO error/processing
+            library: libraryContext.state.library,
+        });
 
     useEffect(() => {
 
@@ -72,119 +74,43 @@ const StageVolume = (props: Props) => {
         });
         logger.debug({
             context: "StageVolume.handleAdd",
-            msg: "Adding new Volume",
             volume: newVolume,
         });
         setVolume(newVolume);
     }
 
-    const handleEdit: HandleVolume = (newVolume) => {
+    const handleEdit: HandleVolume = (theVolume) => {
         logger.debug({
             context: "StageVolume.handleEdit",
-            msg: "Editing existing Volume",
-            volume: newVolume,
+            volume: theVolume,
         });
-        setVolume(newVolume);
+        setVolume(theVolume);
     }
 
-    const handleInsert: HandleVolume = async (newVolume) => {
-        logger.debug({
-            context: "StageVolume.handleInsert",
-            msg: "Inserting new Volume",
-            volume: newVolume,
-        });
-        try {
-
-            // Persist the requested Volume
-            const inserted = await VolumeClient.insert(libraryId, newVolume);
-            logger.info({
-                context: "StageVolume.handleInsert",
-                msg: "Inserted new Volume",
-                volume: Abridgers.VOLUME(inserted),
-            })
-            setVolume(null);
-
-            // If the Volume is of type "Single", create a Story with the same name
-            // and associate it with this Volume
-            if (inserted.type === "Single") {
-                const newStory = new Story({
-                    copyright: inserted.copyright ? inserted.copyright : undefined,
-                    library_id: inserted.library_id,
-                    name: inserted.name,
-                    notes: inserted.notes ? inserted.notes : undefined,
-                });
-                const addedStory = await StoryClient.insert(libraryId, newStory);
-                await VolumeClient.storiesInclude(libraryId, inserted.id, addedStory.id);
-                logger.info({
-                    context: "StageVolume.handleInsert",
-                    msg: "Added Story for Volume of type Single",
-                    volume: Abridgers.VOLUME(inserted),
-                    story: Abridgers.STORY(addedStory),
-                })
-            }
-
-            // Select the inserted Volume, and switch to Authors stage
-            handleSelect(inserted);
-
-        } catch (error) {
-            ReportError("StageVolume.handleInsert", error);
-        }
+    const handleInsert: HandleVolume = async (theVolume) => {
+        const inserted = await performInsert(theVolume);
+        handleSelect(inserted);
     }
 
-    const handleRemove: HandleVolume = async (newVolume) => {
-        logger.debug({
-            context: "StageVolume.handleRemove",
-            msg: "Removing existing Volume",
-            volume: newVolume,
-        });
-        try {
-            await VolumeClient.remove(libraryId, newVolume.id);
-            logger.info({
-                context: "StageVolume.handleRemove",
-                msg: "Removed existing Volume",
-                volume: Abridgers.VOLUME(newVolume),
-            });
-            setVolume(null);
-            if (newVolume.id === props.volume.id) {
-                props.handleVolume(new Volume());   // Unselect if we were current
-            }
-        } catch (error) {
-            ReportError("StageVolume.handleRemove", error);
-        }
-        props.handleRefresh();
+    const handleRemove: HandleVolume = async (theVolume) => {
+        await performRemove(theVolume);
+        setVolume(null);
+        props.handleVolume(new Volume());
     }
 
-    const handleSelect: HandleVolume = (newVolume) => {
+    const handleSelect: HandleVolume = (theVolume) => {
         logger.debug({
             context: "StageVolume.handleSelect",
-            msg: "Selecting existing Volume",
-            volume: newVolume,
+            volume: theVolume,
         });
-        props.handleVolume(newVolume);
+        props.handleVolume(theVolume);
         props.handleStage(Stage.AUTHORS);
     }
 
-    const handleUpdate: HandleVolume = async (newVolume) => {
-        logger.debug({
-            context: "StageVolume.handleUpdate",
-            msg: "Updating existing Volume",
-            volume: newVolume,
-        });
-        try {
-            await VolumeClient.update(libraryId, newVolume.id, newVolume);
-            logger.info({
-                context: "StageVolume.handleUpdate",
-                msg: "Updated existing Volume",
-                volume: Abridgers.VOLUME(newVolume),
-            })
-            setVolume(null);
-        } catch (error) {
-            ReportError("StageVolume.handleUpdate", error);
-        }
-        // If we updated the currently selected Volume, propagate to summary
-        if (newVolume.id === props.volume.id) {
-            props.handleVolume(newVolume);
-        }
+    const handleUpdate: HandleVolume = async (theVolume) => {
+        const updated = await performUpdate(theVolume);
+        setVolume(null);
+        props.handleVolume(updated);
         props.handleRefresh();
     }
 
