@@ -114,7 +114,9 @@ const StageAuthors = (props: Props) => {
 
     const handleInsert: HandleAuthor = async (theAuthor) => {
         const inserted = await performInsert(theAuthor);
-//        handleSelect(inserted); // TODO - needed?
+        inserted.principal = theAuthor.principal; // Carry principal (if any) forward
+        await handleInclude(inserted); // Assume new author is included
+        setAuthor(null);
         props.handleRefresh();
     }
 
