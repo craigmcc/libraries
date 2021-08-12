@@ -17,13 +17,12 @@ import SeriesOptions from "./SeriesOptions";
 import {HandleAction, HandleSeries, OnAction, Scopes} from "../types";
 import {HandleStage, Stage} from "../guide-shared/Stage";
 import SeriesForm from "../series/SeriesForm";
-import SeriesClient from "../../clients/SeriesClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
+import useMutateSeries from "../../hooks/useMutateSeries";
 import Series from "../../models/Series";
 import * as Abridgers from "../../util/abridgers";
 import logger from "../../util/client-logger";
-import ReportError from "../../util/ReportError";
 
 // Incoming Properties -------------------------------------------------------
 
@@ -44,6 +43,11 @@ const StageSeries = (props: Props) => {
     const [canRemove, setCanRemove] = useState<boolean>(false);
     const [libraryId] = useState<number>(libraryContext.state.library.id);
     const [series, setSeries] = useState<Series | null>(null);
+
+    const [{performInsert, performRemove, performUpdate/*, error, processing*/}]
+        = useMutateSeries({
+            library: libraryContext.state.library,
+        })
 
     useEffect(() => {
 
@@ -67,100 +71,43 @@ const StageSeries = (props: Props) => {
         });
         logger.debug({
             context: "StageSeries.handleAdd",
-            msg: "Adding new Series",
             series: newSeries,
         });
         setSeries(newSeries);
     }
 
-    const handleEdit: HandleSeries = (newSeries) => {
+    const handleEdit: HandleSeries = (theSeries) => {
         logger.debug({
             context: "StageSeries.handleEdit",
-            msg: "Editing existing Series",
-            series: newSeries,
+            series: theSeries,
         });
-        setSeries(newSeries);
+        setSeries(theSeries);
     }
 
-    const handleInsert: HandleSeries = async (newSeries) => {
-        logger.debug({
-            context: "StageSeries.handleInsert",
-            msg: "Inserting new Series",
-            series: newSeries,
-        });
-        try {
-
-            // Persist the requested Series
-            const inserted = await SeriesClient.insert(libraryId, newSeries);
-            logger.info({
-                context: "StageSeries.handleInsert",
-                msg: "Inserted new Series",
-                series: Abridgers.SERIES(inserted),
-            });
-            setSeries(null);
-
-            // Select the inserted Series, and switch to Authors stage
-            handleSelect(inserted);
-
-        } catch (error) {
-            ReportError("StageSeries.handleInsert", error);
-        }
+    const handleInsert: HandleSeries = async (theSeries) => {
+        const inserted = await performInsert(theSeries)
+        handleSelect(inserted);
     }
 
-    const handleRemove: HandleSeries = async (newSeries) => {
-        logger.debug({
-            context: "StageSeries.handleRemove",
-            msg: "Removing existing Series",
-            series: newSeries,
-        });
-        try {
-            await SeriesClient.remove(libraryId, newSeries.id);
-            logger.info({
-                context: "StageSeries.handleRemove",
-                msg: "Removed existing Series",
-                series: Abridgers.SERIES(newSeries),
-            });
-            setSeries(null);
-            if (newSeries.id === props.series.id) {
-                props.handleSeries(new Series()); // Unselect if we were current
-            }
-        } catch (error) {
-            ReportError("StageSeries.handleRemove", error);
-        }
-        props.handleRefresh();
+    const handleRemove: HandleSeries = async (theSeries) => {
+        await performRemove(theSeries);
+        setSeries(null);
+        props.handleSeries(new Series());
     }
 
-    const handleSelect: HandleSeries = (newSeries) => {
+    const handleSelect: HandleSeries = (theSeries) => {
         logger.debug({
             context: "StageSeries.handleSelect",
-            msg: "Selecting existing Series",
-            series: newSeries,
+            series: theSeries,
         });
-        props.handleSeries(newSeries);
+        props.handleSeries(theSeries);
         props.handleStage(Stage.AUTHORS);
     }
 
-    const handleUpdate: HandleSeries = async (newSeries) => {
-        logger.debug({
-            context: "StageSeries.handleUpdate",
-            msg: "Updating existing Series",
-            series: newSeries,
-        });
-        try {
-            await SeriesClient.update(libraryId, newSeries.id, newSeries);
-            logger.info({
-                context: "StageSeries.handleUpdate",
-                msg: "Updated existing Series",
-                series: Abridgers.SERIES(newSeries),
-            });
-            setSeries(null);
-        } catch (error) {
-            ReportError("StageSeries.handleUpdate", error);
-        }
-        // If we updated the currently selected Series, propagate to summary
-        if (newSeries.id === props.series.id) {
-            props.handleSeries(newSeries);
-        }
+    const handleUpdate: HandleSeries = async (theSeries) => {
+        const updated = await performUpdate(theSeries);
+        setSeries(null);
+        props.handleSeries(updated);
         props.handleRefresh();
     }
 

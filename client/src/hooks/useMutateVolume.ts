@@ -1,6 +1,6 @@
 // useMutateVolume -----------------------------------------------------------
 
-// Custom hook to encapsulate operations that insert/remove/update Volumes.
+// Custom hook to encapsulate operations that insert/remove/update a Volume.
 
 // External Modules ----------------------------------------------------------
 
