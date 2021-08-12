@@ -61,6 +61,14 @@ export const STORY = (story: Story): any => {
     }
 }
 
+export const STORIES = (stories: Story[]): any => {
+    const results: Story[] = [];
+    stories.forEach(story => {
+        results.push(STORY(story));
+    });
+    return results;
+}
+
 export const USER = (user: User): any => {
     return {
         id: user.id,

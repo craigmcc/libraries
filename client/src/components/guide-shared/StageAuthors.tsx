@@ -148,6 +148,7 @@ const StageAuthors = (props: Props) => {
             setAuthor(null);
 
             // Assume a new Author is included in the current Series/Volume
+            inserted.principal = newAuthor.principal; // Carry principal (if any) forward
             await handleInclude(inserted);
 
         } catch (error) {

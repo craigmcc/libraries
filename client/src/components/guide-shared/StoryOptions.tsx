@@ -6,7 +6,7 @@
 
 // External Modules ----------------------------------------------------------
 
-import React, {useContext, useEffect, useState} from "react";
+import React, {useContext, useState} from "react";
 import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/Container";
 import Col from "react-bootstrap/Col";
@@ -18,14 +18,11 @@ import Table from "react-bootstrap/Table";
 import Pagination from "../Pagination";
 import SearchBar from "../SearchBar";
 import {HandleStory, HandleValue, OnAction} from "../types";
-import StoryClient from "../../clients/StoryClient";
 import LibraryContext from "../../contexts/LibraryContext";
-import LoginContext from "../../contexts/LoginContext";
+import useFetchStories from "../../hooks/useFetchStories";
 import Series from "../../models/Series";
 import Story from "../../models/Story";
 import Volume from "../../models/Volume";
-import logger from "../../util/client-logger";
-import ReportError from "../../util/ReportError";
 import {listValue} from "../../util/transformations";
 
 // Incoming Properties -------------------------------------------------------
@@ -35,7 +32,7 @@ export interface Props {
     handleEdit: HandleStory;            // Handle request to edit this Story
     handleExclude: HandleStory;         // Handle request to exclude a Story
     handleInclude: HandleStory;         // Handle request to include a Story
-    handleInsert: HandleStory;          // Handle request to insert a Story
+//    handleInsert: HandleStory;          // Handle request to insert a Story
     handleSelect: HandleStory;          // Handle request to select a Story
     included: (story: Story) => boolean; // Is the specified Story included?
     parent: Series | Volume;            // Currently selected Series
@@ -46,72 +43,18 @@ export interface Props {
 const StoryOptions = (props: Props) => {
 
     const libraryContext = useContext(LibraryContext);
-    const loginContext = useContext(LoginContext);
 
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [libraryId] = useState<number>(libraryContext.state.library.id);
     const [pageSize] = useState<number>(25);
     const [searchText, setSearchText] = useState<string>("");
-    const [stories, setStories] = useState<Story[]>([]);
 
-    useEffect(() => {
-
-        const fetchStories = async () => {
-
-            // Fetch matching (search text) or included (no search text) Stories
-            if (loginContext.state.loggedIn && (libraryId > 0) && (props.parent.id > 0)) {
-                let newStories: Story[] = [];
-                try {
-                    if (searchText.length > 0) {
-
-                        // Fetch matching Stories
-                        newStories =
-                            await StoryClient.all(libraryId, {
-                                limit: pageSize,
-                                name: searchText,
-                                offset: (pageSize * (currentPage - 1)),
-                                withAuthors: "",
-                            });
-                        logger.debug({
-                            context: "StoryOptions.fetchStories",
-                            msg: "Select by searchText",
-                            searchText: searchText,
-                            stories: newStories,
-                        });
-
-                    } else {
-
-                        // Fetch currently included Stories
-                        newStories = props.parent.stories;
-
-                    }
-                    setStories(newStories);
-
-                } catch (error) {
-                    setStories([]);
-                    if (error.response && (error.response.status === 403)) {
-                        logger.debug({
-                            context: "StoryOptions.fetchStories",
-                            msg: "FORBIDDEN",
-                        });
-                    } else {
-                        ReportError("StoryOptions.fetchStories", error);
-                    }
-                }
-            } else {
-                setStories([]);
-                logger.debug({
-                    context: "StoryOptions.fetchStories",
-                    msg: "SKIPPED",
-                });
-            }
-
-        }
-
-        fetchStories();
-
-    }, [libraryContext.state.library.id, loginContext.state.loggedIn, props.parent,
-        currentPage, libraryId, pageSize, searchText]);
+    const [{stories/*, error, loading*/}] = useFetchStories({ // TODO error/loading
+        currentPage: currentPage,
+        library: libraryContext.state.library,
+        pageSize: pageSize,
+        parent: props.parent,
+        searchText: searchText,
+    });
 
     const handleChange: HandleValue = (newSearchText) => {
         setSearchText(newSearchText);

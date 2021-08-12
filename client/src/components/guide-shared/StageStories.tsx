@@ -28,6 +28,7 @@ import Story from "../../models/Story";
 import Volume from "../../models/Volume";
 import logger from "../../util/client-logger";
 import ReportError from "../../util/ReportError";
+import * as Abridgers from "../../util/abridgers";
 
 // Incoming Properties -------------------------------------------------------
 
@@ -62,6 +63,14 @@ const StageStories = (props: Props) => {
     }, [libraryContext.state.library.id, loginContext, loginContext.state.loggedIn,
         libraryId, props.parent]);
 
+    const abridged = (parent: Series | Volume): Series | Volume => {
+        if (parent instanceof Series) {
+            return Abridgers.SERIES(parent);
+        } else /* if (parent instanceof Volume) */ {
+            return Abridgers.VOLUME(parent);
+        }
+    }
+
     const handleAdd: OnAction = () => {
         const newStory = new Story({
             copyright: null,
@@ -71,7 +80,6 @@ const StageStories = (props: Props) => {
         });
         logger.debug({
             context: "StageStories.handleAdd",
-            msg: "Adding new Story",
             story: newStory,
         });
         setStory(newStory);
@@ -80,33 +88,23 @@ const StageStories = (props: Props) => {
     const handleEdit: HandleStory = async (newStory) => {
         logger.debug({
             context: "StageStories.handleEdit",
-            msg: "Editing existing Story",
             story: newStory,
         });
         setStory(newStory);
     }
 
-    // Exclude this Story from the current Series/Volume, no effect on Author(s)
     const handleExclude: HandleStory = async (newStory) => {
-        logger.debug({
-            context: "StageStories.handleExclude",
-            msg: "Excluding Story for Series/Volume",
-            parent: props.parent,
-            story: newStory,
-        });
         try {
             if (props.parent instanceof Series) {
-                await SeriesClient.storiesExclude
-                    (libraryId, props.parent.id, newStory.id);
+                await SeriesClient.storiesExclude(libraryId, props.parent.id, newStory.id);
             } else {
-                await VolumeClient.storiesExclude
-                    (libraryId, props.parent.id, newStory.id);
+                await VolumeClient.storiesExclude(libraryId, props.parent.id, newStory.id);
             }
             logger.info({
                 context: "StageStories.handleExclude",
                 msg: "Excluded Story for Series/Volume",
-                parent: props.parent,
-                story: newStory,
+                parent: abridged(props.parent),
+                story: Abridgers.STORY(newStory),
             });
         } catch (error) {
             ReportError("StageStories.handleExclude", error);
@@ -114,27 +112,18 @@ const StageStories = (props: Props) => {
         props.handleRefresh();
     }
 
-    // Include this Story in the current Series/Volume, no effect on Author(s)
     const handleInclude: HandleStory = async (newStory) => {
-        logger.debug({
-            context: "StageStories.handleInclude",
-            msg: "Including Story for Series/Volume",
-            parent: props.parent,
-            story: newStory,
-        });
         try {
             if (props.parent instanceof Series) {
-                await SeriesClient.storiesInclude
-                    (libraryId, props.parent.id, newStory.id, newStory.ordinal);
+                await SeriesClient.storiesInclude(libraryId, props.parent.id, newStory.id, newStory.ordinal);
             } else {
-                await VolumeClient.storiesInclude
-                    (libraryId, props.parent.id, newStory.id);
+                await VolumeClient.storiesInclude(libraryId, props.parent.id, newStory.id);
             }
             logger.info({
                 context: "StageStories.handleInclude",
                 msg: "Included Story for Series/Volume",
-                series: props.parent,
-                story: newStory,
+                parent: abridged(props.parent),
+                story: Abridgers.STORY(newStory),
             });
         } catch (error) {
             ReportError("StageStories.handleInclude", error);
@@ -143,11 +132,6 @@ const StageStories = (props: Props) => {
     }
 
     const handleInsert: HandleStory = async (newStory) => {
-        logger.debug({
-            context: "StageStories.handleInsert",
-            msg: "Inserting new Story",
-            story: newStory,
-        });
         try {
 
             // Persist the new Story
@@ -164,18 +148,12 @@ const StageStories = (props: Props) => {
             await handleInclude(inserted);
 
             // Assume that the Author(s) for this Series/Volume wrote this Story as well.
-            logger.debug({
-                context: "StageStories.handleInsert",
-                msg: "About to add Story Authors",
-                story: inserted,
-                authors: props.parent.authors,
-            });
             for (const author of props.parent.authors) {
                 logger.info({
                     context: "StageStories.handleInsert",
                     msg: "Adding Story Author",
-                    story: inserted,
-                    author: author,
+                    story: Abridgers.STORY(inserted),
+                    author: Abridgers.AUTHOR(author),
                 });
                 await AuthorClient.storiesInclude(libraryId, author.id, inserted.id, author.principal);
             }
@@ -190,20 +168,15 @@ const StageStories = (props: Props) => {
     }
 
     const handleRemove: HandleStory = async (newStory) => {
-        logger.debug({
-            context: "StageStories.handleRemove",
-            msg: "Removing old Story",
-            story: newStory,
-        });
         try {
             StoryClient.remove(libraryId, newStory.id);
             logger.info({
                 context: "StageStories.handleRemove",
                 msg: "Removed old Story",
-                story: newStory,
+                story: Abridgers.STORY(newStory),
             });
+            // Database constraints will deal with any join tables
             setStory(null);
-            // Database cascades will take care of joins
         } catch (error) {
             ReportError("StageStories.handleRemove", error);
         }
@@ -216,15 +189,11 @@ const StageStories = (props: Props) => {
             story: newStory,
         });
         props.handleStory(newStory);
+        props.handleStage(Stage.WRITERS);
         props.handleRefresh();
     }
 
     const handleUpdate: HandleStory = async (newStory) => {
-        logger.debug({
-            context: "StageStories.handleUpdate",
-            msg: "Updating existing Story",
-            story: newStory,
-        });
         try {
 
             // Update the Story itself
@@ -232,7 +201,7 @@ const StageStories = (props: Props) => {
             logger.info({
                 context: "StageStories.handleUpdate",
                 msg: "Updated existing Story",
-                story: newStory,
+                story: Abridgers.STORY(newStory),
             });
 
             // If the ordinal changed (Series-Story only), remove and insert to update it
@@ -240,7 +209,7 @@ const StageStories = (props: Props) => {
                 logger.info({
                     context: "StageStories.handleUpdate",
                     msg: "Reregister Series-Story for new ordinal",
-                    story: newStory,
+                    story: Abridgers.STORY(newStory),
                 });
                 try {
                     await SeriesClient.storiesExclude
@@ -258,7 +227,7 @@ const StageStories = (props: Props) => {
                 logger.info({
                     context: "StageStories.handleUpdate",
                     msg: "No reregister is required",
-                    story: newStory,
+                    story: Abridgers.STORY(newStory),
                 });
             }
             setStory(null);
@@ -320,7 +289,7 @@ const StageStories = (props: Props) => {
                         handleEdit={handleEdit}
                         handleExclude={handleExclude}
                         handleInclude={handleInclude}
-                        handleInsert={handleInsert}
+//                        handleInsert={handleInsert}
                         handleSelect={handleSelect}
                         included={included}
                         parent={props.parent}
