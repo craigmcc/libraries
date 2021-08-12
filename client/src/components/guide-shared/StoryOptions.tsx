@@ -119,10 +119,12 @@ const StoryOptions = (props: Props) => {
 
     const handleExclude: HandleStory = (story) => {
         props.handleExclude(story);
+        setSearchText("");
     }
 
     const handleInclude: HandleStory = (story) => {
         props.handleInclude(story);
+        setSearchText("");
     }
 
     const onNext: OnAction = () => {

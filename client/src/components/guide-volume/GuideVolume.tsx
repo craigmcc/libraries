@@ -44,10 +44,11 @@ const GuideVolume = () => {
 
     const handleRefresh = (): void => {
         logger.info({
-            context: "GuideVolume.handleRefresh (NOOP)",
+            context: "GuideVolume.handleRefresh",
             volume: Abridgers.VOLUME(volume),
         });
-//        setVolumeId(volume.id);
+        setVolumeId(-1);
+        setVolumeId(volume.id);
     }
 
     const handleStage = (newStage: Stage): void => {

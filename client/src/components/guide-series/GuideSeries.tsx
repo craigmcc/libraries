@@ -44,10 +44,11 @@ const GuideSeries = () => {
 
     const handleRefresh = (): void => {
         logger.info({
-            context: "GuideSeries.handleRefresh (NOOP)",
+            context: "GuideSeries.handleRefresh",
             series: Abridgers.SERIES(series),
         });
-//        setSeriesId(series.id);
+        setSeriesId(-1);
+        setSeriesId(series.id);
     }
 
     const handleSeries = async (newSeries: Series): Promise<void> => {

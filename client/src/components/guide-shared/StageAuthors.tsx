@@ -48,9 +48,15 @@ const StageAuthors = (props: Props) => {
 
     useEffect(() => {
 
+        let abridged: Series | Volume | null = null;
+        if (props.parent instanceof Series) {
+            abridged = Abridgers.SERIES(props.parent);
+        } else /* if (props.parent instanceof Volume) */ {
+            abridged = Abridgers.VOLUME(props.parent);
+        }
         logger.info({
             context: "StageAuthors.useEffect",
-            parent: props.parent,
+            parent: abridged,
         });
 
         // Record current permissions

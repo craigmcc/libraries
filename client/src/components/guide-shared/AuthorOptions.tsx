@@ -60,10 +60,12 @@ const AuthorOptions = (props: Props) => {
 
     const handleExclude: HandleAuthor = (author) => {
         props.handleExclude(author);
+        setSearchText("");
     }
 
     const handleInclude: HandleAuthor = (author) => {
         props.handleInclude(author);
+        setSearchText("");
     }
 
     const onNext: OnAction = () => {
