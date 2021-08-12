@@ -82,7 +82,7 @@ const StageVolume = (props: Props) => {
     const handleEdit: HandleVolume = (theVolume) => {
         logger.debug({
             context: "StageVolume.handleEdit",
-            volume: theVolume,
+            volume: Abridgers.VOLUME(theVolume),
         });
         setVolume(theVolume);
     }

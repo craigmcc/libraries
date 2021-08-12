@@ -79,7 +79,7 @@ const StageSeries = (props: Props) => {
     const handleEdit: HandleSeries = (theSeries) => {
         logger.debug({
             context: "StageSeries.handleEdit",
-            series: theSeries,
+            series: Abridgers.SERIES(theSeries),
         });
         setSeries(theSeries);
     }

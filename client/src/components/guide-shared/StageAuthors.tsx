@@ -17,15 +17,14 @@ import AuthorOptions from "./AuthorOptions";
 import {HandleStage, Stage} from "./Stage";
 import {HandleAction, HandleAuthor, OnAction, Scopes} from "../types";
 import AuthorForm from "../authors/AuthorForm";
-import AuthorClient from "../../clients/AuthorClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
+import useMutateAuthor from "../../hooks/useMutateAuthor";
 import Author from "../../models/Author";
 import Series from "../../models/Series";
 import Volume from "../../models/Volume";
 import * as Abridgers from "../../util/abridgers";
 import logger from "../../util/client-logger";
-import ReportError from "../../util/ReportError";
 
 // Incoming Properties -------------------------------------------------------
 
@@ -45,6 +44,13 @@ const StageAuthors = (props: Props) => {
     const [author, setAuthor] = useState<Author | null>(null);
     const [canRemove, setCanRemove] = useState<boolean>(false);
     const [libraryId] = useState<number>(libraryContext.state.library.id);
+
+    const [{performExclude, performInclude, performInsert, performRemove,
+        performUpdate/*, error, processing*/}] = useMutateAuthor({
+            author: author,
+            library: libraryContext.state.library,
+            parent: props.parent,
+        });
 
     useEffect(() => {
 
@@ -88,139 +94,39 @@ const StageAuthors = (props: Props) => {
         setAuthor(newAuthor);
     }
 
-    const handleEdit: HandleAuthor = async (newAuthor) => {
+    const handleEdit: HandleAuthor = async (theAuthor) => {
         logger.debug({
             context: "StageAuthors.handleEdit",
-            author: newAuthor,
+            author: theAuthor,
         });
-        setAuthor(newAuthor);
+        setAuthor(theAuthor);
     }
 
-    const handleExclude: HandleAuthor = async (newAuthor) => {
-        try {
-            if (props.parent instanceof Series) {
-                await AuthorClient.seriesExclude(libraryId, newAuthor.id, props.parent.id);
-            } else {
-                await AuthorClient.volumesExclude(libraryId, newAuthor.id, props.parent.id);
-            }
-            logger.info({
-                context: "StageAuthors.handleExclude",
-                msg: "Excluded Author for Series/Volume",
-                parent: abridged(props.parent),
-                author: Abridgers.AUTHOR(newAuthor),
-            });
-        } catch (error) {
-            ReportError("StageAuthors.handleExclude", error);
-        }
+    const handleExclude: HandleAuthor = async (theAuthor) => {
+        await performExclude(theAuthor);
         props.handleRefresh();
     }
 
-    const handleInclude: HandleAuthor = async (newAuthor) => {
-        try {
-            newAuthor.principal = true; // Assume by default
-            if (props.parent instanceof Series) {
-                await AuthorClient.seriesInclude(libraryId, newAuthor.id, props.parent.id, newAuthor.principal);
-            } else {
-                await AuthorClient.volumesInclude(libraryId, newAuthor.id, props.parent.id, newAuthor.principal);
-            }
-            logger.info({
-                context: "StageAuthors.handleInclude",
-                msg: "Included Author for Series/Volume",
-                parent: abridged(props.parent),
-                author: Abridgers.AUTHOR(newAuthor),
-            });
-        } catch (error) {
-            ReportError("StageAuthors.handleInclude", error);
-        }
+    const handleInclude: HandleAuthor = async (theAuthor) => {
+        await performInclude(theAuthor);
         props.handleRefresh();
     }
 
-    const handleInsert: HandleAuthor = async (newAuthor) => {
-        try {
-
-            // Persist the new Author
-            const inserted = await AuthorClient.insert(libraryId, newAuthor);
-            logger.info({
-                context: "StageAuthors.insert",
-                msg: "Inserted new Author",
-                author: Abridgers.AUTHOR(inserted),
-            })
-            setAuthor(null);
-
-            // Assume a new Author is included in the current Series/Volume
-            inserted.principal = newAuthor.principal; // Carry principal (if any) forward
-            await handleInclude(inserted);
-
-        } catch (error) {
-            ReportError("StageAuthors.handleInsert", error);
-        }
+    const handleInsert: HandleAuthor = async (theAuthor) => {
+        const inserted = await performInsert(theAuthor);
+//        handleSelect(inserted); // TODO - needed?
         props.handleRefresh();
     }
 
-    const handleRemove: HandleAuthor = async (newAuthor) => {
-        try {
-            AuthorClient.remove(libraryId, newAuthor.id);
-            logger.info({
-                context: "StageAuthors.handleRemove",
-                msg: "Removed existing Author",
-                author: Abridgers.AUTHOR(newAuthor),
-            });
-            // Database constraints will deal with any join tables
-            setAuthor(null);
-        } catch (error) {
-            ReportError("StageAuthors.handleRemove", error);
-        }
+    const handleRemove: HandleAuthor = async (theAuthor) => {
+        await performRemove(theAuthor);
+        setAuthor(null);
         props.handleRefresh();
     }
 
-    const handleUpdate: HandleAuthor = async (newAuthor) => {
-        try {
-
-            // Update the Author itself
-            await AuthorClient.update(libraryId, newAuthor.id, newAuthor);
-            logger.info({
-                context: "StageAuthors.handleUpdate",
-                msg: "Updated existing Author",
-                author: Abridgers.AUTHOR(newAuthor),
-            });
-
-            // If the principal changed, remove and insert to update it
-            if (author && (newAuthor.principal !== author.principal)) {
-                logger.info({
-                    context: "StageAuthors.handleUpdate",
-                    msg: "Reregister Author-Series/Author-Volume for new principal",
-                    author: Abridgers.AUTHOR(newAuthor),
-                });
-                try {
-                    if (props.parent instanceof Series) {
-                        await AuthorClient.seriesExclude(libraryId, newAuthor.id, props.parent.id);
-                    } else /* if (props.parent instanceof Volume) */ {
-                        await AuthorClient.volumesExclude(libraryId, newAuthor.id, props.parent.id);
-                    }
-                } catch (error) {
-                    // Ignore error if not previously included
-                }
-                try {
-                    if (props.parent instanceof Series) {
-                        await AuthorClient.seriesInclude(libraryId, newAuthor.id, props.parent.id, newAuthor.principal);
-                    } else /* if (props.parent instanceof Volume) */ {
-                        await AuthorClient.volumesInclude(libraryId, newAuthor.id, props.parent.id, newAuthor.principal);
-                    }
-                } catch (error) {
-                    ReportError("StageAuthors.handleUpdate.include", error);
-                }
-            } else {
-                logger.info({
-                    context: "StageAuthors.handleUpdate",
-                    msg: "No reregister is required",
-                    author: Abridgers.AUTHOR(newAuthor),
-                });
-            }
-            setAuthor(null);
-
-        } catch (error) {
-            ReportError("StageAuthors.handleUpdate", error);
-        }
+    const handleUpdate: HandleAuthor = async (theAuthor) => {
+        const updated = await performUpdate(theAuthor);
+        setAuthor(null);
         props.handleRefresh();
     }
 
