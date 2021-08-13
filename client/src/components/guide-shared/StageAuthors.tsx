@@ -54,15 +54,9 @@ const StageAuthors = (props: Props) => {
 
     useEffect(() => {
 
-        let abridged: Series | Volume | null = null;
-        if (props.parent instanceof Series) {
-            abridged = Abridgers.SERIES(props.parent);
-        } else /* if (props.parent instanceof Volume) */ {
-            abridged = Abridgers.VOLUME(props.parent);
-        }
         logger.info({
             context: "StageAuthors.useEffect",
-            parent: abridged,
+            parent: abridged(props.parent),
         });
 
         // Record current permissions
@@ -97,7 +91,7 @@ const StageAuthors = (props: Props) => {
     const handleEdit: HandleAuthor = async (theAuthor) => {
         logger.debug({
             context: "StageAuthors.handleEdit",
-            author: theAuthor,
+            author: Abridgers.AUTHOR(theAuthor),
         });
         setAuthor(theAuthor);
     }
@@ -115,7 +109,7 @@ const StageAuthors = (props: Props) => {
     const handleInsert: HandleAuthor = async (theAuthor) => {
         const inserted = await performInsert(theAuthor);
         inserted.principal = theAuthor.principal; // Carry principal (if any) forward
-        await handleInclude(inserted); // Assume new author is included
+        await performInclude(inserted); // Assume new author is included
         setAuthor(null);
         props.handleRefresh();
     }
@@ -127,7 +121,7 @@ const StageAuthors = (props: Props) => {
     }
 
     const handleUpdate: HandleAuthor = async (theAuthor) => {
-        const updated = await performUpdate(theAuthor);
+        await performUpdate(theAuthor);
         setAuthor(null);
         props.handleRefresh();
     }

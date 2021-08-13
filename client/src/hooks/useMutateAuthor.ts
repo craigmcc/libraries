@@ -37,7 +37,7 @@ const useMutateAuthor = (props: Props) => {
             library: Abridgers.LIBRARY(props.library),
             parent: abridged(props.parent),
         });
-    }, [props.library]);
+    }, [props.author, props.library, props.parent]);
 
     const abridged = (parent: Series | Volume): Series | Volume => {
         if (parent instanceof Series) {

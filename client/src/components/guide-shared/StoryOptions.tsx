@@ -32,7 +32,6 @@ export interface Props {
     handleEdit: HandleStory;            // Handle request to edit this Story
     handleExclude: HandleStory;         // Handle request to exclude a Story
     handleInclude: HandleStory;         // Handle request to include a Story
-//    handleInsert: HandleStory;          // Handle request to insert a Story
     handleSelect: HandleStory;          // Handle request to select a Story
     included: (story: Story) => boolean; // Is the specified Story included?
     parent: Series | Volume;            // Currently selected Series

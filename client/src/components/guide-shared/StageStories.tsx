@@ -13,22 +13,18 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
-import {HandleAction, HandleStory, OnAction, Scopes} from "../types";
-import {HandleStage, Stage} from "./Stage";
 import StoryOptions from "./StoryOptions";
+import {HandleStage, Stage} from "./Stage";
+import {HandleAction, HandleStory, OnAction, Scopes} from "../types";
 import StoryForm from "../stories/StoryForm";
-import AuthorClient from "../../clients/AuthorClient";
-import SeriesClient from "../../clients/SeriesClient";
-import StoryClient from "../../clients/StoryClient";
-import VolumeClient from "../../clients/VolumeClient";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
+import useMutateStory from "../../hooks/useMutateStory";
 import Series from "../../models/Series";
 import Story from "../../models/Story";
 import Volume from "../../models/Volume";
-import logger from "../../util/client-logger";
-import ReportError from "../../util/ReportError";
 import * as Abridgers from "../../util/abridgers";
+import logger from "../../util/client-logger";
 
 // Incoming Properties -------------------------------------------------------
 
@@ -50,11 +46,19 @@ const StageStories = (props: Props) => {
     const [libraryId] = useState<number>(libraryContext.state.library.id);
     const [story, setStory] = useState<Story | null>(null);
 
+    const [{performExclude, performInclude, performInsert, performRemove,
+        performUpdate/*, error, processing*/}] = useMutateStory({
+        library: libraryContext.state.library,
+        parent: props.parent,
+        story: story,
+    });
+
+
     useEffect(() => {
 
         logger.info({
             context: "StageStories.useEffect",
-            series: props.parent,
+            parent: abridged(props.parent),
         });
 
         // Record current permissions
@@ -85,101 +89,35 @@ const StageStories = (props: Props) => {
         setStory(newStory);
     }
 
-    const handleEdit: HandleStory = async (newStory) => {
+    const handleEdit: HandleStory = async (theStory) => {
         logger.debug({
             context: "StageStories.handleEdit",
-            story: newStory,
+            story: Abridgers.STORY(theStory),
         });
-        setStory(newStory);
+        setStory(theStory);
     }
 
-    const handleExclude: HandleStory = async (newStory) => {
-        try {
-            if (props.parent instanceof Series) {
-                await SeriesClient.storiesExclude(libraryId, props.parent.id, newStory.id);
-            } else {
-                await VolumeClient.storiesExclude(libraryId, props.parent.id, newStory.id);
-            }
-            logger.info({
-                context: "StageStories.handleExclude",
-                msg: "Excluded Story for Series/Volume",
-                parent: abridged(props.parent),
-                story: Abridgers.STORY(newStory),
-            });
-        } catch (error) {
-            ReportError("StageStories.handleExclude", error);
-        }
+    const handleExclude: HandleStory = async (theStory) => {
+        await performExclude(theStory);
         props.handleRefresh();
     }
 
-    const handleInclude: HandleStory = async (newStory) => {
-        try {
-            if (props.parent instanceof Series) {
-                await SeriesClient.storiesInclude(libraryId, props.parent.id, newStory.id, newStory.ordinal);
-            } else {
-                await VolumeClient.storiesInclude(libraryId, props.parent.id, newStory.id);
-            }
-            logger.info({
-                context: "StageStories.handleInclude",
-                msg: "Included Story for Series/Volume",
-                parent: abridged(props.parent),
-                story: Abridgers.STORY(newStory),
-            });
-        } catch (error) {
-            ReportError("StageStories.handleInclude", error);
-        }
+    const handleInclude: HandleStory = async (theStory) => {
+        await performInclude(theStory);
         props.handleRefresh();
     }
 
-    const handleInsert: HandleStory = async (newStory) => {
-        try {
-
-            // Persist the new Story
-            const inserted = await StoryClient.insert(libraryId, newStory);
-            logger.info({
-                context: "StageStories.handleInsert",
-                msg: "Inserted new Story",
-                story: inserted,
-            });
-            setStory(null);
-
-            // Assume the new Story is included in the current Series/Volume
-            inserted.ordinal = newStory.ordinal; // Carry ordinal (if any) forward
-            await handleInclude(inserted);
-
-            // Assume that the Author(s) for this Series/Volume wrote this Story as well.
-            for (const author of props.parent.authors) {
-                logger.info({
-                    context: "StageStories.handleInsert",
-                    msg: "Adding Story Author",
-                    story: Abridgers.STORY(inserted),
-                    author: Abridgers.AUTHOR(author),
-                });
-                await AuthorClient.storiesInclude(libraryId, author.id, inserted.id, author.principal);
-            }
-
-            props.handleStory(inserted);    // Select the new Story
-            props.handleRefresh();
-
-        } catch (error) {
-            ReportError("StageStories.handleInsert", error);
-            props.handleRefresh();
-        }
+    const handleInsert: HandleStory = async (theStory) => {
+        const inserted = await performInsert(theStory);
+        inserted.ordinal = theStory.ordinal; // Carry ordinal (if any) forward
+        await performInclude(inserted); // Assume new Story is included
+        setStory(null);
+        props.handleRefresh();
     }
 
-    const handleRemove: HandleStory = async (newStory) => {
-        try {
-            StoryClient.remove(libraryId, newStory.id);
-            logger.info({
-                context: "StageStories.handleRemove",
-                msg: "Removed old Story",
-                story: Abridgers.STORY(newStory),
-            });
-            // Database constraints will deal with any join tables
-            setStory(null);
-        } catch (error) {
-            ReportError("StageStories.handleRemove", error);
-        }
+    const handleRemove: HandleStory = async (theStory) => {
+        await performRemove(theStory);
+        setStory(null);
         props.handleRefresh();
     }
 
@@ -193,48 +131,9 @@ const StageStories = (props: Props) => {
         props.handleRefresh();
     }
 
-    const handleUpdate: HandleStory = async (newStory) => {
-        try {
-
-            // Update the Story itself
-            await StoryClient.update(libraryId, newStory.id, newStory);
-            logger.info({
-                context: "StageStories.handleUpdate",
-                msg: "Updated existing Story",
-                story: Abridgers.STORY(newStory),
-            });
-
-            // If the ordinal changed (Series-Story only), remove and insert to update it
-            if ((props.parent instanceof Series) && story && (newStory.ordinal !== story.ordinal)) {
-                logger.info({
-                    context: "StageStories.handleUpdate",
-                    msg: "Reregister Series-Story for new ordinal",
-                    story: Abridgers.STORY(newStory),
-                });
-                try {
-                    await SeriesClient.storiesExclude
-                        (libraryId, props.parent.id, newStory.id);
-                } catch (error) {
-                    // Ignore error if not previously included
-                }
-                try {
-                    await SeriesClient.storiesInclude
-                        (libraryId, props.parent.id, newStory.id, newStory.ordinal);
-                } catch (error) {
-                    ReportError("StageStories.handleUpdate.include", error);
-                }
-            } else {
-                logger.info({
-                    context: "StageStories.handleUpdate",
-                    msg: "No reregister is required",
-                    story: Abridgers.STORY(newStory),
-                });
-            }
-            setStory(null);
-
-        } catch (error) {
-            ReportError("StageAuthors.handleUpdate", error);
-        }
+    const handleUpdate: HandleStory = async (theStory) => {
+        await performUpdate(theStory);
+        setStory(null);
         props.handleRefresh();
     }
 
@@ -289,7 +188,6 @@ const StageStories = (props: Props) => {
                         handleEdit={handleEdit}
                         handleExclude={handleExclude}
                         handleInclude={handleInclude}
-//                        handleInsert={handleInsert}
                         handleSelect={handleSelect}
                         included={included}
                         parent={props.parent}
