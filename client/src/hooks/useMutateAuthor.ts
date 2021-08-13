@@ -12,6 +12,7 @@ import AuthorClient from "../clients/AuthorClient";
 import Author from "../models/Author";
 import Library from "../models/Library";
 import Series from "../models/Series";
+import Story from "../models/Story";
 import Volume from "../models/Volume";
 import * as Abridgers from "../util/abridgers";
 import logger from "../util/client-logger";
@@ -21,7 +22,7 @@ import logger from "../util/client-logger";
 export interface Props {
     author: Author | null;              // Currently selected Author (if any)
     library: Library;                   // Library for which to process data
-    parent: Series | Volume;            // Currently selected Series/Volume
+    parent: Series | Story | Volume;    // Currently selected Series/Story/Volume
 }
 
 // Component Details ---------------------------------------------------------
@@ -39,9 +40,11 @@ const useMutateAuthor = (props: Props) => {
         });
     }, [props.author, props.library, props.parent]);
 
-    const abridged = (parent: Series | Volume): Series | Volume => {
+    const abridged = (parent: Series | Story | Volume): Series | Story | Volume => {
         if (parent instanceof Series) {
             return Abridgers.SERIES(parent);
+        } else if (parent instanceof Story) {
+            return Abridgers.STORY(parent);
         } else /* if (parent instanceof Volume) */ {
             return Abridgers.VOLUME(parent);
         }
@@ -57,6 +60,13 @@ const useMutateAuthor = (props: Props) => {
                     context: "useMutateAuthor.performExclude",
                     author: Abridgers.AUTHOR(theAuthor),
                     series: Abridgers.SERIES(props.parent),
+                });
+            } else if (props.parent instanceof Story) {
+                await AuthorClient.storiesExclude(props.library.id, theAuthor.id, props.parent.id);
+                logger.info({
+                    context: "useMutateAuthor.performExclude",
+                    author: Abridgers.AUTHOR(theAuthor),
+                    story: Abridgers.STORY(props.parent),
                 });
             } else /* if (props.parent instanceof Volume) */ {
                 await AuthorClient.volumesExclude(props.library.id, theAuthor.id, props.parent.id);
@@ -89,6 +99,13 @@ const useMutateAuthor = (props: Props) => {
                     context: "useMutateAuthor.performInclude",
                     author: Abridgers.AUTHOR(theAuthor),
                     series: Abridgers.SERIES(props.parent),
+                });
+            } else if (props.parent instanceof Story) {
+                await AuthorClient.storiesInclude(props.library.id, theAuthor.id, props.parent.id, theAuthor.principal);
+                logger.info({
+                    context: "useMutateAuthor.performInclude",
+                    author: Abridgers.AUTHOR(theAuthor),
+                    story: Abridgers.STORY(props.parent),
                 });
             } else /* if (props.parent instanceof Volume) */ {
                 await AuthorClient.volumesInclude(props.library.id, theAuthor.id, props.parent.id, theAuthor.principal);
