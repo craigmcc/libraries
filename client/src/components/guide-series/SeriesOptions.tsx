@@ -19,7 +19,7 @@ import SearchBar from "../SearchBar";
 import {HandleSeries, HandleValue, OnAction} from "../types";
 import LibraryContext from "../../contexts/LibraryContext";
 import useFetchSerieses from "../../hooks/useFetchSerieses";
-import {listValue} from "../../util/transformations";
+import {authorsKeys, listValue} from "../../util/transformations";
 
 // Incoming Properties -------------------------------------------------------
 
@@ -104,6 +104,7 @@ const SeriesOptions = (props: Props) => {
                     <thead>
                     <tr className="table-secondary">
                         <th scope="col">Name</th>
+                        <th scope="col">Authors</th>
                         <th scope="col">Active</th>
                         <th scope="col">Copyright</th>
                         <th scope="col">Notes</th>
@@ -137,12 +138,15 @@ const SeriesOptions = (props: Props) => {
                                 {series.name}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 2}>
-                                {listValue(series.active)}
+                                {authorsKeys(series.authors)}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 3}>
-                                {listValue(series.copyright)}
+                                {listValue(series.active)}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 4}>
+                                {listValue(series.copyright)}
+                            </td>
+                            <td key={1000 + (rowIndex * 100) + 5}>
                                 {series.notes}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 99}>

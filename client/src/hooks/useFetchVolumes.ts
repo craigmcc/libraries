@@ -45,6 +45,7 @@ const useFetchVolumes = (props: Props) => {
                         limit: props.pageSize,
                         name: (props.searchText.length > 0) ? props.searchText : null,
                         offset: (props.pageSize * (props.currentPage - 1)),
+                        withAuthors: "",
                     });
                 }
                 logger.info({

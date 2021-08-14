@@ -19,7 +19,7 @@ import SearchBar from "../SearchBar";
 import {HandleValue, HandleVolume, OnAction} from "../types";
 import LibraryContext from "../../contexts/LibraryContext";
 import useFetchVolumes from "../../hooks/useFetchVolumes";
-import {listValue} from "../../util/transformations";
+import {authorsKeys, listValue} from "../../util/transformations";
 
 // Incoming Properties -------------------------------------------------------
 
@@ -104,6 +104,7 @@ const VolumeOptions = (props: Props) => {
                     <thead>
                     <tr className="table-secondary">
                         <th scope="col">Name</th>
+                        <th scope="col">Authors</th>
                         <th scope="col">Active</th>
                         <th scope="col">Read</th>
                         <th scope="col">Location</th>
@@ -138,15 +139,18 @@ const VolumeOptions = (props: Props) => {
                                 {volume.name}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 2}>
-                                {listValue(volume.active)}
+                                {authorsKeys(volume.authors)}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 3}>
-                                {listValue(volume.read)}
+                                {listValue(volume.active)}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 4}>
-                                {volume.location}
+                                {listValue(volume.read)}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 5}>
+                                {volume.location}
+                            </td>
+                            <td key={1000 + (rowIndex * 100) + 6}>
                                 {volume.type}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 99}>

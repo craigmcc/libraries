@@ -23,7 +23,7 @@ import useFetchStories from "../../hooks/useFetchStories";
 import Series from "../../models/Series";
 import Story from "../../models/Story";
 import Volume from "../../models/Volume";
-import {listValue} from "../../util/transformations";
+import {authorsKeys, listValue} from "../../util/transformations";
 
 // Incoming Properties -------------------------------------------------------
 
@@ -127,6 +127,7 @@ const StoryOptions = (props: Props) => {
                         {(props.parent instanceof Series) ? (
                             <th scope="col">Ordinal</th>
                         ) : null }
+                        <th scope="col">Writers</th>
                         <th scope="col">Active</th>
                         <th scope="col">Notes</th>
                         <th scope="col">Actions</th>
@@ -148,9 +149,12 @@ const StoryOptions = (props: Props) => {
                                 </td>
                             ) : null }
                             <td key={1000 + (rowIndex * 100) + 3}>
-                                {listValue(story.active)}
+                                {authorsKeys(story.authors)}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 4}>
+                                {listValue(story.active)}
+                            </td>
+                            <td key={1000 + (rowIndex * 100) + 5}>
                                 {story.notes}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 99}>

@@ -13,10 +13,10 @@ import Table from "react-bootstrap/Table";
 
 // Internal Modules ----------------------------------------------------------
 
-import Author from "../../models/Author";
 import Volume from "../../models/Volume";
 import * as Abridgers from "../../util/abridgers";
 import logger from "../../util/client-logger";
+import {authorsKeys} from "../../util/transformations";
 import {HandleAction} from "../types";
 
 // Incoming Properties ------------------------------------------------------
@@ -39,15 +39,6 @@ const VolumeSummary = (props: Props) => {
         });
 
     }, [props.volume]);
-
-    const calculateAuthorsKeys = (authors: Author[]): string => {
-        const keys: string[] = [];
-        authors.forEach(author => {
-            const principalFlag = author.principal ? "*" : "";
-            keys.push(`${author.last_name}, ${author.first_name}${principalFlag}`);
-        })
-        return keys.join(" | ");
-    }
 
     const toggleExpand: HandleAction = () => {
         setExpand(!expand);
@@ -89,7 +80,7 @@ const VolumeSummary = (props: Props) => {
                         <Col className="text-center">
                             <span>Volume Authors:&nbsp;</span>
                             <span className="text-info">
-                               {calculateAuthorsKeys(props.volume.authors)}
+                               {authorsKeys(props.volume.authors)}
                             </span>
                         </Col>
                     </Row>
@@ -120,7 +111,7 @@ const VolumeSummary = (props: Props) => {
                                         {story.notes}
                                     </td>
                                     <td key={1000 + (rowIndex * 100) + 3}>
-                                        {calculateAuthorsKeys(story.authors)}
+                                        {authorsKeys(story.authors)}
                                     </td>
                                 </tr>
                             ))}

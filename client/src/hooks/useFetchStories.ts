@@ -59,12 +59,14 @@ const useFetchStories = (props: Props) => {
                         newStories = await SeriesClient.stories(props.library.id, props.parent.id, {
                             limit: props.pageSize,
                             offset: (props.pageSize * (props.currentPage - 1)),
+                            withAuthors: "",
                         })
                     } else /* if (props.parent instanceof Volume) */ {
                         abridged = Abridgers.VOLUME(props.parent);
                         newStories = await VolumeClient.stories(props.library.id, props.parent.id, {
                             limit: props.pageSize,
                             offset: (props.pageSize * (props.currentPage - 1)),
+                            withAuthors: "",
                         })
                     }
                     logger.info({
