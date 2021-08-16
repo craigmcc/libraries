@@ -20,6 +20,7 @@ import LoggedInUser from "./components/LoggedInUser";
 import {LibraryContextProvider} from "./contexts/LibraryContext";
 import {LoginContextProvider} from "./contexts/LoginContext";
 import HomeView from "./components/HomeView";
+import OpenApiView from "./components/OpenApiView";
 import AuthorView from "./components/authors/AuthorView";
 import GuideSeries from "./components/guide-series/GuideSeries";
 import GuideVolume from "./components/guide-volume/GuideVolume";
@@ -88,6 +89,9 @@ function App() {
                                     <NavDropdown.Item>Volumes</NavDropdown.Item>
                                 </LinkContainer>
                             </NavDropdown>
+                            <LinkContainer to="/open-api">
+                                <NavItem className="nav-link">OpenAPI Docs</NavItem>
+                            </LinkContainer>
                         </Nav>
                     </Navbar.Collapse>
 
@@ -109,6 +113,9 @@ function App() {
                     </Route>
                     <Route exact path="/libraries">
                         <LibraryView/>
+                    </Route>
+                    <Route exact path="/open-api">
+                        <OpenApiView/>
                     </Route>
                     <Route exact path="/series">
                         <SeriesView/>

@@ -73,6 +73,7 @@
     "express": "^5.0.0-alpha.8",
     "formik": "^2.2.6",
     "morgan": "^1.10.0",
+    "openapi3-ts": "^2.0.1",
     "pg": "^8.5.1",
     "pg-hstore": "^2.3.3",
     "pino": "^6.11.3",

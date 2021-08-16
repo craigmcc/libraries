@@ -23,6 +23,7 @@ import {
 } from "../util/middleware";
 import logger from "../util/server-logger";
 import { toLocalISO } from "../util/timestamps";
+import OpenApiRouter from "./OpenApiRouter";
 
 // Public Objects ------------------------------------------------------------
 
@@ -64,6 +65,7 @@ logger.info({
 app.use(express.static(CLIENT_BASE));
 
 // Configure application-specific routing
+app.use("/openapi.json", OpenApiRouter);
 app.use("/api", ApiRouter);
 app.use("/oauth", OAuthRouter);
 
