@@ -78,6 +78,7 @@
     "pg-hstore": "^2.3.3",
     "pino": "^6.11.3",
     "pino-pretty": "^4.7.1",
+    "pluralize": "^8.0.0",
     "qs": "^6.7.0",
     "react-bootstrap": "^1.5.2",
     "react-router-dom": "^5.2.0",
