@@ -21,7 +21,7 @@ export const generateOpenApi = (): string => {
     if (GENERATED === "") {
         const builder = new ob.OpenApiObjectBuilder(info())
             .addComponents(components())
-            .addPathItems(pathItems())
+            .addPathItems(paths())
             ;
         GENERATED = builder.asJson();
     }
@@ -36,8 +36,6 @@ const components = (): ob.ComponentsObject => {
         .addRequestBodies(requestBodies())
         .addResponses(responses())
         .addSchemas(schemas())
-        // TODO - error responses
-        // TODO - error schemas
         .build();
 }
 
@@ -62,12 +60,6 @@ const license = (): ob.LicenseObject => {
         .build();
 }
 
-const pathItems = (): ob.PathsObject => {
-    const pathItems: ob.PathsObject = {};
-    // TODO
-    return pathItems;
-}
-
 // Components Level Objects ==================================================
 
 const parameters = (): ob.ParametersObject => {
@@ -76,23 +68,23 @@ const parameters = (): ob.ParametersObject => {
     // Child inclusion parameters (query)
     parameters[WITH_AUTHORS] = new ob.ParameterObjectBuilder("query", WITH_AUTHORS)
         .addAllowEmptyValue(true)
-        .addDescription("Include child Authors")
+        .addDescription("Include nested child Authors")
         .build();
     parameters[WITH_LIBRARY] = new ob.ParameterObjectBuilder("query", WITH_LIBRARY)
         .addAllowEmptyValue(true)
-        .addDescription("Include parent Library")
+        .addDescription("Include nested parent Library")
         .build();
     parameters[WITH_SERIES] = new ob.ParameterObjectBuilder("query", WITH_SERIES)
         .addAllowEmptyValue(true)
-        .addDescription("Include child Series")
+        .addDescription("Include nested child Series")
         .build();
     parameters[WITH_STORIES] = new ob.ParameterObjectBuilder("query", WITH_STORIES)
         .addAllowEmptyValue(true)
-        .addDescription("Include child Stories")
+        .addDescription("Include nested child Stories")
         .build();
     parameters[WITH_VOLUMES] = new ob.ParameterObjectBuilder("query", WITH_VOLUMES)
         .addAllowEmptyValue(true)
-        .addDescription("Include child Volumes")
+        .addDescription("Include nested child Volumes")
         .build();
 
     // Filter parameters (query)
@@ -131,6 +123,45 @@ const parameters = (): ob.ParametersObject => {
     return parameters;
 }
 
+// Technically top level, but fits more logically here
+const paths = (): ob.PathsObject => {
+    const paths: ob.PathsObject = {};
+
+    paths[suffixItems(AUTHOR)] = pathItems(AUTHOR);
+    paths[suffixItem(AUTHOR)] = pathItem(AUTHOR);
+    paths[suffixChildren(AUTHOR, SERIES)] = pathChildren(AUTHOR, SERIES);
+    paths[suffixChildren(AUTHOR, STORY)] = pathChildren(AUTHOR, STORY);
+    paths[suffixChildren(AUTHOR, VOLUME)] = pathChildren(AUTHOR, VOLUME);
+
+    paths[suffixItems(LIBRARY)] = pathItems(LIBRARY);
+    paths[suffixItem(LIBRARY)] = pathItem(LIBRARY);
+    paths[suffixChildren(LIBRARY, AUTHOR)] = pathChildren(LIBRARY, AUTHOR);
+    paths[suffixChildren(LIBRARY, SERIES)] = pathChildren(LIBRARY, SERIES);
+    paths[suffixChildren(LIBRARY, STORY)] = pathChildren(LIBRARY, STORY);
+    paths[suffixChildren(LIBRARY, VOLUME)] = pathChildren(LIBRARY, VOLUME);
+
+    paths[suffixItems(SERIES)] = pathItems(SERIES);
+    paths[suffixItem(SERIES)] = pathItem(SERIES);
+    paths[suffixChildren(SERIES, AUTHOR)] = pathChildren(SERIES, AUTHOR);
+    paths[suffixChildren(SERIES, STORY)] = pathChildren(SERIES, STORY);
+
+    paths[suffixItems(STORY)] = pathItems(STORY);
+    paths[suffixItem(STORY)] = pathItem(STORY);
+    paths[suffixChildren(STORY, AUTHOR)] = pathChildren(STORY, AUTHOR);
+    paths[suffixChildren(STORY, SERIES)] = pathChildren(STORY, SERIES);
+    paths[suffixChildren(STORY, VOLUME)] = pathChildren(STORY, VOLUME);
+
+    paths[suffixItems(USER)] = pathItems(USER);
+    paths[suffixItem(USER)] = pathItem(USER);
+
+    paths[suffixItems(VOLUME)] = pathItems(VOLUME);
+    paths[suffixItem(VOLUME)] = pathItem(VOLUME);
+    paths[suffixChildren(VOLUME, AUTHOR)] = pathChildren(VOLUME, AUTHOR);
+    paths[suffixChildren(VOLUME, STORY)] = pathChildren(VOLUME, STORY);
+
+    return paths;
+}
+
 const requestBodies = (): ob.RequestBodiesObject => {
     const requestBodies: ob.RequestBodiesObject = {};
     for (const model of MODELS) {
@@ -145,6 +176,9 @@ const responses = (): ob.ResponsesObject => {
         responses[model] = modelResponse(model);
         responses[pluralize(model)] = modelsResponse(model);
     }
+    responses[BAD_REQUEST] = errorResponse("Error in request properties");
+    responses[FORBIDDEN] = errorResponse("Requested operation is forbidden");
+    responses[NOT_FOUND] = errorResponse("Requested item is not found");
     return responses;
 }
 
@@ -202,6 +236,9 @@ const schemaRef = (schema: string): ob.ReferenceObject => {
 
 // Application Specific Objects ==============================================
 
+// Application API Prefix
+const API = "/api";
+
 // Application Models
 const AUTHOR = "Author";
 const ERROR = "Error";
@@ -222,14 +259,10 @@ const MODELS = [
 
 // Application Model Properties
 const ACTIVE = "active";
-const AUTHORS = pluralize(AUTHOR);
 const COPYRIGHT = "copyright";
 const ID = "id";
 const NAME = "name";
 const NOTES = "notes";
-const SERIESES = SERIES; // Not plural in models
-const STORIES = pluralize(STORY);
-const VOLUMES = pluralize(VOLUME);
 
 // Application Path Parameters
 const AUTHOR_ID = "author_id";
@@ -273,6 +306,7 @@ const childrenOperation = (parent: string, child: string): ob.OperationObject =>
         .addDescription(`Return all ${children} for the specified ${parent}`)
         .addParameter(parameterRef(LIMIT))
         .addParameter(parameterRef(OFFSET))
+        .addParameters(filterParameters(parent))
         .addParameters(withParameters(child))
         .addResponse(OK, responseRef(children))
         .addResponse(FORBIDDEN, responseRef(FORBIDDEN))
@@ -295,54 +329,90 @@ const findOperation = (model: string): ob.OperationObject => {
 
 // Operation that creates and returns the specified model object
 const insertOperation = (model: string): ob.OperationObject => {
-    return new ob.OperationObjectBuilder()
+    const builder = new ob.OperationObjectBuilder()
         .addDescription(`Create and return the specified ${model}`)
         .addRequestBody(requestBodyRef(model))
         .addResponse(CREATED, responseRef(model))
         .addResponse(FORBIDDEN, responseRef(FORBIDDEN))
-        .addResponse(NOT_FOUND, responseRef(NOT_FOUND))
-        .addSummary(`The created ${model}`)
-        .build();
+        .addSummary(`The created ${model}`);
+    if (isChild(model)) {
+        builder.addResponse(NOT_FOUND, responseRef(NOT_FOUND));
+    }
+    return builder.build();
 }
 
 // Operation that deletes and returns the specified model object
 const removeOperation = (model: string): ob.OperationObject => {
-    return new ob.OperationObjectBuilder()
+    const builder = new ob.OperationObjectBuilder()
         .addDescription(`Remove and return the specified ${model}`)
         .addResponse(OK, responseRef(model))
         .addResponse(FORBIDDEN, responseRef(FORBIDDEN))
         .addResponse(NOT_FOUND, responseRef(NOT_FOUND))
-        .addSummary(`The removed ${model}`)
-        .build();
+        .addSummary(`The removed ${model}`);
+    return builder.build();
 }
 
 // Operation that updates and returns the specified model object
 const updateOperation = (model: string): ob.OperationObject => {
     return new ob.OperationObjectBuilder()
-        .addDescription(`Remove and return the specified ${model}`)
+        .addDescription(`Update and return the specified ${model}`)
         .addRequestBody(requestBodyRef(model))
         .addResponse(OK, responseRef(model))
         .addResponse(FORBIDDEN, responseRef(FORBIDDEN))
         .addResponse(NOT_FOUND, responseRef(NOT_FOUND))
-        .addSummary(`The removed ${model}`)
+        .addSummary(`The updated ${model}`)
         .build();
 }
 
 // Model-specific filter parameters (if any)
 const filterParameters = (model: string): ob.ParametersObject => {
     const parameters: ob.ParametersObject = {};
-    // TODO - add relevant "name" parameter based on model
+    if (model !== USER) {
+        parameters[NAME] = parameterRef(NAME);
+    }
     return parameters;
 }
 
 // Model-specific "with" parameters (if any)
 const withParameters = (model: string): ob.ParametersObject => {
     const parameters : ob.ParametersObject = {};
-    // TODO - add relevant "with" parameters based on model
+    // Parent library
+    if ((model !== LIBRARY) && (model !== USER)) {
+        parameters[WITH_LIBRARY] = parameterRef(WITH_LIBRARY);
+    }
+    // Relevant children
+    if ((model === LIBRARY) || (model === SERIES) || (model === STORY) || (model === VOLUME)) {
+        parameters[WITH_AUTHORS] = parameterRef(WITH_AUTHORS);
+    }
+    if ((model === AUTHOR) || (model === LIBRARY) || (model === STORY)) {
+        parameters[WITH_SERIES] = parameterRef(WITH_SERIES);
+    }
+    if ((model === AUTHOR) || (model === LIBRARY) || (model === SERIES) || (model === VOLUME)) {
+        parameters[WITH_STORIES] = parameterRef(WITH_STORIES);
+    }
+    if ((model === AUTHOR) || (model === LIBRARY) || (model === STORY)) {
+        parameters[WITH_VOLUMES] = parameterRef(WITH_VOLUMES);
+    }
     return parameters;
 }
 
-// Generic Collections -------------------------------------------------------
+// Generic Items -------------------------------------------------------------
+
+const errorResponse = (description: string): ob.ResponseObject => {
+    return new ob.ResponseObjectBuilder(description)
+        .addContent(APPLICATION_JSON, new ob.MediaTypeObjectBuilder()
+            .addExample({
+                description: "User Not Found Error",
+                value: {
+                    context: "UserLookupService",
+                    message: "Missing User 123",
+                    status: 404,
+                }
+            })
+            .addSchema(schemaRef(ERROR)))
+        .build();
+}
+
 
 const modelRequestBody = (model: string): ob.RequestBodyObject => {
     return new ob.RequestBodyObjectBuilder()
@@ -372,18 +442,76 @@ const modelsResponse = (model: string): ob.ResponseObject => {
         .build();
 }
 
+// Path for /{models}/{model_id} or /{models}/{library_id}/{model_id}
+const pathItem = (model: string): ob.PathItemObject => {
+    const builder = new ob.PathItemObjectBuilder()
+        .addDelete(removeOperation(model))
+        .addGet(findOperation(model))
+        .addPut(updateOperation(model))
+        .addParameter(new ob.ParameterObjectBuilder("path", pathId(model))
+            .addDescription(`ID of the specified ${model}`)
+            .build());
+    if (isChild(model)) {
+        builder.addParameter(new ob.ParameterObjectBuilder("path", "library_id")
+            .addDescription(`ID of the owning ${LIBRARY}`)
+            .build());
+    }
+    return builder.build();
+}
+
+// Path for /{models} or /{models}/{library_id}
+const pathItems = (model: string): ob.PathItemObject => {
+    const builder = new ob.PathItemObjectBuilder()
+        .addGet(allOperation(model))
+        .addPost(insertOperation(model));
+    if (isChild(model)) {
+        builder.addParameter(new ob.ParameterObjectBuilder("path", "library_id")
+            .addDescription(`ID of the owning ${LIBRARY}`)
+            .build());
+    }
+    return builder.build();
+}
+
+// Path for /{models}/{children} or /{models}/{library_id}/{children}
+const pathChildren = (parent: string, child: string): ob.PathItemObject => {
+    const builder = new ob.PathItemObjectBuilder()
+        .addGet(childrenOperation(parent, child))
+        .addParameters(withParameters(child));
+    if (isChild(parent)) {
+        builder.addParameter(new ob.ParameterObjectBuilder("path", "library_id")
+            .addDescription(`ID of the owning ${LIBRARY}`)
+            .build());
+    }
+    return builder.build();
+}
+
+
+// Calculate the HTTP request path, relative to the server endpoint, of an item's children
+const suffixChildren = (parent: string, child: string): string => {
+    const plural = (child === SERIES) ? SERIES.toLowerCase() : pluralize(child.toLowerCase());
+    return suffixItem(parent) + "/" + plural;
+}
+
+// Calculate the HTTP request path, relative to the server endpoint, of an item
+const suffixItem = (model: string): string => {
+    return suffixItems(model) + "/{" + pathId(model) + "}";
+}
+
+// Calculate the HTTP request path, relative to the server endpoint, of a collection
+const suffixItems = (model: string): string => {
+    const plural = (model === SERIES) ? SERIES.toLowerCase() : pluralize(model.toLowerCase());
+    let result = API + "/" + plural;
+    if (isChild(model)) {
+        result += "/{" + pathId(LIBRARY) + "}";
+    }
+    return result;
+}
+
+
 // Generic Schemas -----------------------------------------------------------
 
 const activeSchema = (model: string): ob.SchemaObject => {
     return new ob.SchemaObjectBuilder("boolean", `Is this ${model} active?`, true)
-        .build();
-}
-
-// An array of the schema objects for the specified model
-const arraySchema = (model: string): ob.SchemaObject => {
-    return new ob.SchemaObjectBuilder()
-        .addItems(schemaRef(model))
-        .addType("array")
         .build();
 }
 
@@ -415,9 +543,14 @@ const notesSchema = (model: string): ob.SchemaObject => {
 
 // Generic Utilities ---------------------------------------------------------
 
+// Is this model a child of a Library?
+const isChild = (model: string): boolean => {
+    return (model !== LIBRARY) && (model !== USER);
+}
+
 // Template variable for the ID of a model
 const pathId = (model: string): string => {
-    return `\{{$model}_id\}`;
+    return `${model.toLowerCase()}_id`;
 }
 
 // Model Specific Objects ====================================================
@@ -436,9 +569,9 @@ const authorSchema = (): ob.SchemasObject => {
             .build())
         .addProperty(LIBRARY_ID, libraryIdSchema(AUTHOR))
         .addProperty(NOTES, notesSchema(AUTHOR))
-        // TODO - series (plural)
-        // TODO - stories
-        // TODO - volume
+        .addProperty(SERIES.toLowerCase(), seriesesSchema())
+        .addProperty(pluralize(STORY.toLowerCase()), storiesSchema())
+        .addProperty(pluralize(VOLUME.toLowerCase()), volumesSchema())
         .build();
 }
 
@@ -464,10 +597,8 @@ const errorSchema = (): ob.SchemaObject => {
         })
         .addProperty("context", new ob.SchemaObjectBuilder("string", "Error source location")
             .build())
-/* TODO - should really allow "string | Error" (but this is only on POSTs anyway
-        .addProperty("inner", new ob.SchemaObjectBuilder("object", "Nested exception we are wrapping")
+        .addProperty("inner", new ob.SchemaObjectBuilder("object", "Nested error we are wrapping (if any)")
             .build())
-*/
         .addProperty("message", new ob.SchemaObjectBuilder("string", "Error message summary")
             .build())
         .addProperty("status", new ob.SchemaObjectBuilder("integer", "HTTP status code")
@@ -486,10 +617,10 @@ const librarySchema = (): ob.SchemaObject => {
         .addProperty(NOTES, notesSchema(LIBRARY))
         .addProperty("scope", new ob.SchemaObjectBuilder("string", "Scope(s) required to access this Library")
             .build())
-        // TODO - authors
-        // TODO - series (plural)
-        // TODO - stories
-        // TODO - volumes
+        .addProperty(pluralize(AUTHOR.toLowerCase()), authorsSchema())
+        .addProperty(SERIES.toLowerCase(), seriesesSchema())
+        .addProperty(pluralize(STORY.toLowerCase()), storiesSchema())
+        .addProperty(pluralize(VOLUME.toLowerCase()), volumesSchema())
         .build();
 }
 
@@ -510,8 +641,8 @@ const seriesSchema = (): ob.SchemaObject => {
         .addProperty(LIBRARY_ID, libraryIdSchema(SERIES))
         .addProperty(NAME, nameSchema(SERIES))
         .addProperty(NOTES, notesSchema(SERIES))
-        // TODO - authors
-        // TODO - stories
+        .addProperty(pluralize(AUTHOR.toLowerCase()), authorsSchema())
+        .addProperty(pluralize(STORY.toLowerCase()), storiesSchema())
         .build();
 }
 
@@ -534,7 +665,9 @@ const storySchema = (): ob.SchemaObject => {
         .addProperty(NOTES, notesSchema(STORY))
         .addProperty("ordinal", new ob.SchemaObjectBuilder("integer", "Ordinal sequence (if retrieved as a Series child", true)
             .build())
-        // TODO - authors
+        .addProperty(pluralize(AUTHOR.toLowerCase()), authorsSchema())
+        .addProperty(SERIES.toLowerCase(), seriesesSchema())
+        .addProperty(pluralize(VOLUME.toLowerCase()), volumesSchema())
         .build();
 }
 
@@ -584,8 +717,8 @@ const volumeSchema = (): ob.SchemaObject => {
         .addProperty(LIBRARY_ID, libraryIdSchema(VOLUME))
         .addProperty(NAME, nameSchema(VOLUME))
         .addProperty(NOTES, notesSchema(VOLUME))
-        // TODO - authors
-        // TODO - stories
+        .addProperty(pluralize(AUTHOR.toLowerCase()), authorsSchema())
+        .addProperty(pluralize(STORY.toLowerCase()), storiesSchema())
         .build();
 }
 
