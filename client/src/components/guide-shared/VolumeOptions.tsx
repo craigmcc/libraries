@@ -19,6 +19,9 @@ import SearchBar from "../SearchBar";
 import {HandleValue, HandleVolume, OnAction} from "../types";
 import LibraryContext from "../../contexts/LibraryContext";
 import useFetchVolumes from "../../hooks/useFetchVolumes";
+import Author from "../../models/Author";
+import Library from "../../models/Library";
+import Story from "../../models/Story";
 import {authorsKeys, listValue} from "../../util/transformations";
 
 // Incoming Properties -------------------------------------------------------
@@ -27,6 +30,7 @@ export interface Props {
     handleAdd?: OnAction;               // Handle request to add a Volume (optional)
     handleEdit: HandleVolume;           // Handle request to edit a Volume
     handleSelect: HandleVolume;         // Handle request to select a Volume
+    parent: Author | Library | Story;   // Parent object for requested Volumes
 }
 
 // Component Details ---------------------------------------------------------
@@ -42,6 +46,7 @@ const VolumeOptions = (props: Props) => {
     const [{volumes, error, loading}] = useFetchVolumes({
         currentPage: currentPage,
         library: libraryContext.state.library,
+        parent: props.parent,
         pageSize: pageSize,
         searchText: searchText,
     });

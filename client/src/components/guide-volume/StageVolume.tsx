@@ -13,9 +13,9 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
-import VolumeOptions from "./VolumeOptions";
 import {HandleAction, HandleVolume, OnAction, Scopes} from "../types";
 import {HandleStage, Stage} from "../guide-shared/Stage";
+import VolumeOptions from "../guide-shared/VolumeOptions";
 import VolumeForm from "../volumes/VolumeForm";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
@@ -149,6 +149,7 @@ const StageVolume = (props: Props) => {
                         handleAdd={handleAdd}
                         handleEdit={handleEdit}
                         handleSelect={handleSelect}
+                        parent={libraryContext.state.library}
                     />
 
                     <Button

@@ -13,6 +13,22 @@ import Volume from "../models/Volume";
 
 // Public Objects ------------------------------------------------------------
 
+export const ANY = (model: Author | Library | Series | Story | User | Volume): any => {
+    if (model instanceof Author) {
+        return AUTHOR(model);
+    } else if (model instanceof Library) {
+        return LIBRARY(model);
+    } else if (model instanceof Series) {
+        return SERIES(model);
+    } else if (model instanceof Story) {
+        return STORY(model);
+    } else if (model instanceof User) {
+        return USER(model);
+    } else if (model instanceof Volume) {
+        return VOLUME(model);
+    }
+}
+
 export const AUTHOR = (author: Author): any => {
     return {
         id: author.id,
