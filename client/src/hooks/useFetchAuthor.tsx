@@ -92,6 +92,7 @@ const useFetchAuthor = (props: Props) => {
 
         }
 
+        fetchAuthor();
 
     }, [props.library, props.authorId]);
 

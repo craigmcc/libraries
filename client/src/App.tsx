@@ -22,6 +22,7 @@ import {LoginContextProvider} from "./contexts/LoginContext";
 import HomeView from "./components/HomeView";
 import OpenApiView from "./components/OpenApiView";
 import AuthorView from "./components/authors/AuthorView";
+import GuideAuthor from "./components/guide-author/GuideAuthor";
 import GuideSeries from "./components/guide-series/GuideSeries";
 import GuideVolume from "./components/guide-volume/GuideVolume";
 import LibraryView from "./components/libraries/LibraryView";
@@ -69,6 +70,9 @@ function App() {
                             <LinkContainer to="/guide-series">
                                 <NavItem className="nav-link">Series</NavItem>
                             </LinkContainer>
+                            <LinkContainer to="/guide-author">
+                                <NavItem className="nav-link">Author</NavItem>
+                            </LinkContainer>
                             <NavDropdown id="master" title="Masters">
                                 <LinkContainer to="/authors">
                                     <NavDropdown.Item>Authors</NavDropdown.Item>
@@ -104,6 +108,9 @@ function App() {
                 <Switch>
                     <Route exact path="/authors">
                         <AuthorView/>
+                    </Route>
+                    <Route exact path="/guide-author">
+                        <GuideAuthor/>
                     </Route>
                     <Route exact path="/guide-series">
                         <GuideSeries/>

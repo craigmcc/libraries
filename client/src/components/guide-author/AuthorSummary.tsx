@@ -14,7 +14,6 @@ import Row from "react-bootstrap/Row";
 import Author from "../../models/Author";
 import * as Abridgers from "../../util/abridgers";
 import logger from "../../util/client-logger";
-import {HandleAction} from "../types";
 
 // Incoming Properties -------------------------------------------------------
 

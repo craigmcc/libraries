@@ -71,8 +71,8 @@ const AuthorOptions = (props: Props) => {
                     <SearchBar
                         autoFocus
                         handleChange={handleChange}
-                        label="Search For Volumes:"
-                        placeholder="Search by all or part of name"
+                        label="Search For Authors:"
+                        placeholder="Search by all or part of either name"
                     />
                 </Col>
             <Col className="col-2">
