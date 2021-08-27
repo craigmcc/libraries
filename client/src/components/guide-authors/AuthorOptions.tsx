@@ -1,7 +1,7 @@
-// VolumeOptions -------------------------------------------------------------
+// AuthorOptions -------------------------------------------------------------
 
-// List Volumes that match search criteria, offering callbacks for adding,
-// editing, or selecting a Volume.
+// List Authors that match search criteria, offering callbacks for adding,
+// editing, or selecting a detailed stage for an Author.
 
 // External Modules ----------------------------------------------------------
 
@@ -16,22 +16,24 @@ import Table from "react-bootstrap/Table";
 
 import Pagination from "../Pagination";
 import SearchBar from "../SearchBar";
-import {HandleValue, HandleVolume, OnAction} from "../types";
+import {HandleValue, HandleAuthor, OnAction} from "../types";
 import LibraryContext from "../../contexts/LibraryContext";
-import useFetchVolumes from "../../hooks/useFetchVolumes";
-import {authorsKeys, listValue} from "../../util/transformations";
+import useFetchAuthors from "../../hooks/useFetchAuthors";
+import {listValue} from "../../util/transformations";
 
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
-    handleAdd?: OnAction;               // Handle request to add a Volume (optional)
-    handleEdit: HandleVolume;           // Handle request to edit a Volume
-    handleSelect: HandleVolume;         // Handle request to select a Volume
+    handleAdd?: OnAction;               // Handle request to add an Author (optional)
+    handleEdit: HandleAuthor;           // Handle request to edit an Author
+    handleSeries: HandleAuthor;         // Handle request to manage Series for an Author
+    handleStories: HandleAuthor;        // Handle request to manage Stories for an Author
+    handleVolumes: HandleAuthor;        // Handle request to manage Volumes for an Author
 }
 
 // Component Details ---------------------------------------------------------
 
-const VolumeOptions = (props: Props) => {
+const AuthorOptions = (props: Props) => {
 
     const libraryContext = useContext(LibraryContext);
 
@@ -39,9 +41,10 @@ const VolumeOptions = (props: Props) => {
     const [pageSize] = useState<number>(25);
     const [searchText, setSearchText] = useState<string>("");
 
-    const [{volumes, error, loading}] = useFetchVolumes({
+    const [{authors, error, loading}] = useFetchAuthors({
         currentPage: currentPage,
         library: libraryContext.state.library,
+        parent: libraryContext.state.library,
         pageSize: pageSize,
         searchText: searchText,
     });
@@ -61,7 +64,7 @@ const VolumeOptions = (props: Props) => {
     }
 
     return (
-        <Container fluid id="VolumeOptions">
+        <Container fluid id="AuthorOptions">
 
             <Row className="mb-3">
                 <Col className="col-8">
@@ -72,25 +75,25 @@ const VolumeOptions = (props: Props) => {
                         placeholder="Search by all or part of name"
                     />
                 </Col>
+            <Col className="col-2">
+                <Pagination
+                    currentPage={currentPage}
+                    lastPage={(authors.length === 0) ||
+                        (authors.length < pageSize)}
+                    onNext={onNext}
+                    onPrevious={onPrevious}
+                    variant="secondary"
+                />
+            </Col>
+            {(props.handleAdd) ? (
                 <Col className="col-2">
-                    <Pagination
-                        currentPage={currentPage}
-                        lastPage={(volumes.length === 0) ||
-                            (volumes.length < pageSize)}
-                        onNext={onNext}
-                        onPrevious={onPrevious}
-                        variant="secondary"
-                    />
+                    <Button
+                        onClick={props.handleAdd}
+                        size="sm"
+                        variant="primary"
+                    >Add</Button>
                 </Col>
-                {(props.handleAdd) ? (
-                    <Col className="col-2">
-                        <Button
-                            onClick={props.handleAdd}
-                            size="sm"
-                            variant="primary"
-                        >Add</Button>
-                    </Col>
-                ) : null }
+            ) : null }
             </Row>
 
             <Row className="ml-1 mr-1">
@@ -103,12 +106,10 @@ const VolumeOptions = (props: Props) => {
 
                     <thead>
                     <tr className="table-secondary">
-                        <th scope="col">Name</th>
-                        <th scope="col">Authors</th>
+                        <th scope="col">First Name</th>
+                        <th scope="col">Last Name</th>
                         <th scope="col">Active</th>
-                        <th scope="col">Read</th>
-                        <th scope="col">Location</th>
-                        <th scope="col">Type</th>
+                        <th scope="col">Notes</th>
                         <th scope="col">Actions</th>
                     </tr>
                     </thead>
@@ -116,58 +117,64 @@ const VolumeOptions = (props: Props) => {
                     <tbody>
                     {(error) ? (
                         <tr>
-                            <td className="text-center" rowSpan={6}>
+                            <td className="text-center" rowSpan={5}>
                                 Database Access Error: {error.message}
                             </td>
                         </tr>
                     ) : null}
                     {(loading) ? (
                         <tr>
-                            <td className="text-center" rowSpan={6}>
+                            <td className="text-center" rowSpan={5}>
                                 Database Fetch In Progress
                             </td>
                         </tr>
                     ) : null}
-                    {volumes.map((volume, rowIndex) => (
+                    {authors.map((author, rowIndex) => (
                         <tr
                             className="table-default"
                             key={1000 + (rowIndex * 100)}
                         >
-                            <td key={1000 + (rowIndex * 100) + 1}
-                                onClick={() => props.handleSelect(volume)}
-                            >
-                                {volume.name}
+                            <td key={1000 + (rowIndex * 100) + 1}>
+                                {author.first_name}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 2}>
-                                {authorsKeys(volume.authors)}
+                                {author.last_name}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 3}>
-                                {listValue(volume.active)}
+                                {listValue(author.active)}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 4}>
-                                {listValue(volume.read)}
-                            </td>
-                            <td key={1000 + (rowIndex * 100) + 5}>
-                                {volume.location}
-                            </td>
-                            <td key={1000 + (rowIndex * 100) + 6}>
-                                {volume.type}
+                                {author.notes}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 99}>
                                 <Button
                                     className="mr-1"
-                                    onClick={() => props.handleEdit(volume)}
+                                    onClick={() => props.handleEdit(author)}
                                     size="sm"
                                     type="button"
                                     variant="secondary"
                                 >Edit</Button>
                                 <Button
                                     className="mr-1"
-                                    onClick={() => props.handleSelect(volume)}
+                                    onClick={() => props.handleSeries(author)}
                                     size="sm"
                                     type="button"
                                     variant="primary"
-                                >Select</Button>
+                                >Series</Button>
+                                <Button
+                                    className="mr-1"
+                                    onClick={() => props.handleStories(author)}
+                                    size="sm"
+                                    type="button"
+                                    variant="primary"
+                                >Stories</Button>
+                                <Button
+                                    className="mr-1"
+                                    onClick={() => props.handleVolumes(author)}
+                                    size="sm"
+                                    type="button"
+                                    variant="primary"
+                                >Volumes</Button>
                             </td>
                         </tr>
                     ))}
@@ -181,4 +188,4 @@ const VolumeOptions = (props: Props) => {
 
 }
 
-export default VolumeOptions;
+export default AuthorOptions;

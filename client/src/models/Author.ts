@@ -6,6 +6,11 @@
 
 // Internal Modules ----------------------------------------------------------
 
+import Series from "./Series";
+import Story from "./Story";
+import Volume from "./Volume";
+import {toSerieses, toStories, toVolumes} from "../util/to-model-types";
+
 // Public Objects ------------------------------------------------------------
 
 class Author {
@@ -18,6 +23,9 @@ class Author {
         this.library_id = data.library_id;
         this.notes = data.notes;
         this.principal = this.calculatePrincipal(data);
+        this.series = data.series ? toSerieses(data.series) : [];
+        this.stories = data.stories ? toStories(data.stories) : [];
+        this.volumes = data.volumes ? toVolumes(data.volumes) : [];
     }
 
     id: number;
@@ -27,6 +35,9 @@ class Author {
     library_id: number;
     notes: string;
     principal: boolean;
+    series: Series[];
+    stories: Story[];
+    volumes: Volume[];
 
     private calculatePrincipal(data: any): boolean {
         if (data.principal !== undefined) {

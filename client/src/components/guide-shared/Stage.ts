@@ -9,6 +9,8 @@ export enum Stage {
     AUTHORS,
     STORIES,
     WRITERS,
+    SERIES,
+    VOLUMES,
 }
 
 export type HandleStage = (newStage: Stage) => void;

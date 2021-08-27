@@ -22,7 +22,7 @@ import logger from "../util/client-logger";
 export interface Props {
     author: Author | null;              // Currently selected Author (if any)
     library: Library;                   // Library for which to process data
-    parent: Series | Story | Volume;    // Currently selected Series/Story/Volume
+    parent: Library | Series | Story | Volume;    // Currently selected Series/Story/Volume
 }
 
 // Component Details ---------------------------------------------------------
@@ -40,8 +40,10 @@ const useMutateAuthor = (props: Props) => {
         });
     }, [props.author, props.library, props.parent]);
 
-    const abridged = (parent: Series | Story | Volume): Series | Story | Volume => {
-        if (parent instanceof Series) {
+    const abridged = (parent: Library | Series | Story | Volume): Library | Series | Story | Volume => {
+        if (parent instanceof Library) {
+            return Abridgers.LIBRARY(parent);
+        } if (parent instanceof Series) {
             return Abridgers.SERIES(parent);
         } else if (parent instanceof Story) {
             return Abridgers.STORY(parent);
@@ -54,7 +56,9 @@ const useMutateAuthor = (props: Props) => {
         setError(null);
         setProcessing(true);
         try {
-            if (props.parent instanceof Series) {
+            if (props.parent instanceof Library) {
+                // No semantic meaning
+            } else if (props.parent instanceof Series) {
                 await AuthorClient.seriesExclude(props.library.id, theAuthor.id, props.parent.id);
                 logger.info({
                     context: "useMutateAuthor.performExclude",
@@ -93,7 +97,9 @@ const useMutateAuthor = (props: Props) => {
         setProcessing(true);
         try {
             theAuthor.principal = true; // Assume by default
-            if (props.parent instanceof Series) {
+            if (props.parent instanceof Library) {
+                // No semantic meaning
+            } else if (props.parent instanceof Series) {
                 await AuthorClient.seriesInclude(props.library.id, theAuthor.id, props.parent.id, theAuthor.principal);
                 logger.info({
                     context: "useMutateAuthor.performInclude",
@@ -209,7 +215,7 @@ const useMutateAuthor = (props: Props) => {
                     if (props.parent instanceof Series) {
                         await AuthorClient.seriesExclude(props.library.id, theAuthor.id, props.parent.id);
                         await AuthorClient.seriesInclude(props.library.id, theAuthor.id, props.parent.id, theAuthor.principal);
-                    } else /* if (props.parent instanceof Volume) */ {
+                    } else if (props.parent instanceof Volume) {
                         await AuthorClient.volumesExclude(props.library.id, theAuthor.id, props.parent.id);
                         await AuthorClient.volumesInclude(props.library.id, theAuthor.id, props.parent.id, theAuthor.principal);
                     }

@@ -6,6 +6,8 @@
 
 import Author from "../models/Author";
 import Story from "../models/Story";
+import Series from "../models/Series";
+import Volume from "../models/Volume";
 
 // Public Objects ------------------------------------------------------------
 
@@ -16,6 +18,18 @@ export const AUTHORS = (authors: Author[]): Author[] => {
         if (aName > bName) {
             return 1;
         } else if (aName < bName) {
+            return -1;
+        } else {
+            return 0;
+        }
+    });
+}
+
+export const SERIES = (serieses: Series[]): Series[] => {
+    return serieses.sort(function (a, b) {
+        if (a.name > b.name) {
+            return 1;
+        } else if (a.name < b.name) {
             return -1;
         } else {
             return 0;
@@ -35,3 +49,16 @@ export const STORIES = (stories: Story[]): Story[] => {
 
     });
 }
+
+export const VOLUMES = (volumes: Volume[]): Volume[] => {
+    return volumes.sort(function (a, b) {
+        if (a.name > b.name) {
+            return 1;
+        } else if (a.name < b.name) {
+            return -1;
+        } else {
+            return 0;
+        }
+    });
+}
+

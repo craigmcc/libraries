@@ -26,7 +26,7 @@ export interface Props {
     currentPage: number;                // One-relative current page number
     library: Library;                   // Library for which to select data
     pageSize: number;                   // Number of entries per returned page
-    parent: Series | Story | Volume;    // Parent object if no searchText specified
+    parent: Library | Series | Story | Volume;    // Parent object if no searchText specified
     searchText: string;                 // Name match text (or "" for all)
 }
 
@@ -54,6 +54,12 @@ const useFetchAuthors = (props: Props) => {
                         newAuthors = await LibraryClient.authors(props.library.id, {
                             limit: props.pageSize,
                             name: props.searchText,
+                            offset: (props.pageSize * (props.currentPage - 1)),
+                        });
+                    } else if (props.parent instanceof Library) {
+                        abridged = Abridgers.LIBRARY(props.parent);
+                        newAuthors = await LibraryClient.authors(props.parent.id, {
+                            limit: props.pageSize,
                             offset: (props.pageSize * (props.currentPage - 1)),
                         });
                     } else if (props.parent instanceof Series) {
