@@ -43,6 +43,7 @@ const SeriesOptions = (props: Props) => {
         currentPage: currentPage,
         library: libraryContext.state.library,
         pageSize: pageSize,
+        parent: libraryContext.state.library,
         searchText: searchText,
     });
 

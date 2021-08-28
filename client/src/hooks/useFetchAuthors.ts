@@ -74,11 +74,6 @@ const useFetchAuthors = (props: Props) => {
                             limit: props.pageSize,
                             offset: (props.pageSize * (props.currentPage - 1)),
                         });
-                    } else /* if (props.parent instanceof Library) */ {
-                        theAuthors = await LibraryClient.authors(props.library.id, {
-                            limit: props.pageSize,
-                            offset: (props.pageSize * (props.currentPage - 1)),
-                        });
                     }
                     logger.info({
                         context: "useFetchAuthors.fetchAuthors",

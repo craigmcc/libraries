@@ -47,6 +47,7 @@ const StageSeries = (props: Props) => {
     const [{performInsert, performRemove, performUpdate/*, error, processing*/}]
         = useMutateSeries({
             library: libraryContext.state.library,
+            parent: libraryContext.state.library,
         })
 
     useEffect(() => {
