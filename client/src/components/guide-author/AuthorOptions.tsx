@@ -41,7 +41,7 @@ const AuthorOptions = (props: Props) => {
     const [pageSize] = useState<number>(25);
     const [searchText, setSearchText] = useState<string>("");
 
-    const [{authors, error, loading}] = useFetchAuthors({
+    const [{authors/*, error, loading*/}] = useFetchAuthors({
         currentPage: currentPage,
         library: libraryContext.state.library,
         parent: libraryContext.state.library,
@@ -115,20 +115,6 @@ const AuthorOptions = (props: Props) => {
                     </thead>
 
                     <tbody>
-                    {(error) ? (
-                        <tr>
-                            <td className="text-center" rowSpan={5}>
-                                Database Access Error: {error.message}
-                            </td>
-                        </tr>
-                    ) : null}
-                    {(loading) ? (
-                        <tr>
-                            <td className="text-center" rowSpan={5}>
-                                Database Fetch In Progress
-                            </td>
-                        </tr>
-                    ) : null}
                     {authors.map((author, rowIndex) => (
                         <tr
                             className="table-default"

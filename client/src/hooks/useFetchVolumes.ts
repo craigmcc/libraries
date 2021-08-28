@@ -45,36 +45,47 @@ const useFetchVolumes = (props: Props) => {
             let theVolumes: Volume[] = [];
 
             try {
-                if (props.library.id > 0) {
-                    if (props.parent instanceof Author) {
+                if ((props.library.id > 0) && (props.parent.id > 0)) {
+                    if (props.searchText.length > 0) {
+                        theVolumes = await LibraryClient.volumes(props.library.id, {
+                            limit: props.pageSize,
+                            name: props.searchText,
+                            offset: (props.pageSize * (props.currentPage - 1)),
+                        });
+                    } else if (props.parent instanceof Author) {
                         theVolumes = await AuthorClient.volumes(props.library.id, props.parent.id, {
                             limit: props.pageSize,
-                            name: (props.searchText.length > 0) ? props.searchText : null,
                             offset: (props.pageSize * (props.currentPage - 1)),
                         });
                     } else if (props.parent instanceof Story) {
                         theVolumes = await StoryClient.volumes(props.library.id, props.parent.id, {
                             limit: props.pageSize,
-                            name: (props.searchText.length > 0) ? props.searchText : null,
                             offset: (props.pageSize * (props.currentPage - 1)),
                         })
                     } else /* if (props.parent instanceof Library) */ {
                         theVolumes = await LibraryClient.volumes(props.library.id, {
                             limit: props.pageSize,
-                            name: (props.searchText.length > 0) ? props.searchText : null,
                             offset: (props.pageSize * (props.currentPage - 1)),
-                            withAuthors: "",
                         });
                     }
+                    logger.info({
+                        context: "useFetchVolumes.fetchVolumes",
+                        library: Abridgers.LIBRARY(props.library),
+                        parent: Abridgers.ANY(props.parent),
+                        currentPage: props.currentPage,
+                        searchText: props.searchText,
+                        volumes: Abridgers.VOLUMES(theVolumes),
+                    });
+                } else {
+                    logger.info({
+                        context: "useFetchVolumes.fetchVolumes",
+                        msg: "Nothing to select",
+                        library: Abridgers.LIBRARY(props.library),
+                        parent: Abridgers.ANY(props.parent),
+                        currentPage: props.currentPage,
+                        searchText: props.searchText,
+                    });
                 }
-                logger.info({
-                    context: "useFetchVolumes.fetchVolumes",
-                    library: Abridgers.LIBRARY(props.library),
-                    parent: Abridgers.ANY(props.parent),
-                    currentPage: props.currentPage,
-                    searchText: props.searchText,
-                    volumes: Abridgers.VOLUMES(theVolumes),
-                });
             } catch (error) {
                 logger.error({
                     context: "useFetchVolumes.fetchVolumes",
@@ -94,7 +105,8 @@ const useFetchVolumes = (props: Props) => {
 
         fetchVolumes();
 
-    }, [props.currentPage, props.library, props.pageSize, props.parent, props.searchText]);
+    }, [props.currentPage, props.library, props.pageSize,
+        props.parent, props.searchText]);
 
     return [{volumes, error, loading}];
 

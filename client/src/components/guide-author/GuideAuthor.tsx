@@ -11,10 +11,11 @@ import Container from "react-bootstrap/Container";
 
 import AuthorSummary from "./AuthorSummary";
 import StageAuthor from "./StageAuthor";
+import {HandleVolume} from "../types";
+import {Stage} from "../guide-shared/Stage";
 // import StageSeries from "./StageSeries";
 // import StageStories from "./StageStories";
-// import StageVolumes from "./StageVolumes";
-import {Stage} from "../guide-shared/Stage";
+import StageVolumes from "../guide-shared/StageVolumes";
 import LibraryContext from "../../contexts/LibraryContext";
 import useFetchAuthor from "../../hooks/useFetchAuthor";
 import Author from "../../models/Author";
@@ -52,8 +53,16 @@ const GuideAuthor = () => {
         setAuthorId(author.id);
     }
 
-    const handleStage = (newStage: Stage): void => {
-        setStage(newStage);
+    const handleStage = (theStage: Stage): void => {
+        setStage(theStage);
+    }
+
+    const handleVolume: HandleVolume = (theVolume) => {
+        logger.error({
+            context: "GuideAuthor.handleVolume",
+            msg: "Should never have been called",
+            volume: Abridgers.VOLUME(theVolume),
+        });
     }
 
     return (
@@ -73,6 +82,14 @@ const GuideAuthor = () => {
                 />
             ) : null}
 
+            {(stage === Stage.VOLUMES) ? (
+                <StageVolumes
+                    handleRefresh={handleRefresh}
+                    handleStage={handleStage}
+                    handleVolume={handleVolume}
+                    parent={author}
+                />
+            ) : null}
 
         </Container>
     )

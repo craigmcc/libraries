@@ -8,8 +8,10 @@ import {useEffect, useState} from "react";
 
 // Internal Modules ----------------------------------------------------------
 
+import AuthorClient from "../clients/AuthorClient";
 import StoryClient from "../clients/StoryClient";
 import VolumeClient from "../clients/VolumeClient";
+import Author from "../models/Author";
 import Library from "../models/Library";
 import Story from "../models/Story";
 import Volume from "../models/Volume";
@@ -20,6 +22,7 @@ import logger from "../util/client-logger";
 
 export interface Props {
     library: Library;                   // Library for which to process data
+    parent: Author | Library | Story;   // Currently selected Author/Story
 }
 
 // Component Details ---------------------------------------------------------
@@ -33,8 +36,71 @@ const useMutateVolume = (props: Props) => {
         logger.info({
             context: "useMutateVolume.useEffect",
             library: Abridgers.LIBRARY(props.library),
+            parent: Abridgers.ANY(props.parent),
         });
-    }, [props.library]);
+    }, [props.library, props.parent]);
+
+    const performExclude = async(theVolume: Volume): Promise<void> => {
+        setError(null);
+        setProcessing(true);
+        try {
+            if (props.parent instanceof Author) {
+                await AuthorClient.volumesExclude(props.library.id, props.parent.id, theVolume.id);
+                logger.info({
+                    context: "useMutateVolume.performExclude",
+                    author: Abridgers.AUTHOR(props.parent),
+                    volume: Abridgers.VOLUME(theVolume),
+                });
+            } else if (props.parent instanceof Story) {
+                await VolumeClient.storiesExclude(props.library.id, theVolume.id, props.parent.id);
+                logger.info({
+                    context: "useMutateVolume.performExclude",
+                    story: Abridgers.STORY(props.parent),
+                    volume: Abridgers.VOLUME(theVolume),
+                });
+            }
+            // else no-op if props.parent instanceof Library
+        } catch (error) {
+            logger.error({
+                context: "useMutateVolume.performExclude",
+                library: Abridgers.LIBRARY(props.library),
+                parent: Abridgers.ANY(props.parent),
+                volume: Abridgers.VOLUME(theVolume),
+            })
+        }
+        setProcessing(false);
+    }
+
+    const performInclude = async(theVolume: Volume): Promise<void> => {
+        setError(null);
+        setProcessing(true);
+        try {
+            if (props.parent instanceof Author) {
+                await AuthorClient.volumesInclude(props.library.id, props.parent.id, theVolume.id, props.parent.principal);
+                logger.info({
+                    context: "useMutateVolume.performInclude",
+                    author: Abridgers.AUTHOR(props.parent),
+                    volume: Abridgers.VOLUME(theVolume),
+                });
+            } else if (props.parent instanceof Story) {
+                await VolumeClient.storiesInclude(props.library.id, theVolume.id, props.parent.id);
+                logger.info({
+                    context: "useMutateVolume.performExclude",
+                    story: Abridgers.STORY(props.parent),
+                    volume: Abridgers.VOLUME(theVolume),
+                });
+            }
+            // else no-op if props.parent instanceof Library
+        } catch (error) {
+            logger.error({
+                context: "useMutateVolume.performInclude",
+                library: Abridgers.LIBRARY(props.library),
+                parent: Abridgers.ANY(props.parent),
+                volume: Abridgers.VOLUME(theVolume),
+            })
+        }
+        setProcessing(false);
+    }
 
     const performInsert = async (theVolume: Volume): Promise<Volume> => {
 
@@ -139,7 +205,8 @@ const useMutateVolume = (props: Props) => {
 
     }
 
-    return [{performInsert, performRemove, performUpdate, error, processing}];
+    return [{performExclude, performInclude, performInsert, performRemove,
+        performUpdate, error, processing}];
 
 }
 

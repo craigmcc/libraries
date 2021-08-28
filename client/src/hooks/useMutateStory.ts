@@ -38,17 +38,10 @@ const useMutateStory = (props: Props) => {
         logger.info({
             context: "useMutateStory.useEffect",
             library: Abridgers.LIBRARY(props.library),
-            parent: abridged(props.parent),
+            parent: Abridgers.ANY(props.parent),
+            story: (props.story) ? Abridgers.STORY(props.story) : null,
         });
     }, [props.library, props.parent, props.story]);
-
-    const abridged = (parent: Series | Volume): Series | Volume => {
-        if (parent instanceof Series) {
-            return Abridgers.SERIES(parent);
-        } else /* if (parent instanceof Volume) */ {
-            return Abridgers.VOLUME(parent);
-        }
-    }
 
     const performExclude = async (theStory: Story): Promise<void> => {
         setError(null);
@@ -74,7 +67,7 @@ const useMutateStory = (props: Props) => {
                 context: "useMutateStory.performExclude",
                 library: Abridgers.LIBRARY(props.library),
                 story: Abridgers.STORY(theStory),
-                parent: abridged(props.parent),
+                parent: Abridgers.ANY(props.parent),
             });
             setError(error);
         }
@@ -105,7 +98,7 @@ const useMutateStory = (props: Props) => {
                 context: "useMutateStory.performInclude",
                 library: Abridgers.LIBRARY(props.library),
                 story: Abridgers.STORY(theStory),
-                parent: abridged(props.parent),
+                parent: Abridgers.ANY(props.parent),
             });
             setError(error);
         }
@@ -146,7 +139,7 @@ const useMutateStory = (props: Props) => {
             logger.error({
                 context: "useMutateStory.performInsert",
                 library: Abridgers.LIBRARY(props.library),
-                parent: abridged(props.parent),
+                parent: Abridgers.ANY(props.parent),
                 story: Abridgers.STORY(inserted),
                 error: error,
             });
@@ -204,7 +197,7 @@ const useMutateStory = (props: Props) => {
                 logger.info({
                     context: "useMutateStory.performUpdate",
                     msg: "Reregister Series-Story for new ordinal",
-                    series: abridged(props.parent),
+                    series: Abridgers.ANY(props.parent),
                     story: Abridgers.STORY(updated),
                 });
                 try {

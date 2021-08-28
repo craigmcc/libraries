@@ -1,11 +1,12 @@
 // VolumeOptions -------------------------------------------------------------
 
 // List Volumes that match search criteria, offering callbacks for adding,
-// editing, or selecting a Volume.
+// editing, including (marking this Volume as part of this Author/Story), or
+// excluding (marking this Volume as not part of this Author/Story).
 
 // External Modules ----------------------------------------------------------
 
-import React, {useContext, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/Container";
 import Col from "react-bootstrap/Col";
@@ -22,6 +23,9 @@ import useFetchVolumes from "../../hooks/useFetchVolumes";
 import Author from "../../models/Author";
 import Library from "../../models/Library";
 import Story from "../../models/Story";
+import Volume from "../../models/Volume";
+import * as Abridgers from "../../util/abridgers";
+import logger from "../../util/client-logger";
 import {authorsKeys, listValue} from "../../util/transformations";
 
 // Incoming Properties -------------------------------------------------------
@@ -29,7 +33,10 @@ import {authorsKeys, listValue} from "../../util/transformations";
 export interface Props {
     handleAdd?: OnAction;               // Handle request to add a Volume (optional)
     handleEdit: HandleVolume;           // Handle request to edit a Volume
+    handleExclude: HandleVolume;        // Handle request to exclude a Volume
+    handleInclude: HandleVolume;        // Handle request to include a Volume
     handleSelect: HandleVolume;         // Handle request to select a Volume
+    included: (volume: Volume) => boolean; // Is the specified Volume included?
     parent: Author | Library | Story;   // Parent object for requested Volumes
 }
 
@@ -43,16 +50,33 @@ const VolumeOptions = (props: Props) => {
     const [pageSize] = useState<number>(25);
     const [searchText, setSearchText] = useState<string>("");
 
-    const [{volumes, error, loading}] = useFetchVolumes({
+    const [{volumes/*, error, loading*/}] = useFetchVolumes({
         currentPage: currentPage,
         library: libraryContext.state.library,
-        parent: props.parent,
         pageSize: pageSize,
+        parent: props.parent,
         searchText: searchText,
     });
 
+    useEffect(() => {
+        logger.info({
+            context: "VolumeOptions.useEffect",
+            parent: Abridgers.ANY(props.parent),
+        });
+    }, [props.parent])
+
     const handleChange: HandleValue = (newSearchText) => {
         setSearchText(newSearchText);
+    }
+
+    const handleExclude: HandleVolume = (theVolume) => {
+        props.handleExclude(theVolume);
+        setSearchText("");
+    }
+
+    const handleInclude: HandleVolume = (theVolume) => {
+        props.handleInclude(theVolume);
+        setSearchText("");
     }
 
     const onNext: OnAction = () => {
@@ -119,20 +143,6 @@ const VolumeOptions = (props: Props) => {
                     </thead>
 
                     <tbody>
-                    {(error) ? (
-                        <tr>
-                            <td className="text-center" rowSpan={6}>
-                                Database Access Error: {error.message}
-                            </td>
-                        </tr>
-                    ) : null}
-                    {(loading) ? (
-                        <tr>
-                            <td className="text-center" rowSpan={6}>
-                                Database Fetch In Progress
-                            </td>
-                        </tr>
-                    ) : null}
                     {volumes.map((volume, rowIndex) => (
                         <tr
                             className="table-default"
@@ -166,13 +176,34 @@ const VolumeOptions = (props: Props) => {
                                     type="button"
                                     variant="secondary"
                                 >Edit</Button>
-                                <Button
-                                    className="mr-1"
-                                    onClick={() => props.handleSelect(volume)}
-                                    size="sm"
-                                    type="button"
-                                    variant="primary"
-                                >Select</Button>
+                                {(!(props.parent instanceof Library)) ? (
+                                    <>
+                                        <Button
+                                            className="mr-1"
+                                            disabled={props.included(volume)}
+                                            onClick={() => handleInclude(volume)}
+                                            size="sm"
+                                            type="button"
+                                            variant="primary"
+                                        >Include</Button>
+                                        <Button
+                                            className="mr-1"
+                                            disabled={!props.included(volume)}
+                                            onClick={() => handleExclude(volume)}
+                                            size="sm"
+                                            type="button"
+                                            variant="primary"
+                                        >Exclude</Button>
+                                    </>
+                                ) : (
+                                    <Button
+                                        className="mr-1"
+                                        onClick={() => props.handleSelect(volume)}
+                                        size="sm"
+                                        type="button"
+                                        variant="primary"
+                                    >Select</Button>
+                                )}
                             </td>
                         </tr>
                     ))}

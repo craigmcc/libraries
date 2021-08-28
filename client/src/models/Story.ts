@@ -8,7 +8,8 @@
 // Internal Modules ----------------------------------------------------------
 
 import Author from "./Author";
-import {toAuthors} from "../util/to-model-types";
+import Volume from "./Volume";
+import {toAuthors, toVolumes} from "../util/to-model-types";
 
 // Public Objects ------------------------------------------------------------
 
@@ -24,6 +25,7 @@ class Story {
         this.notes = data.notes;
         this.ordinal = this.calculateOrdinal(data);
         this.authors = data.authors ? toAuthors(data.authors) : [];
+        this.volumes = data.volumes ? toVolumes(data.volumes) : [];
     }
 
     id: number;
@@ -34,6 +36,7 @@ class Story {
     notes: string;
     ordinal: number | null;
     authors: Author[];
+    volumes: Volume[];
 
     private calculateOrdinal(data: any): number | null {
         if (data.ordinal) {

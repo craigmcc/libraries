@@ -1,7 +1,7 @@
-// StageStories --------------------------------------------------------------
+// StageVolumes --------------------------------------------------------------
 
-// Select Story(ies) for the currently selected Series/Volume, while offering
-// the option to edit existing Stories or create a new one.
+// Select Volume(s) for the currently selected Author/Story, while offering
+// the option to edit existing Volumes or create a new one.
 
 // External Modules ----------------------------------------------------------
 
@@ -14,13 +14,13 @@ import Row from "react-bootstrap/Row";
 // Internal Modules ----------------------------------------------------------
 
 import {HandleStage, Stage} from "./Stage";
-import StoryOptions from "./StoryOptions";
-import {HandleAction, HandleStory, OnAction, Scopes} from "../types";
-import StoryForm from "../stories/StoryForm";
+import VolumeOptions from "./VolumeOptions";
+import {HandleAction, HandleVolume, OnAction, Scopes} from "../types";
+import VolumeForm from "../volumes/VolumeForm";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
-import useMutateStory from "../../hooks/useMutateStory";
-import Series from "../../models/Series";
+import useMutateVolume from "../../hooks/useMutateVolume";
+import Author from "../../models/Author";
 import Story from "../../models/Story";
 import Volume from "../../models/Volume";
 import * as Abridgers from "../../util/abridgers";
@@ -31,33 +31,31 @@ import logger from "../../util/client-logger";
 export interface Props {
     handleRefresh: HandleAction;        // Trigger a UI refresh
     handleStage: HandleStage;           // Handle changing guide stage
-    handleStory: HandleStory;           // Handle selecting a Story
-    parent: Series | Volume;            // Currently selected Series or Volume
+    handleVolume: HandleVolume;         // Handle selecting a Volume
+    parent: Author | Story;             // Currently selected Author or Story
 }
 
 // Component Details ---------------------------------------------------------
 
-const StageStories = (props: Props) => {
+const StageVolumes = (props: Props) => {
 
     const libraryContext = useContext(LibraryContext);
     const loginContext = useContext(LoginContext);
 
     const [canRemove, setCanRemove] = useState<boolean>(false);
     const [libraryId] = useState<number>(libraryContext.state.library.id);
-    const [story, setStory] = useState<Story | null>(null);
+    const [volume, setVolume] = useState<Volume | null>(null);
 
     const [{performExclude, performInclude, performInsert, performRemove,
-        performUpdate/*, error, processing*/}] = useMutateStory({
+        performUpdate/*, error, processing*/}] = useMutateVolume({
         library: libraryContext.state.library,
         parent: props.parent,
-        story: story,
     });
-
 
     useEffect(() => {
 
         logger.info({
-            context: "StageStories.useEffect",
+            context: "StageVolumes.useEffect",
             parent: Abridgers.ANY(props.parent),
         });
 
@@ -68,72 +66,72 @@ const StageStories = (props: Props) => {
         libraryId, props.parent]);
 
     const handleAdd: OnAction = () => {
-        const newStory = new Story({
-            copyright: null,
+        const theVolume = new Volume({
             library_id: libraryId,
-            name: null,
-            notes: null,
         });
         logger.debug({
-            context: "StageStories.handleAdd",
-            story: newStory,
+            context: "StageVolumes.handleAdd",
+            volume: theVolume,
         });
-        setStory(newStory);
+        setVolume(theVolume);
     }
 
-    const handleEdit: HandleStory = async (theStory) => {
+    const handleEdit: HandleVolume = async (theVolume) => {
         logger.debug({
-            context: "StageStories.handleEdit",
-            story: Abridgers.STORY(theStory),
-        });
-        setStory(theStory);
+            context: "StageVolumes.handleEdit",
+            volume: Abridgers.VOLUME(theVolume),
+        })
+        setVolume(theVolume);
     }
 
-    const handleExclude: HandleStory = async (theStory) => {
-        await performExclude(theStory);
+    const handleExclude: HandleVolume = async (theVolume) => {
+        await performExclude(theVolume);
         props.handleRefresh();
     }
 
-    const handleInclude: HandleStory = async (theStory) => {
-        await performInclude(theStory);
+    const handleInclude: HandleVolume = async (theVolume) => {
+        await performInclude(theVolume);
         props.handleRefresh();
     }
 
-    const handleInsert: HandleStory = async (theStory) => {
-        const inserted = await performInsert(theStory);
-        inserted.ordinal = theStory.ordinal; // Carry ordinal (if any) forward
-        await performInclude(inserted); // Assume new Story is included
-        setStory(null);
+    const handleInsert: HandleVolume = async (theVolume) => {
+        const inserted = await performInsert(theVolume);
+        await performInclude(inserted); // Assume new Volume is included
+        setVolume(null);
         props.handleRefresh();
     }
 
-    const handleRemove: HandleStory = async (theStory) => {
-        await performRemove(theStory);
-        setStory(null);
+    const handlePrevious = (): void => {
+        props.handleStage(Stage.PARENT);
+    }
+
+    const handleRemove: HandleVolume = async (theVolume) => {
+        await performRemove(theVolume);
+        setVolume(null);
         props.handleRefresh();
     }
 
-    const handleSelect: HandleStory = async (newStory) => {
+    const handleSelect: HandleVolume = async (theVolume) => {
         logger.debug({
-            context: "StageStories.handleSelect",
-            story: newStory,
+            context: "StageVolumes.handleSelect",
+            volume: theVolume,
         });
-        props.handleStory(newStory);
-        props.handleStage(Stage.WRITERS);
+        props.handleVolume(theVolume);
+        // props.handleStage(???) - Nothing to do here???
+        // props.handleRefresh()
+    }
+
+    const handleUpdate: HandleVolume = async (theVolume) => {
+        await performUpdate(theVolume);
+        setVolume(theVolume);
         props.handleRefresh();
     }
 
-    const handleUpdate: HandleStory = async (theStory) => {
-        await performUpdate(theStory);
-        setStory(null);
-        props.handleRefresh();
-    }
-
-    // Is the specified Story currently included for this Series/Volume?
-    const included = (story: Story): boolean => {
+    // Is the specified Volume currently included for this Author/Story?
+    const included = (volume: Volume): boolean => {
         let result = false;
-        props.parent.stories.forEach(includedStory => {
-            if (story.id === includedStory.id) {
+        props.parent.volumes.forEach(includedVolume => {
+            if (volume.id === includedVolume.id) {
                 result = true;
             }
         });
@@ -141,30 +139,38 @@ const StageStories = (props: Props) => {
     }
 
     return (
-        <Container fluid id="StageStories">
+        <Container fluid id="StageVolumes">
 
             {/* List View */}
-            {(!story) ? (
+            {(!volume) ? (
                 <>
 
                     <Row className="mb-3 ml-1 mr-1">
                         <Col className="text-left">
                             <Button
                                 disabled={false}
-                                onClick={() => props.handleStage(Stage.AUTHORS)}
+                                onClick={handlePrevious}
                                 size="sm"
                                 variant="success"
                             >Previous</Button>
                         </Col>
                         <Col className="text-center">
-                            {(props.parent instanceof Series) ? (
-                                <span>Manage Stories for Series:&nbsp;</span>
+                            {(props.parent instanceof Author) ? (
+                                <>
+                                    <span>Manage Volumes for Author:&nbsp;</span>
+                                    <span className="text-info">
+                                        {props.parent.first_name}&nbsp;
+                                        {props.parent.last_name}
+                                    </span>
+                                </>
                             ) : (
-                                <span>Manage Stories for Volume:&nbsp;</span>
+                                <>
+                                    <span>Manage Volumes for Story:&nbsp;</span>
+                                    <span className="text-info">
+                                        {props.parent.name}
+                                    </span>
+                                </>
                             )}
-                            <span className="text-info">
-                                {props.parent.name}
-                            </span>
                         </Col>
                         <Col className="text-right">
                             <Button
@@ -175,7 +181,7 @@ const StageStories = (props: Props) => {
                         </Col>
                     </Row>
 
-                    <StoryOptions
+                    <VolumeOptions
                         handleAdd={handleAdd}
                         handleEdit={handleEdit}
                         handleExclude={handleExclude}
@@ -195,28 +201,36 @@ const StageStories = (props: Props) => {
             ) : null}
 
             {/* Detail View */}
-            {(story) ? (
+            {(volume) ? (
                 <>
 
                     <Row className="mb-3 ml-1 mr-1">
                         <Col className="text-center">
-                            {(story.id > 0) ? (
+                            {(volume.id > 0) ? (
                                 <span>Edit Existing&nbsp;</span>
                             ) : (
                                 <span>Add New&nbsp;</span>
                             )}
-                            {(props.parent instanceof Series) ? (
-                                <span>Story for Series:&nbsp;</span>
+                            {(props.parent instanceof Author) ? (
+                                <>
+                                    <span>Volume for Author:&nbsp;</span>
+                                    <span className="text-info">
+                                        {props.parent.first_name}&nbsp;
+                                        {props.parent.last_name}
+                                    </span>
+                                </>
                             ) : (
-                                <span>Story for Volume:&nbsp;</span>
+                                <>
+                                    <span>Volume for Story:&nbsp;</span>
+                                    <span className="text-info">
+                                        {props.parent.name}
+                                    </span>
+                                </>
                             )}
-                            <span className="text-info">
-                                {props.parent.name}
-                            </span>
                         </Col>
                         <Col className="text-right">
                             <Button
-                                onClick={() => setStory(null)}
+                                onClick={() => setVolume(null)}
                                 size="sm"
                                 type="button"
                                 variant="secondary"
@@ -224,13 +238,13 @@ const StageStories = (props: Props) => {
                         </Col>
                     </Row>
 
-                    <StoryForm
+                    <VolumeForm
                         autoFocus
                         canRemove={canRemove}
                         handleInsert={handleInsert}
                         handleRemove={handleRemove}
                         handleUpdate={handleUpdate}
-                        story={story}
+                        volume={volume}
                     />
 
                 </>
@@ -241,4 +255,4 @@ const StageStories = (props: Props) => {
 
 }
 
-export default StageStories;
+export default StageVolumes;

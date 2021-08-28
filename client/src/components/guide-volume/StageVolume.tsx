@@ -47,6 +47,7 @@ const StageVolume = (props: Props) => {
     const [{performInsert, performRemove, performUpdate/*, error, processing*/}]
         = useMutateVolume({ // TODO error/processing
             library: libraryContext.state.library,
+            parent: libraryContext.state.library,
         });
 
     useEffect(() => {
@@ -87,6 +88,14 @@ const StageVolume = (props: Props) => {
         setVolume(theVolume);
     }
 
+    const handleExclude: HandleVolume = (theVolume) => {
+        // No-op since our parent is the Library
+    }
+
+    const handleInclude: HandleVolume = (theVolume) => {
+        // No-op since our parent is the Library
+    }
+
     const handleInsert: HandleVolume = async (theVolume) => {
         const inserted = await performInsert(theVolume);
         handleSelect(inserted);
@@ -112,6 +121,11 @@ const StageVolume = (props: Props) => {
         setVolume(null);
         props.handleVolume(updated);
         props.handleRefresh();
+    }
+
+    const included = (volume: Volume): boolean => {
+        // No-op since our parent is the Library
+        return true;
     }
 
     return (
@@ -148,7 +162,10 @@ const StageVolume = (props: Props) => {
                     <VolumeOptions
                         handleAdd={handleAdd}
                         handleEdit={handleEdit}
+                        handleExclude={handleExclude}
+                        handleInclude={handleInclude}
                         handleSelect={handleSelect}
+                        included={included}
                         parent={libraryContext.state.library}
                     />
 

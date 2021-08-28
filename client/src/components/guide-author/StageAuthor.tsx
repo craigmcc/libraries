@@ -13,8 +13,8 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
-import AuthorOptions from "./AuthorOptions";
 import {HandleAction, HandleAuthor, OnAction, Scopes} from "../types";
+import AuthorOptions from "./AuthorOptions"; // TODO - shared???
 import {HandleStage, Stage} from "../guide-shared/Stage";
 import AuthorForm from "../authors/AuthorForm";
 import LibraryContext from "../../contexts/LibraryContext";
@@ -44,13 +44,12 @@ const StageAuthor = (props: Props) => {
     const [libraryId] = useState<number>(libraryContext.state.library.id);
     const [author, setAuthor] = useState<Author | null>(null);
 
-    const [{/*performExclude, performInclude,*/ performInsert, performRemove, performUpdate/*, error, processing*/}]
+    const [{performInsert, performRemove, performUpdate/*, error, processing*/}]
         = useMutateAuthor({ // TODO error/processing
-        author: author,
-        library: libraryContext.state.library,
-        parent: libraryContext.state.library,
-
-    });
+            author: author,
+            library: libraryContext.state.library,
+            parent: libraryContext.state.library,
+        });
 
     useEffect(() => {
 

@@ -37,10 +37,14 @@ const AuthorSummary = (props: Props) => {
             <Row className="mb-1">
                 <Col className="text-center">
                     <span>Summary for Author:&nbsp;</span>
-                    <span className="text-info">
-                    {props.author.last_name}&nbsp;
-                        {props.author.first_name}&nbsp;&nbsp;
-                </span>
+                    {(props.author.id > 0) ? (
+                        <span className="text-info">
+                            {props.author.first_name}&nbsp;
+                            {props.author.last_name}&nbsp;&nbsp;
+                        </span>
+                    ) : (
+                        <span>(Please Select)</span>
+                    )}
                 </Col>
             </Row>
         </Container>

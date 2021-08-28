@@ -26,7 +26,7 @@ export interface Props {
     currentPage: number;                // One-relative current page number
     library: Library;                   // Library for which to select data
     pageSize: number;                   // Number of entries per returned page
-    parent: Library | Series | Story | Volume;    // Parent object if no searchText specified
+    parent: Library | Series | Story | Volume;    // Parent object
     searchText: string;                 // Name match text (or "" for all)
 }
 
@@ -44,39 +44,33 @@ const useFetchAuthors = (props: Props) => {
 
             setError(null);
             setLoading(true);
-            let abridged: Library | Series | Story | Volume | null = null;
-            let newAuthors: Author[] = [];
+            let theAuthors: Author[] = [];
 
             try {
                 if ((props.library.id > 0) && (props.parent.id > 0)) {
                     if (props.searchText.length > 0) {
-                        abridged = Abridgers.LIBRARY(props.library);
-                        newAuthors = await LibraryClient.authors(props.library.id, {
+                        theAuthors = await LibraryClient.authors(props.library.id, {
                             limit: props.pageSize,
                             name: props.searchText,
                             offset: (props.pageSize * (props.currentPage - 1)),
                         });
                     } else if (props.parent instanceof Library) {
-                        abridged = Abridgers.LIBRARY(props.parent);
-                        newAuthors = await LibraryClient.authors(props.parent.id, {
+                        theAuthors = await LibraryClient.authors(props.parent.id, {
                             limit: props.pageSize,
                             offset: (props.pageSize * (props.currentPage - 1)),
                         });
                     } else if (props.parent instanceof Series) {
-                        abridged = Abridgers.SERIES(props.parent);
-                        newAuthors = await SeriesClient.authors(props.library.id, props.parent.id,{
+                        theAuthors = await SeriesClient.authors(props.library.id, props.parent.id,{
                             limit: props.pageSize,
                             offset: (props.pageSize * (props.currentPage - 1)),
                         });
                     } else if (props.parent instanceof Story) {
-                        abridged = Abridgers.STORY(props.parent);
-                        newAuthors = await StoryClient.authors(props.library.id, props.parent.id,{
+                        theAuthors = await StoryClient.authors(props.library.id, props.parent.id,{
                             limit: props.pageSize,
                             offset: (props.pageSize * (props.currentPage - 1)),
                         });
                     } else /* if (props.parent instanceof Volume) */ {
-                        abridged = Abridgers.VOLUME(props.parent);
-                        newAuthors = await VolumeClient.authors(props.library.id, props.parent.id,{
+                        theAuthors = await VolumeClient.authors(props.library.id, props.parent.id,{
                             limit: props.pageSize,
                             offset: (props.pageSize * (props.currentPage - 1)),
                         });
@@ -84,19 +78,19 @@ const useFetchAuthors = (props: Props) => {
                     logger.info({
                         context: "useFetchAuthors.fetchAuthors",
                         library: Abridgers.LIBRARY(props.library),
+                        parent: Abridgers.ANY(props.parent),
                         currentPage: props.currentPage,
                         searchText: props.searchText,
-                        parent: abridged,
-                        authors: Abridgers.AUTHORS(newAuthors),
+                        authors: Abridgers.AUTHORS(theAuthors),
                     });
                 } else {
                     logger.info({
                         context: "useFetchAuthors.fetchAuthors",
                         msg: "Nothing to select",
                         library: Abridgers.LIBRARY(props.library),
+                        parent: Abridgers.ANY(props.parent),
                         currentPage: props.currentPage,
                         searchText: props.searchText,
-                        parent: abridged,
                     });
                 }
             } catch (error) {
@@ -110,14 +104,15 @@ const useFetchAuthors = (props: Props) => {
                 setError(error);
             }
 
-            setAuthors(newAuthors);
+            setAuthors(theAuthors);
             setLoading(false);
 
         }
 
         fetchAuthors();
 
-    }, [props.currentPage, props.library, props.pageSize, props.parent, props.searchText]);
+    }, [props.currentPage, props.library, props.pageSize,
+        props.parent, props.searchText]);
 
     return [{authors, error, loading}];
 
