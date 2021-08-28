@@ -12,6 +12,7 @@ import AuthorClient from "../clients/AuthorClient";
 import SeriesClient from "../clients/SeriesClient";
 import StoryClient from "../clients/StoryClient";
 import VolumeClient from "../clients/VolumeClient";
+import Author from "../models/Author";
 import Story from "../models/Story";
 import Library from "../models/Library";
 import Series from "../models/Series";
@@ -23,7 +24,7 @@ import logger from "../util/client-logger";
 
 export interface Props {
     library: Library;                   // Library for which to process data
-    parent: Series | Volume;            // Currently selected Series/Volume
+    parent: Author | Library | Series | Volume;    // Currently selected Author/Series/Volume
     story: Story | null;                // Currently selected Story (if any)
 }
 
@@ -47,14 +48,21 @@ const useMutateStory = (props: Props) => {
         setError(null);
         setProcessing(true);
         try {
-            if (props.parent instanceof Series) {
+            if (props.parent instanceof Author) {
+                await AuthorClient.storiesExclude(props.library.id, props.parent.id, theStory.id);
+                logger.info({
+                    context: "useMutateStory.performExclude",
+                    story: Abridgers.STORY(theStory),
+                    author: Abridgers.AUTHOR(props.parent),
+                });
+            } else if (props.parent instanceof Series) {
                 await SeriesClient.storiesExclude(props.library.id, props.parent.id, theStory.id);
                 logger.info({
                     context: "useMutateStory.performExclude",
                     story: Abridgers.STORY(theStory),
                     series: Abridgers.SERIES(props.parent),
                 });
-            } else /* if (props.parent instanceof Volume) */ {
+            } else if (props.parent instanceof Volume) {
                 await VolumeClient.storiesExclude(props.library.id, props.parent.id, theStory.id);
                 logger.info({
                     context: "useMutateStory.performExclude",
@@ -62,6 +70,7 @@ const useMutateStory = (props: Props) => {
                     volume: Abridgers.VOLUME(props.parent),
                 });
             }
+            // else no-op if props.parent instanceof Library
         } catch (error) {
             logger.error({
                 context: "useMutateStory.performExclude",
@@ -78,6 +87,14 @@ const useMutateStory = (props: Props) => {
         setError(null);
         setProcessing(true);
         try {
+            if (props.parent instanceof Author) {
+                await AuthorClient.storiesInclude(props.library.id, props.parent.id, theStory.id, props.parent.principal);
+                logger.info({
+                    context: "useMutateStory.performInclude",
+                    story: Abridgers.STORY(theStory),
+                    author: Abridgers.AUTHOR(props.parent),
+                });
+            }
             if (props.parent instanceof Series) {
                 await SeriesClient.storiesInclude(props.library.id, props.parent.id, theStory.id, theStory.ordinal);
                 logger.info({
@@ -85,7 +102,7 @@ const useMutateStory = (props: Props) => {
                     story: Abridgers.STORY(theStory),
                     series: Abridgers.SERIES(props.parent),
                 });
-            } else /* if (props.parent instanceof Volume) */ {
+            } else if (props.parent instanceof Volume) {
                 await VolumeClient.storiesInclude(props.library.id, props.parent.id, theStory.id);
                 logger.info({
                     context: "useMutateStory.performInclude",
@@ -93,6 +110,7 @@ const useMutateStory = (props: Props) => {
                     volume: Abridgers.VOLUME(props.parent),
                 });
             }
+            // else no-op if props.parent instanceof Library
         } catch (error) {
             logger.error({
                 context: "useMutateStory.performInclude",
@@ -125,14 +143,16 @@ const useMutateStory = (props: Props) => {
             await performInclude(inserted);
 
             // Assume that the Author(s) for this Series/Volume wrote this Story as well
-            for (const author of props.parent.authors) {
-                await AuthorClient.storiesInclude(props.library.id, author.id, inserted.id, author.principal);
-                logger.info({
-                    context: "useMutateStory.performInsert",
-                    msg: "Adding Story Author",
-                    story: Abridgers.STORY(inserted),
-                    author: Abridgers.AUTHOR(author),
-                });
+            if ((props.parent instanceof Series) || (props.parent instanceof Volume)) {
+                for (const author of props.parent.authors) {
+                    await AuthorClient.storiesInclude(props.library.id, author.id, inserted.id, author.principal);
+                    logger.info({
+                        context: "useMutateStory.performInsert",
+                        msg: "Adding Story Author",
+                        story: Abridgers.STORY(inserted),
+                        author: Abridgers.AUTHOR(author),
+                    });
+                }
             }
 
         } catch (error) {

@@ -69,8 +69,13 @@ const useFetchAuthors = (props: Props) => {
                             limit: props.pageSize,
                             offset: (props.pageSize * (props.currentPage - 1)),
                         });
-                    } else /* if (props.parent instanceof Volume) */ {
+                    } else if (props.parent instanceof Volume) {
                         theAuthors = await VolumeClient.authors(props.library.id, props.parent.id,{
+                            limit: props.pageSize,
+                            offset: (props.pageSize * (props.currentPage - 1)),
+                        });
+                    } else /* if (props.parent instanceof Library) */ {
+                        theAuthors = await LibraryClient.authors(props.library.id, {
                             limit: props.pageSize,
                             offset: (props.pageSize * (props.currentPage - 1)),
                         });
@@ -97,6 +102,7 @@ const useFetchAuthors = (props: Props) => {
                 logger.error({
                     context: "useFetchAuthors.fetchAuthors",
                     library: Abridgers.LIBRARY(props.library),
+                    parent: Abridgers.ANY(props.parent),
                     currentPage: props.currentPage,
                     searchText: props.searchText,
                     error: error,

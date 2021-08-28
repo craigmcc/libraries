@@ -1,7 +1,7 @@
 // useFetchStory -------------------------------------------------------------
 
 // Custom hook to fetch a specified Story object, fleshed out with nested
-// Author objects.
+// Author, Series, and Volume objects.
 
 // External Modules ----------------------------------------------------------
 
@@ -41,35 +41,39 @@ const useFetchStory = (props: Props) => {
             try {
                 if ((props.library.id > 0) && (props.storyId > 0)) {
 
-                    // Fetch the requested Story with nested authors
-                    const newStory = await StoryClient.find(props.library.id, props.storyId, {
+                    // Fetch the requested Story with nested objects
+                    const theStory = await StoryClient.find(props.library.id, props.storyId, {
                         withAuthors: "",
+                        withSeries: "",
+                        withVolumes: "",
                     });
 
                     // Sort the nested authors
-                    newStory.authors = Sorters.AUTHORS(newStory.authors);
+                    theStory.authors = Sorters.AUTHORS(theStory.authors);
+                    theStory.series = Sorters.SERIES(theStory.series);
+                    theStory.volumes = Sorters.VOLUMES(theStory.volumes);
 
                     // Cause the fetched Story to be returned
                     logger.info({
                         context: "useFetchStory.fetchStory",
-                        msg: "Return fetched Story with nested Authors",
+                        msg: "Return fetched Story with nested objects",
                         library: Abridgers.LIBRARY(props.library),
                         storyId: props.storyId,
-                        story: Abridgers.STORY(newStory),
+                        story: Abridgers.STORY(theStory),
                     });
-                    setStory(newStory);
+                    setStory(theStory);
 
                 } else {
 
-                    const newStory = new Story();
+                    const theStory = new Story();
                     logger.info({
                         context: "useFetchStory.fetchStory",
                         msg: "Return empty Story because none selected",
                         library: Abridgers.LIBRARY(props.library),
                         storyId: props.storyId,
-                        story: Abridgers.STORY(newStory),
+                        story: Abridgers.STORY(theStory),
                     })
-                    setStory(newStory);
+                    setStory(theStory);
 
                 }
 

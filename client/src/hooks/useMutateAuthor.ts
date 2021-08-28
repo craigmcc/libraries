@@ -37,6 +37,7 @@ const useMutateAuthor = (props: Props) => {
             context: "useMutateAuthor.useEffect",
             library: Abridgers.LIBRARY(props.library),
             parent: Abridgers.ANY(props.parent),
+            author: (props.author) ? Abridgers.AUTHOR(props.author) : null,
         });
     }, [props.author, props.library, props.parent]);
 
@@ -138,6 +139,7 @@ const useMutateAuthor = (props: Props) => {
             logger.error({
                 context: "useMutateAuthor.performInsert",
                 library: Abridgers.LIBRARY(props.library),
+                parent: Abridgers.ANY(props.parent),
                 author: Abridgers.AUTHOR(inserted),
                 error: error,
             });

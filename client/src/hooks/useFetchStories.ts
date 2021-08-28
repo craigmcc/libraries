@@ -8,9 +8,11 @@ import {useEffect, useState} from "react";
 
 // Internal Modules ----------------------------------------------------------
 
+import AuthorClient from "../clients/AuthorClient";
 import LibraryClient from "../clients/LibraryClient";
 import SeriesClient from "../clients/SeriesClient";
 import VolumeClient from "../clients/VolumeClient";
+import Author from "../models/Author";
 import Library from "../models/Library";
 import Series from "../models/Series";
 import Story from "../models/Story";
@@ -24,7 +26,7 @@ export interface Props {
     currentPage: number;                // One-relative current page number
     library: Library;                   // Library for which to select data
     pageSize: number;                   // Number of entries per returned page
-    parent: Series | Volume;            // Parent object if no searchText specified
+    parent: Author | Library | Series | Volume; // Parent object
     searchText: string;                 // Name match text (or "" for all)
 }
 
@@ -42,55 +44,60 @@ const useFetchStories = (props: Props) => {
 
             setError(null);
             setLoading(true);
-            let abridged: Library | Series | Volume | null = null;
-            let newStories: Story[] = [];
+            let theStories: Story[] = [];
 
             try {
                 if ((props.library.id > 0) && (props.parent.id > 0)) {
                     if (props.searchText.length > 0) {
-                        abridged = Abridgers.LIBRARY(props.library);
-                        newStories = await LibraryClient.stories(props.library.id, {
+                        theStories = await LibraryClient.stories(props.library.id, {
                             limit: props.pageSize,
                             name: props.searchText,
                             offset: (props.pageSize * (props.currentPage - 1)),
                         });
+                    } else if (props.parent instanceof Author) {
+                        theStories = await AuthorClient.stories(props.library.id, props.parent.id, {
+                            limit: props.pageSize,
+                            offset: (props.pageSize * (props.currentPage - 1)),
+                        });
                     } else if (props.parent instanceof Series) {
-                        abridged = Abridgers.SERIES(props.parent);
-                        newStories = await SeriesClient.stories(props.library.id, props.parent.id, {
+                        theStories = await SeriesClient.stories(props.library.id, props.parent.id, {
                             limit: props.pageSize,
                             offset: (props.pageSize * (props.currentPage - 1)),
-                            withAuthors: "",
-                        })
-                    } else /* if (props.parent instanceof Volume) */ {
-                        abridged = Abridgers.VOLUME(props.parent);
-                        newStories = await VolumeClient.stories(props.library.id, props.parent.id, {
+                        });
+                    } else if (props.parent instanceof Volume) {
+                        theStories = await VolumeClient.stories(props.library.id, props.parent.id, {
                             limit: props.pageSize,
                             offset: (props.pageSize * (props.currentPage - 1)),
-                            withAuthors: "",
-                        })
+                        });
+                    } else /* if (props.parent instanceof Library) */ {
+                        theStories = await LibraryClient.stories(props.library.id, {
+                            limit: props.pageSize,
+                            offset: (props.pageSize * (props.currentPage - 1)),
+                        });
                     }
                     logger.info({
                         context: "useFetchStories.fetchStories",
                         library: Abridgers.LIBRARY(props.library),
+                        parent: Abridgers.ANY(props.parent),
                         currentPage: props.currentPage,
                         searchText: props.searchText,
-                        parent: abridged,
-                        authors: Abridgers.STORIES(newStories),
+                        stories: Abridgers.STORIES(theStories),
                     });
                 } else {
                     logger.info({
                         context: "useFetchStories.fetchStories",
                         msg: "Nothing to select",
                         library: Abridgers.LIBRARY(props.library),
+                        parent: Abridgers.ANY(props.parent),
                         currentPage: props.currentPage,
                         searchText: props.searchText,
-                        parent: abridged,
                     });
                 }
             } catch (error) {
                 logger.error({
                     context: "useFetchStories.fetchStories",
                     library: Abridgers.LIBRARY(props.library),
+                    parent: Abridgers.ANY(props.parent),
                     currentPage: props.currentPage,
                     searchText: props.searchText,
                     error: error,
@@ -99,13 +106,14 @@ const useFetchStories = (props: Props) => {
             }
 
             setLoading(false);
-            setStories(newStories);
+            setStories(theStories);
 
         }
 
         fetchStories();
 
-    }, [props.currentPage, props.library, props.pageSize, props.parent, props.searchText]);
+    }, [props.currentPage, props.library, props.pageSize,
+        props.parent, props.searchText]);
 
     return [{stories, error, loading}];
 
