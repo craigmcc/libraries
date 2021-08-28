@@ -36,29 +36,15 @@ const useMutateAuthor = (props: Props) => {
         logger.info({
             context: "useMutateAuthor.useEffect",
             library: Abridgers.LIBRARY(props.library),
-            parent: abridged(props.parent),
+            parent: Abridgers.ANY(props.parent),
         });
     }, [props.author, props.library, props.parent]);
-
-    const abridged = (parent: Library | Series | Story | Volume): Library | Series | Story | Volume => {
-        if (parent instanceof Library) {
-            return Abridgers.LIBRARY(parent);
-        } if (parent instanceof Series) {
-            return Abridgers.SERIES(parent);
-        } else if (parent instanceof Story) {
-            return Abridgers.STORY(parent);
-        } else /* if (parent instanceof Volume) */ {
-            return Abridgers.VOLUME(parent);
-        }
-    }
 
     const performExclude = async (theAuthor: Author): Promise<void> => {
         setError(null);
         setProcessing(true);
         try {
-            if (props.parent instanceof Library) {
-                // No semantic meaning
-            } else if (props.parent instanceof Series) {
+            if (props.parent instanceof Series) {
                 await AuthorClient.seriesExclude(props.library.id, theAuthor.id, props.parent.id);
                 logger.info({
                     context: "useMutateAuthor.performExclude",
@@ -72,7 +58,7 @@ const useMutateAuthor = (props: Props) => {
                     author: Abridgers.AUTHOR(theAuthor),
                     story: Abridgers.STORY(props.parent),
                 });
-            } else /* if (props.parent instanceof Volume) */ {
+            } else if (props.parent instanceof Volume) {
                 await AuthorClient.volumesExclude(props.library.id, theAuthor.id, props.parent.id);
                 logger.info({
                     context: "useMutateAuthor.performExclude",
@@ -80,12 +66,13 @@ const useMutateAuthor = (props: Props) => {
                     volume: Abridgers.VOLUME(props.parent),
                 });
             }
+            // else no-op if props.parent instanceof Library
         } catch (error) {
             logger.error({
                 context: "useMutateAuthor.performExclude",
                 library: Abridgers.LIBRARY(props.library),
                 author: Abridgers.AUTHOR(theAuthor),
-                parent: abridged(props.parent),
+                parent: Abridgers.ANY(props.parent),
             });
             setError(error);
         }
@@ -97,9 +84,7 @@ const useMutateAuthor = (props: Props) => {
         setProcessing(true);
         try {
             theAuthor.principal = true; // Assume by default
-            if (props.parent instanceof Library) {
-                // No semantic meaning
-            } else if (props.parent instanceof Series) {
+            if (props.parent instanceof Series) {
                 await AuthorClient.seriesInclude(props.library.id, theAuthor.id, props.parent.id, theAuthor.principal);
                 logger.info({
                     context: "useMutateAuthor.performInclude",
@@ -113,7 +98,7 @@ const useMutateAuthor = (props: Props) => {
                     author: Abridgers.AUTHOR(theAuthor),
                     story: Abridgers.STORY(props.parent),
                 });
-            } else /* if (props.parent instanceof Volume) */ {
+            } else if (props.parent instanceof Volume) {
                 await AuthorClient.volumesInclude(props.library.id, theAuthor.id, props.parent.id, theAuthor.principal);
                 logger.info({
                     context: "useMutateAuthor.performInclude",
@@ -121,12 +106,13 @@ const useMutateAuthor = (props: Props) => {
                     volume: Abridgers.VOLUME(props.parent),
                 });
             }
+            // else no-op if props.parent instanceof Library
         } catch (error) {
             logger.error({
                 context: "useMutateAuthor.performInclude",
                 library: Abridgers.LIBRARY(props.library),
                 author: Abridgers.AUTHOR(theAuthor),
-                parent: abridged(props.parent),
+                parent: Abridgers.ANY(props.parent),
             });
             setError(error);
         }
