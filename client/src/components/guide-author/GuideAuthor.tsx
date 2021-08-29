@@ -11,9 +11,9 @@ import Container from "react-bootstrap/Container";
 
 import AuthorSummary from "./AuthorSummary";
 import StageAuthor from "./StageAuthor";
-import {HandleVolume} from "../types";
+import {HandleSeries, HandleVolume} from "../types";
 import {Stage} from "../guide-shared/Stage";
-// import StageSeries from "./StageSeries";
+import StageSerieses from "../guide-shared/StageSerieses";
 // import StageStories from "./StageStories";
 import StageVolumes from "../guide-shared/StageVolumes";
 import LibraryContext from "../../contexts/LibraryContext";
@@ -53,6 +53,14 @@ const GuideAuthor = () => {
         setAuthorId(author.id);
     }
 
+    const handleSeries: HandleSeries = (theSeries) => {
+        logger.error({
+            context: "GuideAuthor.handleSeries",
+            msg: "Should never have been called",
+            series: Abridgers.SERIES(theSeries),
+        })
+    }
+
     const handleStage = (theStage: Stage): void => {
         setStage(theStage);
     }
@@ -79,6 +87,15 @@ const GuideAuthor = () => {
                     handleAuthor={handleAuthor}
                     handleRefresh={handleRefresh}
                     handleStage={handleStage}
+                />
+            ) : null}
+
+            {(stage === Stage.SERIES) ? (
+                <StageSerieses
+                    handleRefresh={handleRefresh}
+                    handleSeries={handleSeries}
+                    handleStage={handleStage}
+                    parent={author}
                 />
             ) : null}
 

@@ -51,21 +51,25 @@ const useFetchVolumes = (props: Props) => {
                             limit: props.pageSize,
                             name: props.searchText,
                             offset: (props.pageSize * (props.currentPage - 1)),
+                            withAuthors: "",
                         });
                     } else if (props.parent instanceof Author) {
                         theVolumes = await AuthorClient.volumes(props.library.id, props.parent.id, {
                             limit: props.pageSize,
                             offset: (props.pageSize * (props.currentPage - 1)),
+                            withAuthors: "",
                         });
                     } else if (props.parent instanceof Story) {
                         theVolumes = await StoryClient.volumes(props.library.id, props.parent.id, {
                             limit: props.pageSize,
                             offset: (props.pageSize * (props.currentPage - 1)),
+                            withAuthors: "",
                         })
                     } else /* if (props.parent instanceof Library) */ {
                         theVolumes = await LibraryClient.volumes(props.library.id, {
                             limit: props.pageSize,
                             offset: (props.pageSize * (props.currentPage - 1)),
+                            withAuthors: "",
                         });
                     }
                     logger.info({

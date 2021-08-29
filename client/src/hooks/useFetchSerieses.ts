@@ -52,21 +52,25 @@ const useFetchSerieses = (props: Props) => {
                             limit: props.pageSize,
                             name: props.searchText,
                             offset: (props.pageSize * (props.currentPage - 1)),
+                            withAuthors: "",
                         });
                     } else if (props.parent instanceof Author) {
                         theSerieses = await AuthorClient.series(props.library.id, props.parent.id, {
                             limit: props.pageSize,
                             offset: (props.pageSize * (props.currentPage - 1)),
+                            withAuthors: "",
                         });
                     } else if (props.parent instanceof Library) {
                         theSerieses = await LibraryClient.series(props.parent.id, {
                             limit: props.pageSize,
                             offset: (props.pageSize * (props.currentPage - 1)),
+                            withAuthors: "",
                         });
                     } else if (props.parent instanceof Story) {
                         theSerieses = await StoryClient.series(props.library.id, props.parent.id, {
                             limit: props.pageSize,
                             offset: (props.pageSize * (props.currentPage - 1)),
+                            withAuthors: "",
                         });
                     }
                     logger.info({

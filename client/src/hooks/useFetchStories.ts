@@ -53,26 +53,31 @@ const useFetchStories = (props: Props) => {
                             limit: props.pageSize,
                             name: props.searchText,
                             offset: (props.pageSize * (props.currentPage - 1)),
+                            withAuthors: "",
                         });
                     } else if (props.parent instanceof Author) {
                         theStories = await AuthorClient.stories(props.library.id, props.parent.id, {
                             limit: props.pageSize,
                             offset: (props.pageSize * (props.currentPage - 1)),
+                            withAuthors: "",
                         });
                     } else if (props.parent instanceof Series) {
                         theStories = await SeriesClient.stories(props.library.id, props.parent.id, {
                             limit: props.pageSize,
                             offset: (props.pageSize * (props.currentPage - 1)),
+                            withAuthors: "",
                         });
                     } else if (props.parent instanceof Volume) {
                         theStories = await VolumeClient.stories(props.library.id, props.parent.id, {
                             limit: props.pageSize,
                             offset: (props.pageSize * (props.currentPage - 1)),
+                            withAuthors: "",
                         });
                     } else /* if (props.parent instanceof Library) */ {
                         theStories = await LibraryClient.stories(props.library.id, {
                             limit: props.pageSize,
                             offset: (props.pageSize * (props.currentPage - 1)),
+                            withAuthors: "",
                         });
                     }
                     logger.info({
