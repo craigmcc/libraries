@@ -20,6 +20,7 @@ import StoryForm from "../stories/StoryForm";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
 import useMutateStory from "../../hooks/useMutateStory";
+import Author from "../../models/Author";
 import Series from "../../models/Series";
 import Story from "../../models/Story";
 import Volume from "../../models/Volume";
@@ -32,7 +33,7 @@ export interface Props {
     handleRefresh: HandleAction;        // Trigger a UI refresh
     handleStage: HandleStage;           // Handle changing guide stage
     handleStory: HandleStory;           // Handle selecting a Story
-    parent: Series | Volume;            // Currently selected Series or Volume
+    parent: Author | Series | Volume;            // Currently selected Series or Volume
 }
 
 // Component Details ---------------------------------------------------------
@@ -157,14 +158,31 @@ const StageStories = (props: Props) => {
                             >Previous</Button>
                         </Col>
                         <Col className="text-center">
+                            {(props.parent instanceof Author) ? (
+                                <>
+                                    <span>Manage Stories for Author:&nbsp;</span>
+                                    <span className="text-info">
+                                        {props.parent.first_name}&nbsp;
+                                        {props.parent.last_name}
+                                    </span>
+                                </>
+                            ) : null }
                             {(props.parent instanceof Series) ? (
-                                <span>Manage Stories for Series:&nbsp;</span>
-                            ) : (
-                                <span>Manage Stories for Volume:&nbsp;</span>
-                            )}
-                            <span className="text-info">
-                                {props.parent.name}
-                            </span>
+                                <>
+                                    <span>Manage Stories for Series:&nbsp;</span>
+                                    <span className="text-info">
+                                        {props.parent.name}
+                                    </span>
+                                </>
+                            ) : null }
+                            {(props.parent instanceof Volume) ? (
+                                <>
+                                    <span>Manage Stories for Volume:&nbsp;</span>
+                                    <span className="text-info">
+                                        {props.parent.name}
+                                    </span>
+                                </>
+                            ) : null }
                         </Col>
                         <Col className="text-right">
                             <Button
@@ -205,14 +223,31 @@ const StageStories = (props: Props) => {
                             ) : (
                                 <span>Add New&nbsp;</span>
                             )}
+                            {(props.parent instanceof Author) ? (
+                                <>
+                                    <span>Story for Author:&nbsp;</span>
+                                    <span className="text-info">
+                                        {props.parent.first_name}&nbsp;
+                                        {props.parent.last_name}
+                                    </span>
+                                </>
+                            ) : null }
                             {(props.parent instanceof Series) ? (
-                                <span>Story for Series:&nbsp;</span>
-                            ) : (
-                                <span>Story for Volume:&nbsp;</span>
-                            )}
-                            <span className="text-info">
-                                {props.parent.name}
-                            </span>
+                                <>
+                                    <span>Story for Series:&nbsp;</span>
+                                    <span className="text-info">
+                                        {props.parent.name}
+                                    </span>
+                                </>
+                            ) : null }
+                            {(props.parent instanceof Volume) ? (
+                                <>
+                                    <span>Story for Volume:&nbsp;</span>
+                                    <span className="text-info">
+                                        {props.parent.name}
+                                    </span>
+                                </>
+                            ) : null }
                         </Col>
                         <Col className="text-right">
                             <Button

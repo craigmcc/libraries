@@ -20,10 +20,12 @@ import SearchBar from "../SearchBar";
 import {HandleStory, HandleValue, OnAction} from "../types";
 import LibraryContext from "../../contexts/LibraryContext";
 import useFetchStories from "../../hooks/useFetchStories";
+import Author from "../../models/Author";
 import Series from "../../models/Series";
 import Story from "../../models/Story";
 import Volume from "../../models/Volume";
 import {authorsKeys, listValue} from "../../util/transformations";
+import Library from "../../models/Library";
 
 // Incoming Properties -------------------------------------------------------
 
@@ -34,7 +36,7 @@ export interface Props {
     handleInclude: HandleStory;         // Handle request to include a Story
     handleSelect: HandleStory;          // Handle request to select a Story
     included: (story: Story) => boolean; // Is the specified Story included?
-    parent: Series | Volume;            // Currently selected Series
+    parent: Author | Series | Volume;   // Currently selected Author/Series/Volume
 }
 
 // Component Details ---------------------------------------------------------
@@ -181,13 +183,15 @@ const StoryOptions = (props: Props) => {
                                     type="button"
                                     variant="primary"
                                 >Exclude</Button>
-                                <Button
-                                    className="mr-1"
-                                    onClick={() => props.handleSelect(story)}
-                                    size="sm"
-                                    type="button"
-                                    variant="secondary"
-                                >Writers</Button>
+                                {(!((props.parent instanceof Author) || (props.parent instanceof Series))) ? (
+                                    <Button
+                                        className="mr-1"
+                                        onClick={() => props.handleSelect(story)}
+                                        size="sm"
+                                        type="button"
+                                        variant="secondary"
+                                    >Writers</Button>
+                                ) : null }
                             </td>
                         </tr>
                     ))}
