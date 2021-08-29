@@ -64,14 +64,14 @@ function App() {
                             <LinkContainer to="/home">
                                 <NavItem className="nav-link">Home</NavItem>
                             </LinkContainer>
-                            <LinkContainer to="/guide-volume">
-                                <NavItem className="nav-link">Volumes</NavItem>
+                            <LinkContainer to="/guide-author">
+                                <NavItem className="nav-link">Authors</NavItem>
                             </LinkContainer>
                             <LinkContainer to="/guide-series">
                                 <NavItem className="nav-link">Series</NavItem>
                             </LinkContainer>
-                            <LinkContainer to="/guide-author">
-                                <NavItem className="nav-link">Author</NavItem>
+                            <LinkContainer to="/guide-volume">
+                                <NavItem className="nav-link">Volumes</NavItem>
                             </LinkContainer>
                             <NavDropdown id="master" title="Masters">
                                 <LinkContainer to="/authors">
