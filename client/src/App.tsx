@@ -24,6 +24,7 @@ import OpenApiView from "./components/OpenApiView";
 import AuthorView from "./components/authors/AuthorView";
 import GuideAuthor from "./components/guide-author/GuideAuthor";
 import GuideSeries from "./components/guide-series/GuideSeries";
+import GuideStory from "./components/guide-story/GuideStory";
 import GuideVolume from "./components/guide-volume/GuideVolume";
 import LibraryView from "./components/libraries/LibraryView";
 import SeriesView from "./components/series/SeriesView";
@@ -70,6 +71,9 @@ function App() {
                             <LinkContainer to="/guide-series">
                                 <NavItem className="nav-link">Series</NavItem>
                             </LinkContainer>
+                            <LinkContainer to="/guide-story">
+                                <NavItem className="nav-link">Stories</NavItem>
+                            </LinkContainer>
                             <LinkContainer to="/guide-volume">
                                 <NavItem className="nav-link">Volumes</NavItem>
                             </LinkContainer>
@@ -114,6 +118,9 @@ function App() {
                     </Route>
                     <Route exact path="/guide-series">
                         <GuideSeries/>
+                    </Route>
+                    <Route exact path="/guide-story">
+                        <GuideStory/>
                     </Route>
                     <Route exact path="/guide-volume">
                         <GuideVolume/>

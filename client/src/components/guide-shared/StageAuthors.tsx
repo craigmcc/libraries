@@ -22,6 +22,7 @@ import LoginContext from "../../contexts/LoginContext";
 import useMutateAuthor from "../../hooks/useMutateAuthor";
 import Author from "../../models/Author";
 import Series from "../../models/Series";
+import Story from "../../models/Story";
 import Volume from "../../models/Volume";
 import * as Abridgers from "../../util/abridgers";
 import logger from "../../util/client-logger";
@@ -31,7 +32,7 @@ import logger from "../../util/client-logger";
 export interface Props {
     handleRefresh: HandleAction;        // Trigger a UI refresh
     handleStage: HandleStage;           // Handle changing guide stage
-    parent: Series | Volume;            // Currently selected Series/Volume
+    parent: Series | Story | Volume;    // Currently selected Series/Story/Volume
 }
 
 // Component Details ---------------------------------------------------------
@@ -56,7 +57,7 @@ const StageAuthors = (props: Props) => {
 
         logger.info({
             context: "StageAuthors.useEffect",
-            parent: abridged(props.parent),
+            parent: Abridgers.ANY(props.parent),
         });
 
         // Record current permissions
@@ -64,14 +65,6 @@ const StageAuthors = (props: Props) => {
 
     }, [loginContext, loginContext.state.loggedIn,
         libraryId, props.parent]);
-
-    const abridged = (parent: Series | Volume): Series | Volume => {
-        if (parent instanceof Series) {
-            return Abridgers.SERIES(parent);
-        } else /* if (parent instanceof Volume) */ {
-            return Abridgers.VOLUME(parent);
-        }
-    }
 
     const handleAdd: OnAction = () => {
         const newAuthor = new Author({

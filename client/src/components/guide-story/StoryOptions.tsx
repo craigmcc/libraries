@@ -1,8 +1,7 @@
-// AuthorOptions -------------------------------------------------------------
+// StoryOptions --------------------------------------------------------------
 
-// List Authors that match search criteria, offering callbacks for adding,
-// editing, including (marking this Author as creator of this Series),
-// or excluding (marking this Author as not a creator of this Series).
+// List Stories that match search criteria, offering callbacks for adding,
+// editing, or selecting a detailed stage for a Story.
 
 // External Modules ----------------------------------------------------------
 
@@ -17,29 +16,24 @@ import Table from "react-bootstrap/Table";
 
 import Pagination from "../Pagination";
 import SearchBar from "../SearchBar";
-import {HandleAuthor, HandleValue, OnAction} from "../types";
+import {HandleStory, HandleValue, OnAction} from "../types";
 import LibraryContext from "../../contexts/LibraryContext";
-import useFetchAuthors from "../../hooks/useFetchAuthors";
-import Author from "../../models/Author";
-import Series from "../../models/Series";
-import Story from "../../models/Story";
-import Volume from "../../models/Volume";
-import {listValue} from "../../util/transformations";
+import useFetchStories from "../../hooks/useFetchStories";
+import {authorsKeys, listValue} from "../../util/transformations";
 
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
-    handleAdd?: OnAction;               // Handle request to add an Author (optional)
-    handleEdit: HandleAuthor;           // Handle request to edit an Author
-    handleExclude: HandleAuthor;        // Handle request to exclude an Author
-    handleInclude: HandleAuthor;        // Handle request to include an Author
-    included: (author: Author) => boolean; // Is the specified Author included?
-    parent: Series | Story | Volume;    // Currently selected Series/Story/Volume
+    handleAdd?: OnAction;               // Handle request to add a Story (optional)
+    handleEdit: HandleStory;            // Handle request to edit a Story
+    handleAuthors: HandleStory;         // Handle request to manage Authors for a Story
+    handleSeries: HandleStory;          // Handle request to manage Series for a Story
+    handleVolumes: HandleStory;         // Handle request to manage Volumes for a Story
 }
 
 // Component Details ---------------------------------------------------------
 
-const AuthorOptions = (props: Props) => {
+const StoryOptions = (props: Props) => {
 
     const libraryContext = useContext(LibraryContext);
 
@@ -47,26 +41,16 @@ const AuthorOptions = (props: Props) => {
     const [pageSize] = useState<number>(25);
     const [searchText, setSearchText] = useState<string>("");
 
-    const [{authors/*, error, loading*/}] = useFetchAuthors({ // TODO error/loading
+    const [{stories/*, error, loading*/}] = useFetchStories({
         currentPage: currentPage,
         library: libraryContext.state.library,
+        parent: libraryContext.state.library,
         pageSize: pageSize,
-        parent: props.parent,
         searchText: searchText,
     });
 
     const handleChange: HandleValue = (newSearchText) => {
         setSearchText(newSearchText);
-    }
-
-    const handleExclude: HandleAuthor = (author) => {
-        props.handleExclude(author);
-        setSearchText("");
-    }
-
-    const handleInclude: HandleAuthor = (author) => {
-        props.handleInclude(author);
-        setSearchText("");
     }
 
     const onNext: OnAction = () => {
@@ -80,23 +64,22 @@ const AuthorOptions = (props: Props) => {
     }
 
     return (
-        <Container fluid id="AuthorOptions">
+        <Container fluid id="StoryOptions">
 
             <Row className="mb-3">
                 <Col className="col-8">
                     <SearchBar
                         autoFocus
                         handleChange={handleChange}
-                        initialValue={searchText}
-                        label="Search For Authors:"
-                        placeholder="Search by all or part of either name"
+                        label="Search For Stories:"
+                        placeholder="Search by all or part of name"
                     />
                 </Col>
                 <Col className="col-2">
                     <Pagination
                         currentPage={currentPage}
-                        lastPage={(authors.length === 0) ||
-                        (authors.length < pageSize)}
+                        lastPage={(stories.length === 0) ||
+                            (stories.length < pageSize)}
                         onNext={onNext}
                         onPrevious={onPrevious}
                         variant="secondary"
@@ -123,9 +106,8 @@ const AuthorOptions = (props: Props) => {
 
                     <thead>
                     <tr className="table-secondary">
-                        <th scope="col">First Name</th>
-                        <th scope="col">Last Name</th>
-                        <th scope="col">Principal</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Writers</th>
                         <th scope="col">Active</th>
                         <th scope="col">Notes</th>
                         <th scope="col">Actions</th>
@@ -133,50 +115,52 @@ const AuthorOptions = (props: Props) => {
                     </thead>
 
                     <tbody>
-                    {authors.map((author, rowIndex) => (
+                    {stories.map((story, rowIndex) => (
                         <tr
                             className="table-default"
                             key={1000 + (rowIndex * 100)}
                         >
                             <td key={1000 + (rowIndex * 100) + 1}>
-                                {author.first_name}
+                                {story.name}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 2}>
-                                {author.last_name}
+                                {authorsKeys(story.authors)}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 3}>
-                                {listValue(author.principal)}
+                                {listValue(story.active)}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 4}>
-                                {listValue(author.active)}
-                            </td>
-                            <td key={1000 + (rowIndex * 100) + 5}>
-                                {author.notes}
+                                {story.notes}
                             </td>
                             <td key={1000 + (rowIndex * 100) + 99}>
                                 <Button
                                     className="mr-1"
-                                    onClick={() => props.handleEdit(author)}
+                                    onClick={() => props.handleEdit(story)}
                                     size="sm"
                                     type="button"
                                     variant="secondary"
                                 >Edit</Button>
                                 <Button
                                     className="mr-1"
-                                    disabled={props.included(author)}
-                                    onClick={() => handleInclude(author)}
+                                    onClick={() => props.handleAuthors(story)}
                                     size="sm"
                                     type="button"
                                     variant="primary"
-                                >Include</Button>
+                                >Authors</Button>
                                 <Button
                                     className="mr-1"
-                                    disabled={!props.included(author)}
-                                    onClick={() => handleExclude(author)}
+                                    onClick={() => props.handleSeries(story)}
                                     size="sm"
                                     type="button"
                                     variant="primary"
-                                >Exclude</Button>
+                                >Series</Button>
+                                <Button
+                                    className="mr-1"
+                                    onClick={() => props.handleVolumes(story)}
+                                    size="sm"
+                                    type="button"
+                                    variant="primary"
+                                >Volumes</Button>
                             </td>
                         </tr>
                     ))}
@@ -190,4 +174,4 @@ const AuthorOptions = (props: Props) => {
 
 }
 
-export default AuthorOptions;
+export default StoryOptions;

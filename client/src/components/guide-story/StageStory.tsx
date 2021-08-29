@@ -1,7 +1,7 @@
-// StageAuthor ---------------------------------------------------------------
+// StageStory ----------------------------------------------------------------
 
-// Select the Author to process for subsequent stages, while offering the option
-// to edit existing Authors or create a new one.
+// Select the Story to process for subsequent stages, while offering the option
+// to edit an existing Story or create a new one.
 
 // External Modules ----------------------------------------------------------
 
@@ -13,132 +13,112 @@ import Row from "react-bootstrap/Row";
 
 // Internal Modules ----------------------------------------------------------
 
-import {HandleAction, HandleAuthor, OnAction, Scopes} from "../types";
-import AuthorOptions from "./AuthorOptions"; // TODO - shared???
+import {HandleAction, HandleStory, OnAction, Scopes} from "../types";
+import StoryOptions from "./StoryOptions";
 import {HandleStage, Stage} from "../guide-shared/Stage";
-import AuthorForm from "../authors/AuthorForm";
+import StoryForm from "../stories/StoryForm";
 import LibraryContext from "../../contexts/LibraryContext";
 import LoginContext from "../../contexts/LoginContext";
-import useMutateAuthor from "../../hooks/useMutateAuthor";
-import Author from "../../models/Author";
+import useMutateStory from "../../hooks/useMutateStory";
+import Story from "../../models/Story";
 import * as Abridgers from "../../util/abridgers";
 import logger from "../../util/client-logger";
 
 // Incoming Properties -------------------------------------------------------
 
 export interface Props {
-    author: Author;                     // Currently selected Author (if id>0)
-    handleAuthor: HandleAuthor;         // Handle request to select an Author
     handleRefresh: HandleAction;        // Trigger a UI refresh
     handleStage: HandleStage;           // Handle changing guide stage
+    handleStory: HandleStory;           // Handle request to select a Story
+    story: Story;                       // Currently selected Story (if id>0)
 }
 
 // Component Details ---------------------------------------------------------
 
-const StageAuthor = (props: Props) => {
+const StageStory = (props: Props) => {
 
     const libraryContext = useContext(LibraryContext);
     const loginContext = useContext(LoginContext);
 
     const [canRemove, setCanRemove] = useState<boolean>(false);
     const [libraryId] = useState<number>(libraryContext.state.library.id);
-    const [author, setAuthor] = useState<Author | null>(null);
+    const [story, setStory] = useState<Story | null>(null);
 
-    const [{performInsert, performRemove, performUpdate/*, error, processing*/}]
-        = useMutateAuthor({ // TODO error/processing
-            author: author,
+    const [{performInsert, performRemove, performUpdate/* error, processing*/}]
+        = useMutateStory({
             library: libraryContext.state.library,
             parent: libraryContext.state.library,
+            story: story,
         });
 
     useEffect(() => {
 
         logger.info({
-            context: "StageAuthor.useEffect",
-            author: Abridgers.AUTHOR(props.author),
+            context: "StageStory.useEffect",
+            story: Abridgers.STORY(props.story),
         });
 
         // Record current permissions
         setCanRemove(loginContext.validateScope(Scopes.SUPERUSER));
 
     }, [libraryContext.state.library.id, loginContext, loginContext.state.loggedIn,
-        libraryId, props.author]);
+        libraryId, props.story]);
 
     const handleAdd: OnAction = () => {
-        const newAuthor = new Author({
+        const theStory = new Story({
             active: true,
-            first_name: null,
-            last_name: null,
+            copyright: null,
             library_id: libraryId,
+            name: null,
             notes: null,
-            principal: false,
-        })
-        logger.debug({
-            context: "StageAuthor.handleAdd",
-            author: newAuthor,
+            ordinal: null,
         });
-        setAuthor(newAuthor);
+        setStory(theStory);
     }
 
-    const handleEdit: HandleAuthor = (theAuthor) => {
-        logger.debug({
-            context: "StageAuthor.handleEdit",
-            author: Abridgers.AUTHOR(theAuthor),
-        });
-        setAuthor(theAuthor);
+    const handleAuthors: HandleStory = async (theStory) => {
+        props.handleStory(theStory);
+        props.handleStage(Stage.AUTHORS);
     }
 
-    const handleInsert: HandleAuthor = async (theAuthor) => {
-        const inserted = await performInsert(theAuthor);
-        setAuthor(null);
-        props.handleAuthor(inserted);
+    const handleEdit: HandleStory = (theStory) => {
+        setStory(theStory);
     }
 
-    const handleRemove: HandleAuthor = async (theAuthor) => {
-        await performRemove(theAuthor);
-        setAuthor(null);
-        props.handleAuthor(new Author());
+    const handleInsert: HandleStory = async (theStory) => {
+        const inserted = await performInsert(theStory);
+        setStory(null);
+        props.handleStory(inserted);
     }
 
-    const handleSeries: HandleAuthor = async (theAuthor) => {
-        logger.debug({
-            context: "StageAuthor.handleSeries",
-            author: theAuthor,
-        });
-        props.handleAuthor(theAuthor);
+    const handleRemove: HandleStory = async (theStory) => {
+        await performRemove(theStory);
+        setStory(null);
+        props.handleStory(new Story());
+    }
+
+    const handleSeries: HandleStory = async (theStory) => {
+        props.handleStory(theStory);
         props.handleStage(Stage.SERIES);
     }
 
-    const handleStories: HandleAuthor = async (theAuthor) => {
-        logger.debug({
-            context: "StageAuthor.handleStories",
-            author: theAuthor,
-        });
-        props.handleAuthor(theAuthor);
-        props.handleStage(Stage.STORIES);
-    }
-
-    const handleUpdate: HandleAuthor = async (theAuthor) => {
-        const updated = await performUpdate(theAuthor);
-        setAuthor(null);
-        props.handleAuthor(updated);
+    const handleUpdate: HandleStory = async (theStory) => {
+        const updated = await performUpdate(theStory);
+        setStory(null);
+        props.handleStory(updated);
         props.handleRefresh();
     }
 
-    const handleVolumes: HandleAuthor = async (theAuthor) => {
-        logger.debug({
-            context: "StageAuthor.handleVolumes",
-            author: theAuthor,
-        });
-        props.handleAuthor(theAuthor);
+    const handleVolumes: HandleStory = async (theStory) => {
+        props.handleStory(theStory);
         props.handleStage(Stage.VOLUMES);
     }
 
     return (
-        <Container fluid id="StageAuthor">
+        <Container fluid id="StageStory">
 
             {/* List View */}
-            {(!author) ? (
+            {(!story) ? (
                 <>
 
                     <Row className="mb-3 ml-1 mr-1">
@@ -150,7 +130,7 @@ const StageAuthor = (props: Props) => {
                             >Previous</Button>
                         </Col>
                         <Col className="text-center">
-                            <span>Select or Create Author for Library:&nbsp;</span>
+                            <span>Select or Create Story for Library:&nbsp;</span>
                             <span className="text-info">
                                 {libraryContext.state.library.name}
                             </span>
@@ -164,11 +144,11 @@ const StageAuthor = (props: Props) => {
                         </Col>
                     </Row>
 
-                    <AuthorOptions
+                    <StoryOptions
                         handleAdd={handleAdd}
+                        handleAuthors={handleAuthors}
                         handleEdit={handleEdit}
                         handleSeries={handleSeries}
-                        handleStories={handleStories}
                         handleVolumes={handleVolumes}
                     />
 
@@ -183,24 +163,24 @@ const StageAuthor = (props: Props) => {
             ) : null}
 
             {/* Detail View */}
-            {(author) ? (
+            {(story) ? (
                 <>
 
                     <Row className="mb-3 ml-1 mr-1">
                         <Col className="text-center">
-                            {(author.id > 0) ? (
+                            {(story.id > 0) ? (
                                 <span>Edit Existing</span>
                             ) : (
                                 <span>Add New</span>
                             )}
-                            &nbsp;Author for Library:&nbsp;
+                            &nbsp;Story for Library:&nbsp;
                             <span className="text-info">
                                 {libraryContext.state.library.name}
                             </span>
                         </Col>
                         <Col className="text-right">
                             <Button
-                                onClick={() => setAuthor(null)}
+                                onClick={() => setStory(null)}
                                 size="sm"
                                 type="button"
                                 variant="secondary"
@@ -208,23 +188,21 @@ const StageAuthor = (props: Props) => {
                         </Col>
                     </Row>
 
-                    <AuthorForm
-                        author={author}
+                    <StoryForm
                         autoFocus
                         canRemove={canRemove}
                         handleInsert={handleInsert}
                         handleRemove={handleRemove}
                         handleUpdate={handleUpdate}
+                        story={story}
                     />
 
                 </>
             ) : null}
-
 
         </Container>
     )
 
 }
 
-export default StageAuthor;
-
+export default StageStory;

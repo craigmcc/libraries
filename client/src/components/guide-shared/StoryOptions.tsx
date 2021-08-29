@@ -25,7 +25,6 @@ import Series from "../../models/Series";
 import Story from "../../models/Story";
 import Volume from "../../models/Volume";
 import {authorsKeys, listValue} from "../../util/transformations";
-import Library from "../../models/Library";
 
 // Incoming Properties -------------------------------------------------------
 
