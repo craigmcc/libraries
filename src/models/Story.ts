@@ -21,9 +21,7 @@ import AbstractModel from "./AbstractModel";
 import Author from "./Author";
 import AuthorStory from "./AuthorStory";
 import Library from "./Library";
-import {
-    validateLibraryId
-} from "../util/async-validators";
+import {validateLibraryId} from "../util/AsyncValidators";
 import {BadRequest} from "../util/http-errors";
 import VolumeStory from "./VolumeStory";
 import Volume from "./Volume";

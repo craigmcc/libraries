@@ -13,10 +13,7 @@ import Author from "./Author";
 import Series from "./Series";
 import Story from "./Story";
 import Volume from "./Volume";
-import {
-    validateLibraryNameUnique,
-    validateLibraryScopeUnique
-} from "../util/async-validators";
+import {validateLibraryNameUnique, validateLibraryScopeUnique} from "../util/AsyncValidators";
 import {BadRequest} from "../util/http-errors";
 
 // Public Objects ------------------------------------------------------------

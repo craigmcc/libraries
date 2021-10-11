@@ -10,7 +10,7 @@ import {Column, DataType, Table} from "sequelize-typescript";
 
 import AbstractModel from "./AbstractModel";
 import {BadRequest} from "../util/http-errors";
-import {validateUserUsernameUnique} from "../util/async-validators";
+import {validateUserUsernameUnique} from "../util/AsyncValidators";
 
 // Public Objects ------------------------------------------------------------
 

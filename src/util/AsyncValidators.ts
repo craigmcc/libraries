@@ -1,4 +1,4 @@
-// async-validators ----------------------------------------------------------
+// AsyncValidators -----------------------------------------------------------
 
 // Custom (to this application) validation methods that can only be used by
 // server side applications, because they interact directly with the database.

@@ -15,8 +15,8 @@ import AuthorVolume from "./AuthorVolume";
 import Library from "./Library";
 import Story from "./Story";
 import VolumeStory from "./VolumeStory";
-import {validateLocation, validateVolumeType} from "../util/application-validators";
-import {validateLibraryId} from "../util/async-validators";
+import {validateVolumeLocation, validateVolumeType} from "../util/ApplicationValidators";
+import {validateLibraryId} from "../util/AsyncValidators";
 import {BadRequest} from "../util/http-errors";
 
 // Public Objects ------------------------------------------------------------
@@ -31,7 +31,7 @@ import {BadRequest} from "../util/http-errors";
             }
         },
         isValidLocation: function(this: Volume): void {
-            if (!validateLocation(this.location)) {
+            if (!validateVolumeLocation(this.location)) {
                 throw new BadRequest(`location: Invalid location '${this.location}'`);
             }
         },

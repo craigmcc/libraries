@@ -20,10 +20,7 @@ import AuthorStory from "./AuthorStory";
 import AuthorVolume from "./AuthorVolume";
 import Library from "./Library";
 import Volume from "./Volume";
-import {
-    validateAuthorNameUnique,
-    validateLibraryId
-} from "../util/async-validators";
+import {validateAuthorNameUnique, validateLibraryId} from "../util/AsyncValidators";
 import {BadRequest} from "../util/http-errors";
 import Story from "./Story";
 import Series from "./Series";
