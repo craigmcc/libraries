@@ -25,9 +25,9 @@ import {BadRequest} from "../util/http-errors";
     tableName: "volumes",
     validate: {
         isLibraryIdValid: async function(this: Volume): Promise<void> {
-            if (!(await validateLibraryId(this.library_id))) {
+            if (!(await validateLibraryId(this.libraryId))) {
                 throw new BadRequest
-                (`library_id: Invalid library_id ${this.library_id}`);
+                    (`library_id: Invalid library_id ${this.libraryId}`);
             }
         },
         isValidLocation: function(this: Volume): void {
@@ -72,7 +72,7 @@ export class Volume extends AbstractModel<Volume> {
         field: "google_id",
         type: DataType.STRING,
     })
-    google_id?: string;
+    googleId?: string;
 
     @Column({
         allowNull: true,
@@ -96,7 +96,7 @@ export class Volume extends AbstractModel<Volume> {
             }
         },
     })
-    library_id!: number;
+    libraryId!: number;
 
     @Column({
         allowNull: true,

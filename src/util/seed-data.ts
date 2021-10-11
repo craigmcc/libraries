@@ -36,24 +36,24 @@ export const LIBRARIES: Partial<Library>[] = [
 // For FIRST_LIBRARY (library_id to be interpolated)
 export const AUTHORS_LIBRARY0: Partial<Author>[] = [
     {
-        "first_name": "Fred",
-        "last_name": "Flintstone",
+        firstName: "Fred",
+        lastName: "Flintstone",
     },
     {
-        "first_name": "Wilma",
-        "last_name": "Flintstone",
+        firstName: "Wilma",
+        lastName: "Flintstone",
     },
 ];
 
 // For SECOND_LIBRARY (library_id to be interpolated)
 export const AUTHORS_LIBRARY1: Partial<Author>[] = [
     {
-        "first_name": "Barney",
-        "last_name": "Rubble",
+        firstName: "Barney",
+        lastName: "Rubble",
     },
     {
-        "first_name": "Betty",
-        "last_name": "Rubble",
+        firstName: "Betty",
+        lastName: "Rubble",
     },
 ];
 

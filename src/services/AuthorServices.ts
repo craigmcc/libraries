@@ -76,7 +76,7 @@ export class AuthorServices {
         let transaction;
         try {
             transaction = await Database.transaction();
-            author.library_id = libraryId; // No cheating
+            author.libraryId = libraryId; // No cheating
             const inserted = await Author.create(author, {
                 fields: fields,
                 transaction: transaction
@@ -134,7 +134,7 @@ export class AuthorServices {
         try {
             transaction = await Database.transaction();
             author.id = authorId; // No cheating
-            author.library_id = libraryId; // No cheating
+            author.libraryId = libraryId; // No cheating
             let result: [number, Author[]] = await Author.update(author, {
                 fields: fieldsWithId,
                 transaction: transaction,

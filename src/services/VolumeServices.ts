@@ -73,7 +73,7 @@ export class VolumeServices {
         let transaction;
         try {
             transaction = await Database.transaction();
-            volume.library_id = libraryId; // No cheating
+            volume.libraryId = libraryId; // No cheating
             const inserted = await Volume.create(volume, {
                 fields: fields,
                 transaction: transaction
@@ -131,7 +131,7 @@ export class VolumeServices {
         try {
             transaction = await Database.transaction();
             volume.id = volumeId; // No cheating
-            volume.library_id = libraryId; // No cheating
+            volume.libraryId = libraryId; // No cheating
             let result: [number, Volume[]] = await Volume.update(volume, {
                 fields: fieldsWithId,
                 transaction: transaction,

@@ -72,7 +72,7 @@ export class StoryServices {
         let transaction;
         try {
             transaction = await Database.transaction();
-            story.library_id = libraryId; // No cheating
+            story.libraryId = libraryId; // No cheating
             const inserted = await Story.create(story, {
                 fields: fields,
                 transaction: transaction
@@ -130,7 +130,7 @@ export class StoryServices {
         try {
             transaction = await Database.transaction();
             story.id = storyId; // No cheating
-            story.library_id = libraryId; // No cheating
+            story.libraryId = libraryId; // No cheating
             let result: [number, Story[]] = await Story.update(story, {
                 fields: fieldsWithId,
                 transaction: transaction,

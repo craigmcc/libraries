@@ -36,9 +36,9 @@ import SeriesStory from "./SeriesStory";
     tableName: "stories",
     validate: {
         isLibraryIdValid: async function(this: Story): Promise<void> {
-            if (!(await validateLibraryId(this.library_id))) {
+            if (!(await validateLibraryId(this.libraryId))) {
                 throw new BadRequest
-                (`library_id: Invalid library_id ${this.library_id}`);
+                    (`libraryId: Invalid library_id ${this.libraryId}`);
             }
         },
     },
@@ -83,7 +83,7 @@ export class Story extends AbstractModel<Story> {
             }
         },
     })
-    library_id!: number;
+    libraryId!: number;
 
     @Index("ix_stories_library_id_name")
     @Column({

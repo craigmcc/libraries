@@ -35,15 +35,15 @@ import AuthorSeries from "./AuthorSeries";
     tableName: "authors",
     validate: {
         isLibraryIdValid: async function(this: Author): Promise<void> {
-            if (!(await validateLibraryId(this.library_id))) {
+            if (!(await validateLibraryId(this.libraryId))) {
                 throw new BadRequest
-                    (`library_id: Invalid library_id ${this.library_id}`);
+                    (`libraryId: Invalid libraryId ${this.libraryId}`);
             }
         },
         isAuthorNameUnique: async function(this: Author): Promise<void> {
             if (!(await validateAuthorNameUnique(this))) {
                 throw new BadRequest
-                  (`name: Name '${this.first_name} ${this.last_name}' "
+                  (`name: Name '${this.firstName} ${this.lastName}' "
                     + "is already in use within this Library`);
             }
         },
@@ -75,11 +75,11 @@ export class Author extends AbstractModel<Author> {
         unique: "uniqueNameWithinLibrary",
         validate: {
             notNull: {
-                msg: "library_id: Is required"
+                msg: "libraryId: Is required"
             }
         },
     })
-    library_id!: number;
+    libraryId!: number;
 
     @Column({
         allowNull: false,
@@ -88,11 +88,11 @@ export class Author extends AbstractModel<Author> {
         unique: "uniqueNameWithinLibrary",
         validate: {
             notNull: {
-                msg: "last_name: Is required"
+                msg: "lastName: Is required"
             },
         }
     })
-    last_name!: string;
+    lastName!: string;
 
     @Column({
         allowNull: false,
@@ -101,11 +101,11 @@ export class Author extends AbstractModel<Author> {
         unique: "uniqueNameWithinLibrary",
         validate: {
             notNull: {
-                msg: "first_name: Is required"
+                msg: "firstName: Is required"
             },
         }
     })
-    first_name!: string;
+    firstName!: string;
 
     @Column({
         allowNull: true,

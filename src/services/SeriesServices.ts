@@ -73,7 +73,7 @@ export class SeriesServices {
         let transaction;
         try {
             transaction = await Database.transaction();
-            series.library_id = libraryId; // No cheating
+            series.libraryId = libraryId; // No cheating
             const inserted = await Series.create(series, {
                 fields: fields,
                 transaction: transaction
@@ -131,7 +131,7 @@ export class SeriesServices {
         try {
             transaction = await Database.transaction();
             series.id = seriesId; // No cheating
-            series.library_id = libraryId; // No cheating
+            series.libraryId = libraryId; // No cheating
             let result: [number, Series[]] = await Series.update(series, {
                 fields: fieldsWithId,
                 transaction: transaction,

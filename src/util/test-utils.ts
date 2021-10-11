@@ -92,7 +92,7 @@ const reloadAuthors
 {
 //    console.info(`Reloading Authors for Library: ${JSON.stringify(library)}`);
     authors.forEach(author => {
-        author.library_id = library.id;
+        author.libraryId = library.id;
     });
     let results: Author[] = [];
     try {
@@ -143,7 +143,7 @@ const reloadSeries
 {
 //    console.info(`Reloading Series for Library: ${JSON.stringify(library)}`);
     series.forEach(aSeries => {
-        aSeries.library_id = library.id;
+        aSeries.libraryId = library.id;
     });
     let results: Series[] = [];
     try {
@@ -171,7 +171,7 @@ const reloadStories
 {
 //    console.info(`Reloading Stories for Library: ${JSON.stringify(library)}`);
     stories.forEach(story => {
-        story.library_id = library.id;
+        story.libraryId = library.id;
     });
     let results: Story[] = [];
     try {
@@ -208,7 +208,7 @@ const reloadVolumes
 {
 //    console.info(`Reloading Volumes for Library: ${JSON.stringify(library)}`);
     volumes.forEach(volume => {
-        volume.library_id = library.id;
+        volume.libraryId = library.id;
     });
     let results: Volume[] = [];
     try {

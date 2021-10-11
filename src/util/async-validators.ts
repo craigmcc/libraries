@@ -18,14 +18,14 @@ import User from "../models/User";
 // Public Objects ------------------------------------------------------------
 
 export const validateAuthorId
-    = async (library_id: number, author_id: number | undefined): Promise<boolean> =>
+    = async (libraryId: number, authorId: number | undefined): Promise<boolean> =>
 {
-    if (author_id) {
-        const author = await Author.findByPk(author_id);
+    if (authorId) {
+        const author = await Author.findByPk(authorId);
         if (!author) {
             return false;
         } else {
-            return author.library_id === library_id;
+            return author.libraryId === libraryId;
         }
     } else {
         return true;
@@ -38,9 +38,9 @@ export const validateAuthorNameUnique
     if (author) {
         let options: any = {
             where: {
-                first_name: author.first_name,
-                last_name: author.last_name,
-                library_id: author.library_id,
+                first_name: author.firstName,
+                last_name: author.lastName,
+                library_id: author.libraryId,
             }
         }
         if (author.id) {
