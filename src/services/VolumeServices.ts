@@ -15,7 +15,7 @@ import Story from "../models/Story";
 import Volume from "../models/Volume";
 import VolumeStory from "../models/VolumeStory";
 import * as SortOrder from "../models/SortOrder";
-import {NotFound} from "../util/http-errors";
+import {NotFound} from "../util/HttpErrors";
 import {appendQuery, appendQueryWithName, appendQueryWithNames} from "../util/query-parameters";
 import logger from "../util/server-logger";
 

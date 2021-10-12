@@ -14,7 +14,7 @@ import Series from "./Series";
 import Story from "./Story";
 import Volume from "./Volume";
 import {validateLibraryNameUnique, validateLibraryScopeUnique} from "../util/AsyncValidators";
-import {BadRequest} from "../util/http-errors";
+import {BadRequest} from "../util/HttpErrors";
 
 // Public Objects ------------------------------------------------------------
 

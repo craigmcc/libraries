@@ -20,7 +20,7 @@ import {
     handleHttpError,
     handleServerError,
     handleValidationError
-} from "../util/middleware";
+} from "../util/Middleware";
 import logger from "../util/server-logger";
 import { toLocalISO } from "../util/timestamps";
 import OpenApiRouter from "./OpenApiRouter";

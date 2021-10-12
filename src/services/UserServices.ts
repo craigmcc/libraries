@@ -13,7 +13,7 @@ import Database from "../models/Database";
 import User from "../models/User";
 import * as SortOrder from "../models/SortOrder";
 import {hashPassword} from "../oauth/oauth-utils";
-import {NotFound} from "../util/http-errors";
+import {NotFound} from "../util/HttpErrors";
 import {appendPagination} from "../util/query-parameters";
 
 // Public Classes ------------------------------------------------------------

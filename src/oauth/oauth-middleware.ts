@@ -17,7 +17,7 @@ import {
 // Internal Modules ----------------------------------------------------------
 
 import {OAuthOrchestrator} from "../server";
-import {Forbidden} from "../util/http-errors";
+import {Forbidden} from "../util/HttpErrors";
 import logger from "../util/server-logger";
 
 const AUTHORIZATION_HEADER = "Authorization";

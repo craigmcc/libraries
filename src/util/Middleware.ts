@@ -11,7 +11,7 @@ const SequelizeValidationError = require("sequelize");
 
 // Internal Modules ----------------------------------------------------------
 
-import { HttpError } from "./http-errors";
+import { HttpError } from "./HttpErrors";
 
 // Public Functions -----------------------------------------------------------
 

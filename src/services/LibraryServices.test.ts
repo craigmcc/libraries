@@ -9,11 +9,9 @@ const expect = chai.expect;
 
 // Internal Modules ----------------------------------------------------------
 
-import {BadRequest, NotFound} from "../util/http-errors";
+import {BadRequest, NotFound} from "../util/HttpErrors";
 import * as SeedData from "../util/seed-data";
-import {
-    reloadTestData
-} from "../util/test-utils";
+import {reloadTestData} from "../util/test-utils";
 import LibraryServices from "./LibraryServices";
 
 // Test Specifications ------------------------------------------------------

@@ -8,7 +8,6 @@ import {Op} from "sequelize";
 
 // Internal Modules ----------------------------------------------------------
 
-import {NotFound} from "./http-errors";
 import * as SeedData from "./seed-data";
 import Author from "../models/Author";
 import Database from "../models/Database";
@@ -17,8 +16,9 @@ import Series from "../models/Series";
 import Story from "../models/Story";
 import Volume from "../models/Volume";
 import SeriesStory from "../models/SeriesStory";
-import {hashPassword} from "../oauth/oauth-utils";
 import User from "../models/User";
+import {hashPassword} from "../oauth/oauth-utils";
+import {NotFound} from "./HttpErrors";
 
 // Public Objects ------------------------------------------------------------
 

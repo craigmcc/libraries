@@ -8,7 +8,7 @@
 
 // Public Objects ------------------------------------------------------------
 
-import {NotUnique} from "../util/http-errors";
+import {NotUnique} from "../util/HttpErrors";
 
 export class OAuthAccessToken {
 

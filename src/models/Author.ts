@@ -16,15 +16,15 @@ import {
 // Internal Modules ----------------------------------------------------------
 
 import AbstractModel from "./AbstractModel";
+import AuthorSeries from "./AuthorSeries";
 import AuthorStory from "./AuthorStory";
 import AuthorVolume from "./AuthorVolume";
 import Library from "./Library";
+import Series from "./Series";
+import Story from "./Story";
 import Volume from "./Volume";
 import {validateAuthorNameUnique, validateLibraryId} from "../util/AsyncValidators";
-import {BadRequest} from "../util/http-errors";
-import Story from "./Story";
-import Series from "./Series";
-import AuthorSeries from "./AuthorSeries";
+import {BadRequest} from "../util/HttpErrors";
 
 // Public Objects ------------------------------------------------------------
 

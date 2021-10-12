@@ -17,7 +17,7 @@ import Story from "./Story";
 import VolumeStory from "./VolumeStory";
 import {validateVolumeLocation, validateVolumeType} from "../util/ApplicationValidators";
 import {validateLibraryId} from "../util/AsyncValidators";
-import {BadRequest} from "../util/http-errors";
+import {BadRequest} from "../util/HttpErrors";
 
 // Public Objects ------------------------------------------------------------
 
