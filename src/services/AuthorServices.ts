@@ -572,6 +572,31 @@ export class AuthorServices implements AbstractChildServices<Author>{
         return options;
     }
 
+    /**
+     * Find and return the specified Author.
+     * @param context                   Call context for errors
+     * @param libraryId                 ID of owning Library
+     * @param authorId                  ID of requested Author
+     * @param query                     Optional include query parameters
+     */
+    public async findAuthor(context: string, libraryId: number, authorId: number, query?: any): Promise<Author> {
+        const options: FindOptions = this.appendIncludeOptions({
+            where: {
+                id: authorId,
+                libraryId: libraryId,
+            }
+        }, query);
+        const author = await Author.findOne(options);
+        if (author) {
+            return author;
+        } else {
+            throw new NotFound(
+                `authorId: Missing Author ${authorId}`,
+                context
+            )
+        }
+    }
+
 }
 
 export default new AuthorServices();
@@ -580,9 +605,9 @@ export default new AuthorServices();
 
 const FIELDS: string[] = [
     "active",
-    "first_name",
-    "last_name",
-    "library_id",
+    "firstName",
+    "lastName",
+    "libraryId",
     "notes",
 ];
 

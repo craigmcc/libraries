@@ -4,22 +4,22 @@
 
 // External Modules ----------------------------------------------------------
 
-import {FindOptions, Op} from "sequelize";
+import {FindOptions, Op, ValidationError} from "sequelize";
 
 // Internal Modules ----------------------------------------------------------
 
 import AbstractChildServices from "./AbstractChildServices";
 import AuthorServices from "./AuthorServices";
+import LibraryServices from "./LibraryServices";
 import StoryServices from "./StoryServices";
 import Author from "../models/Author";
-import Database from "../models/Database";
 import Library from "../models/Library";
 import Series from "../models/Series";
 import SeriesStory from "../models/SeriesStory";
 import * as SortOrder from "../models/SortOrder";
 import Story from "../models/Story";
-import {NotFound} from "../util/HttpErrors";
-import {appendPaginationOptions, appendQuery, appendQueryWithName, appendQueryWithNames} from "../util/QueryParameters";
+import {BadRequest, NotFound, ServerError} from "../util/HttpErrors";
+import {appendPaginationOptions} from "../util/QueryParameters";
 
 // Public Objects ------------------------------------------------------------
 
@@ -28,171 +28,101 @@ export class SeriesServices implements AbstractChildServices<Series> {
     // Standard CRUD Methods -------------------------------------------------
 
     public async all(libraryId: number, query?: any): Promise<Series[]> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "SeriesServices.all"
-            );
-        }
-        let options: FindOptions = appendQueryWithName({
+        const library = await LibraryServices.findLibrary("SeriesServices.all", libraryId);
+        const options: FindOptions = this.appendMatchOptions({
             order: SortOrder.SERIES,
         }, query);
         return await library.$get("series", options);
     }
 
     public async find(libraryId: number, seriesId: number, query?: any): Promise<Series> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "SeriesServices.find"
-            );
-        }
-        let options: FindOptions = appendQuery({
-            where: {
-                id: seriesId,
-            }
-        }, query);
-        let results = await library.$get("series", options);
-        if (results.length === 1) {
-            return results[0];
-        } else {
-            throw new NotFound(
-                `seriesId: Missing Series ${seriesId}`,
-                "SeriesServices.find");
-        }
+        return await this.findSeries("SeriesServices.find", libraryId, seriesId, query);
     }
 
     public async insert(libraryId: number, series: Series): Promise<Series> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "SeriesServices.insert"
-            );
-        }
-        let transaction;
+        const library = await LibraryServices.findLibrary("SeriesServices.insert", libraryId);
         try {
-            transaction = await Database.transaction();
             series.libraryId = libraryId; // No cheating
-            const inserted = await Series.create(series, {
-                fields: fields,
-                transaction: transaction
+            return await Series.create(series, {
+                fields: FIELDS,
             });
-            await transaction.commit();
-            return inserted;
         } catch (error) {
-            if (transaction) {
-                await transaction.rollback();
+            if (error instanceof ValidationError) {
+                throw new BadRequest(
+                    error,
+                    "SeriesServices.insert"
+                );
+            } else {
+                throw new ServerError(
+                    error as Error,
+                    "SeriesServices.insert"
+                );
             }
-            throw error;
         }
     }
 
     public async remove(libraryId: number, seriesId: number): Promise<Series> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "SeriesServices.remove"
-            );
-        }
-        const options = {
-            where: {
-                id: seriesId,
-                library_id: libraryId
-            }
-        }
-        let removed = await Series.findOne(options);
-        if (!removed) {
-            throw new NotFound(
-                `seriesId: Missing Series ${seriesId}`,
-                "SeriesServices.remove");
-        }
-        let count = await Series.destroy({
-            where: { id: seriesId }
+        const library = await LibraryServices.findLibrary("SeriesServices.remove", libraryId);
+        const series = await this.findSeries("SeriesServices.remove", libraryId, seriesId);
+        await Series.destroy({
+            where: { id: seriesId },
         });
-        if (count < 1) {
-            throw new NotFound(
-                `seriesId: Cannot remove Series ${seriesId}`,
-                "SeriesServices.remove");
-        }
-        return removed;
+        return series;
     }
 
     public async update(libraryId: number, seriesId: number, series: Series): Promise<Series> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "SeriesServices.update"
-            );
-        }
-        let transaction;
+        const library = await LibraryServices.findLibrary("SeriesServices.update", libraryId);
         try {
-            transaction = await Database.transaction();
-            series.id = seriesId; // No cheating
             series.libraryId = libraryId; // No cheating
-            let result: [number, Series[]] = await Series.update(series, {
-                fields: fieldsWithId,
-                transaction: transaction,
+            const results = await Series.update(series, {
+                fields: FIELDS_WITH_ID,
+                returning: true,
                 where: {
                     id: seriesId,
-                    library_id: libraryId
-                }
+                    libraryId: libraryId,
+                },
             });
-            if (result[0] < 1) {
+            if (results[0] < 1) {
                 throw new NotFound(
-                    `seriesId: Cannot update Series ${seriesId}`,
-                    "SeriesServices.update");
+                    `seriesId: Missing Series ${seriesId}`,
+                    "SeriesServices.update",
+                );
             }
-            await transaction.commit();
-            transaction = null;
-            return await this.find(libraryId, seriesId);
+            return results[1][0];
         } catch (error) {
-            if (transaction) {
-                await transaction.rollback();
+            if (error instanceof NotFound) {
+                throw error;
+            } else if (error instanceof ValidationError) {
+                throw new BadRequest(
+                    error,
+                    "AuthorServices.update"
+                );
+            } else {
+                throw new ServerError(
+                    error as Error,
+                    "AuthorServices.update"
+                );
             }
-            throw error;
         }
     }
 
     // Model-Specific Methods ------------------------------------------------
 
-    // ***** Series Lookups *****
-
-    public async active(libraryId: number, query?: any): Promise<Series[]> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "SeriesServices.active"
-            );
-        }
-        let options: FindOptions = appendQuery({
-            order: SortOrder.STORIES,
-            where: {
-                active: true,
-            }
+    public async authors(libraryId: number, seriesId: number, query?: any): Promise<Author[]> {
+        const library = await LibraryServices.findLibrary("SeriesServices.authors", libraryId);
+        const series = await this.findSeries("SeriesServices.authors", libraryId, seriesId);
+        const options: FindOptions = AuthorServices.appendMatchOptions({
+            order: SortOrder.AUTHORS,
         }, query);
-        return await library.$get("series", options);
+        return await series.$get("authors", options);
     }
 
     public async exact(libraryId: number, name: string, query?: any): Promise<Series> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "SeriesServices.exact"
-            );
-        }
-        let options: FindOptions = appendQuery({
-            where: {
-                name: name
-            }
+        const library = await LibraryServices.findLibrary("SeriesServices.exact", libraryId);
+        const options: FindOptions = this.appendIncludeOptions({
+            where: { name: name }
         }, query);
-        let results = await library.$get("series", options);
+        const results = await library.$get("series", options);
         if (results.length !== 1) {
             throw new NotFound(
                 `name: Missing Series '${name}'`,
@@ -201,157 +131,35 @@ export class SeriesServices implements AbstractChildServices<Series> {
         return results[0];
     }
 
-    public async name(libraryId: number, name: string, query?: any): Promise<Series[]> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "SeriesServices.name"
-            );
-        }
-        const names = name.trim().split(" ");
-        let options: FindOptions = {};
-        options = appendQuery({
-            order: SortOrder.SERIES,
-            where: {
-                name: {[Op.iLike]: `%${name}%`}
-            },
-        }, query);
-        return await library.$get("series", options);
-    }
-
-    // ***** Series-Author Relationships *****
-
-    public async authors(libraryId: number, seriesId: number, query?: any): Promise<Author[]> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "SeriesServices.authors"
-            );
-        }
-        const series = await Series.findOne({
-            where: {
-                id: seriesId,
-                library_id: libraryId,
-            }
-        })
-        if (!series) {
-            throw new NotFound(
-                `seriesId: Missing Series ${seriesId}`,
-                "SeriesServices.authors"
-            );
-        }
-        let options: FindOptions = appendQueryWithNames({
-            order: SortOrder.AUTHORS,
-        }, query);
-        return await series.$get("authors", options);
-    }
-
-    // ***** Series-Story Relationships *****
-
     public async stories(libraryId: number, seriesId: number, query?: any): Promise<Story[]> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "SeriesServices.stories"
-            );
-        }
-        const series = await Series.findOne({
-            where: {
-                id: seriesId,
-                library_id: libraryId,
-            }
-        })
-        if (!series) {
-            throw new NotFound(
-                `seriesId: Missing Series ${seriesId}`,
-                "SeriesServices.stories"
-            );
-        }
-        let options: FindOptions = appendQueryWithName({
-            order: SortOrder.VOLUMES,
+        const library = await LibraryServices.findLibrary("SeriesServices.stories", libraryId);
+        const series = await this.findSeries("SeriesServices.stories", libraryId, seriesId);
+        const options: FindOptions = AuthorServices.appendMatchOptions({
+            order: SortOrder.AUTHORS,
         }, query);
         return await series.$get("stories", options);
     }
 
     public async storiesExclude(libraryId: number, seriesId: number, storyId: number): Promise<Story> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "SeriesServices.storiesExclude"
-            );
-        }
-        const series = await Series.findOne({
-            where: {
-                id: seriesId,
-                library_id: libraryId
-            }
-        })
-        if (!series) {
-            throw new NotFound(
-                `seriesId: Missing Series ${seriesId}`,
-                "SeriesServices.storiesExclude"
-            );
-        }
-        const story = await Story.findOne({
-            where: {
-                id: storyId,
-                library_id: libraryId
-            }
-        })
-        if (!story) {
-            throw new NotFound(
-                `storyId: Missing Story ${storyId}`,
-                "SeriesServices.storiesExclude"
-            );
-        }
+        await LibraryServices.findLibrary("SeriesServices.storiesExclude", libraryId);
+        await this.findSeries("SeriesServices.storiesExclude", libraryId, seriesId);
+        const story = await StoryServices.findStory("SeriesServices.storiesExclude", libraryId, storyId);
         await SeriesStory.destroy({
             where: {
-                series_id: seriesId,
-                story_id: storyId
+                seriesId: seriesId,
+                storyId: storyId,
             }
         });
         return story;
     }
 
     public async storiesInclude(libraryId: number, seriesId: number, storyId: number, ordinal: number | null): Promise<Story> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "SeriesServices.storiesInclude"
-            );
-        }
-        const series = await Series.findOne({
-            where: {
-                id: seriesId,
-                library_id: libraryId
-            }
-        })
-        if (!series) {
-            throw new NotFound(
-                `seriesId: Missing Series ${seriesId}`,
-                "SeriesServices.storiesInclude"
-            );
-        }
-        const story = await Story.findOne({
-            where: {
-                id: storyId,
-                library_id: libraryId
-            }
-        })
-        if (!story) {
-            throw new NotFound(
-                `storyId: Missing Story ${storyId}`,
-                "SeriesServices.storiesInclude"
-            );
-        }
+        await Library.findByPk(libraryId);
+        await this.findSeries("SeriesServices.storiesExclude", libraryId, seriesId);
+        const story = await StoryServices.findStory("SeriesServices.storiesExclude", libraryId, storyId);
         await SeriesStory.create({
-            series_id: seriesId,
-            story_id: storyId,
+            seriesId: seriesId,
+            storyId: storyId,
             ordinal: ordinal,
         });
         return story;
@@ -409,21 +217,46 @@ export class SeriesServices implements AbstractChildServices<Series> {
         return options;
     }
 
+    /**
+     * Find and return the specified Series.
+     * @param context                   Call context for errors
+     * @param libraryId                 ID of owning Library
+     * @param seriesId                  ID of requested Series
+     * @param query                     Optional include query parameters
+     */
+    public async findSeries(context: string, libraryId: number, seriesId: number, query?: any): Promise<Series> {
+        const options: FindOptions = this.appendIncludeOptions({
+            where: {
+                id: seriesId,
+                libraryId: libraryId,
+            }
+        }, query);
+        const series = await Series.findOne(options);
+        if (series) {
+            return series;
+        } else {
+            throw new NotFound(
+                `seriesId: Missing Series ${seriesId}`,
+                context
+            )
+        }
+    }
+
 }
 
 export default new SeriesServices();
 
 // Private Objects -----------------------------------------------------------
 
-const fields: string[] = [
+const FIELDS: string[] = [
     "active",
     "copyright",
-    "library_id",
+    "libraryId",
     "name",
     "notes",
 ];
 
-const fieldsWithId: string[] = [
-    ...fields,
+const FIELDS_WITH_ID: string[] = [
+    ...FIELDS,
     "id"
 ];

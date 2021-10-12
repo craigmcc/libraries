@@ -360,6 +360,31 @@ export class StoryServices implements AbstractChildServices<Story>{
         return options;
     }
 
+    /**
+     * Find and return the specified Story.
+     * @param context                   Call context for errors
+     * @param libraryId                 ID of owning Library
+     * @param storyId                   ID of requested Story
+     * @param query                     Optional include query parameters
+     */
+    public async findStory(context: string, libraryId: number, storyId: number, query?: any): Promise<Story> {
+        const options: FindOptions = this.appendIncludeOptions({
+            where: {
+                id: storyId,
+                libraryId: libraryId,
+            }
+        }, query);
+        const story = await Story.findOne(options);
+        if (story) {
+            return story;
+        } else {
+            throw new NotFound(
+                `storyId: Missing Story ${storyId}`,
+                context
+            )
+        }
+    }
+
 }
 
 export default new StoryServices();
@@ -369,7 +394,7 @@ export default new StoryServices();
 const fields: string[] = [
     "active",
     "copyright",
-    "library_id",
+    "libraryId",
     "name",
     "notes",
 ];

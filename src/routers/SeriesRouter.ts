@@ -24,32 +24,11 @@ export default SeriesRouter;
 
 // Model-Specific Routes (no seriesId) ---------------------------------------
 
-// GET /:libraryId/active - Find active Series
-SeriesRouter.get("/:libraryId/active",
-    requireRegular,
-    async (req: Request, res: Response) => {
-        res.send(await SeriesServices.active(
-            parseInt(req.params.libraryId, 10),
-            req.query
-        ));
-    });
-
 // GET /:libraryId/exact/:name - Find Series by exact name
 SeriesRouter.get("/:libraryId/exact/:name",
     requireRegular,
     async (req: Request, res: Response) => {
         res.send(await SeriesServices.exact(
-            parseInt(req.params.libraryId, 10),
-            req.params.name,
-            req.query
-        ));
-    });
-
-// GET /:libraryId/name/:name - Find Series by name match
-SeriesRouter.get("/:libraryId/name/:name",
-    requireRegular,
-    async (req: Request, res: Response) => {
-        res.send(await SeriesServices.name(
             parseInt(req.params.libraryId, 10),
             req.params.name,
             req.query

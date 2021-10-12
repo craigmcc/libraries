@@ -36,17 +36,7 @@ export class LibraryServices extends AbstractParentServices<Library> {
     }
 
     public async find(libraryId: number, query?: any): Promise<Library> {
-        let options: FindOptions = this.appendIncludeOptions({
-            where: { id: libraryId }
-        }, query);
-        let results = await Library.findAll(options);
-        if (results.length === 1) {
-            return results[0];
-        } else {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "LibraryServices.find");
-        }
+        return await this.findLibrary("LibraryServices.find", libraryId, query);
     }
 
     public async insert(library: Library): Promise<Library> {
@@ -70,16 +60,11 @@ export class LibraryServices extends AbstractParentServices<Library> {
     }
 
     public async remove(libraryId: number): Promise<Library> {
-        let removed = await Library.findByPk(libraryId);
-        if (!removed) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "LibraryServices.remove");
-        }
+        const library = await this.findLibrary("LibraryServices.remove", libraryId);
         await Library.destroy({
             where: { id: libraryId }
         });
-        return removed;
+        return library;
     }
 
     public async update(libraryId: number, library: Library): Promise<Library> {
@@ -117,13 +102,7 @@ export class LibraryServices extends AbstractParentServices<Library> {
     // Model-Specific Methods ------------------------------------------------
 
     public async authors(libraryId: number, query?: any): Promise<Author[]> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "LibraryServices.authors"
-            );
-        }
+        const library = await this.findLibrary("LibraryServices.authors", libraryId);
         const options: FindOptions = AuthorServices.appendMatchOptions({
             order: SortOrder.AUTHORS,
         }, query);
@@ -146,42 +125,24 @@ export class LibraryServices extends AbstractParentServices<Library> {
     }
 
     public async series(libraryId: number, query?: any): Promise<Series[]> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "LibraryServices.series"
-            );
-        }
-        let options: FindOptions = SeriesServices.appendMatchOptions({
+        const library = await this.findLibrary("LibraryServices.series", libraryId);
+        const options: FindOptions = SeriesServices.appendMatchOptions({
             order: SortOrder.SERIES,
         }, query);
         return await library.$get("series", options);
     }
 
     public async stories(libraryId: number, query?: any): Promise<Story[]> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "LibraryServices.stories"
-            );
-        }
-        let options: FindOptions = StoryServices.appendMatchOptions({
+        const library = await this.findLibrary("LibraryServices.stories", libraryId);
+        const options: FindOptions = StoryServices.appendMatchOptions({
             order: SortOrder.STORIES,
         }, query);
         return await library.$get("stories", options);
     }
 
     public async volumes(libraryId: number, query?: any): Promise<Volume[]> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "LibraryServices.volumes"
-            );
-        }
-        let options: FindOptions = VolumeServices.appendMatchOptions({
+        const library = await this.findLibrary("LibraryServices.volumes", libraryId);
+        const options: FindOptions = VolumeServices.appendMatchOptions({
             order: SortOrder.VOLUMES,
         }, query);
         return await library.$get("volumes", options);
@@ -242,6 +203,26 @@ export class LibraryServices extends AbstractParentServices<Library> {
             where.scope = query.scope;
         }
         return options;
+    }
+
+    /**
+     * Find and return the requested Library.
+     * @param context                   Call context for errors
+     * @param libraryId                 ID of requested Library
+     * @param query                     Optional include query parameters
+     */
+    public async findLibrary(context: string, libraryId: number, query?: any): Promise<Library> {
+        const options: FindOptions = this.appendIncludeOptions({
+            where: { id: libraryId }
+        }, query);
+        const library = await Library.findOne(options);
+        if (library) {
+            return library;
+        } else {
+            throw new NotFound(
+                `libraryId: Missing Library ${libraryId}`,
+                context);
+        }
     }
 
 }

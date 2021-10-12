@@ -421,6 +421,31 @@ export class VolumeServices {
         return options;
     }
 
+    /**
+     * Find and return the specified Volume.
+     * @param context                   Call context for errors
+     * @param libraryId                 ID of owning Library
+     * @param volumeId                  ID of requested Volume
+     * @param query                     Optional include query parameters
+     */
+    public async findVolume(context: string, libraryId: number, volumeId: number, query?: any): Promise<Volume> {
+        const options: FindOptions = this.appendIncludeOptions({
+            where: {
+                id: volumeId,
+                libraryId: libraryId,
+            }
+        }, query);
+        const volume = await Volume.findOne(options);
+        if (volume) {
+            return volume;
+        } else {
+            throw new NotFound(
+                `volumeId: Missing Volume ${volumeId}`,
+                context
+            )
+        }
+    }
+
 }
 
 export default new VolumeServices();
@@ -431,7 +456,7 @@ const fields: string[] = [
     "active",
     "copyright",
     "isbn",
-    "library_id",
+    "libraryId",
     "location",
     "name",
     "notes",
