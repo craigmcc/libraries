@@ -8,6 +8,9 @@ import {FindOptions, Op} from "sequelize";
 
 // Internal Modules ----------------------------------------------------------
 
+import AbstractChildServices from "./AbstractChildServices";
+import AuthorServices from "./AuthorServices";
+import StoryServices from "./StoryServices";
 import Author from "../models/Author";
 import Database from "../models/Database";
 import Library from "../models/Library";
@@ -16,7 +19,7 @@ import Volume from "../models/Volume";
 import VolumeStory from "../models/VolumeStory";
 import * as SortOrder from "../models/SortOrder";
 import {NotFound} from "../util/HttpErrors";
-import {appendQuery, appendQueryWithName, appendQueryWithNames} from "../util/QueryParameters";
+import {appendPaginationOptions, appendQuery, appendQueryWithName, appendQueryWithNames} from "../util/QueryParameters";
 import logger from "../util/ServerLogger";
 
 // Public Objects ------------------------------------------------------------
@@ -364,6 +367,58 @@ export class VolumeServices {
             volume_id: volumeId,
         });
         return story;
+    }
+
+    // Public Helpers --------------------------------------------------------
+
+    /**
+     * Supported include query parameters:
+     * * withAuthors                    Include related Authors
+     * * withLibrary                    Include parent Library
+     * * withStories                    Include related Stories
+     */
+    public appendIncludeOptions(options: FindOptions, query?: any): FindOptions {
+        if (!query) {
+            return options;
+        }
+        options = appendPaginationOptions(options, query);
+        const include: any = options.include ? options.include : [];
+        if ("" === query.withAuthors) {
+            include.push(Author);
+        }
+        if ("" === query.withLibrary) {
+            include.push(Library);
+        }
+        if ("" === query.withStories) {
+            include.push(Story);
+        }
+        if (include.length > 0) {
+            options.include = include;
+        }
+        return options;
+    }
+
+    /**
+     * Supported match query parameters:
+     * * active                         Select active Volumes
+     * * name={wildcard}                Select Volumes name with matching {wildcard}
+     */
+    public appendMatchOptions(options: FindOptions, query?: any): FindOptions {
+        options = this.appendIncludeOptions(options, query);
+        if (!query) {
+            return options;
+        }
+        const where: any = options.where ? options.where : {};
+        if ("" === query.active) {
+            where.active = true;
+        }
+        if (query.name) {
+            where.name = { [Op.iLike]: `%${query.name}%` };
+        }
+        if (Object.keys(where).length > 0) {
+            options.where = where;
+        }
+        return options;
     }
 
 }

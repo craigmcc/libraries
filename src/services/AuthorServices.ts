@@ -4,27 +4,29 @@
 
 // External Modules ----------------------------------------------------------
 
-import {FindOptions, Op} from "sequelize";
+import {FindOptions, Op, ValidationError} from "sequelize";
 
 // Internal Modules ----------------------------------------------------------
 
+import AbstractChildServices from "./AbstractChildServices";
+import SeriesServices from "./SeriesServices";
+import StoryServices from "./StoryServices";
+import VolumeServices from "./VolumeServices";
 import Author from "../models/Author";
 import AuthorSeries from "../models/AuthorSeries";
 import AuthorStory from "../models/AuthorStory";
 import AuthorVolume from "../models/AuthorVolume";
-import Database from "../models/Database";
 import Library from "../models/Library";
 import Series from "../models/Series";
 import * as SortOrder from "../models/SortOrder";
 import Story from "../models/Story";
 import Volume from "../models/Volume";
-import {NotFound} from "../util/HttpErrors";
-import {appendQuery, appendQueryWithName, appendQueryWithNames} from "../util/QueryParameters";
-import logger from "../util/ServerLogger";
+import {BadRequest, NotFound, ServerError} from "../util/HttpErrors";
+import {appendPaginationOptions} from "../util/QueryParameters";
 
 // Public Objects ------------------------------------------------------------
 
-export class AuthorServices {
+export class AuthorServices implements AbstractChildServices<Author>{
 
     // Standard CRUD Methods -------------------------------------------------
 
@@ -36,7 +38,7 @@ export class AuthorServices {
                 "AuthorServices.all"
             );
         }
-        let options: FindOptions = appendQueryWithNames({
+        let options: FindOptions = this.appendMatchOptions({
             order: SortOrder.AUTHORS,
         }, query);
         return await library.$get("authors", options);
@@ -50,7 +52,7 @@ export class AuthorServices {
                 "AuthorServices.find"
             );
         }
-        let options: FindOptions = appendQuery({
+        let options: FindOptions = this.appendIncludeOptions({
             where: {
                 id: authorId,
             }
@@ -73,21 +75,23 @@ export class AuthorServices {
                 "AuthorServices.insert"
             );
         }
-        let transaction;
         try {
-            transaction = await Database.transaction();
             author.libraryId = libraryId; // No cheating
-            const inserted = await Author.create(author, {
-                fields: fields,
-                transaction: transaction
+            return await Author.create(author, {
+                fields: FIELDS,
             });
-            await transaction.commit();
-            return inserted;
         } catch (error) {
-            if (transaction) {
-                await transaction.rollback();
+            if (error instanceof ValidationError) {
+                throw new BadRequest(
+                    error,
+                    "AuthorServices.insert"
+                );
+            } else {
+                throw new ServerError(
+                    error as Error,
+                    "AuthorServices.insert"
+                );
             }
-            throw error;
         }
     }
 
@@ -99,27 +103,19 @@ export class AuthorServices {
                 "AuthorServices.remove"
             );
         }
-        const options = {
-            where: {
-                id: authorId,
-                library_id: libraryId
-            }
-        }
-        let removed = await Author.findOne(options);
-        if (!removed) {
+        const results = await library.$get("authors", {
+            where: { id: authorId },
+        });
+        if (results.length !== 1) {
             throw new NotFound(
                 `authorId: Missing Author ${authorId}`,
-                "AuthorServices.remove");
+                "AuthorServices.remove",
+            );
         }
-        let count = await Author.destroy({
-            where: { id: authorId }
+        await Author.destroy({
+            where: { id: authorId },
         });
-        if (count < 1) {
-            throw new NotFound(
-                `authorId: Cannot remove Author ${authorId}`,
-                "AuthorServices.remove");
-        }
-        return removed;
+        return results[0];
     }
 
     public async update(libraryId: number, authorId: number, author: Author): Promise<Author> {
@@ -130,55 +126,40 @@ export class AuthorServices {
                 "AuthorServices.update"
             );
         }
-        let transaction;
         try {
-            transaction = await Database.transaction();
-            author.id = authorId; // No cheating
-            author.libraryId = libraryId; // No cheating
-            let result: [number, Author[]] = await Author.update(author, {
-                fields: fieldsWithId,
-                transaction: transaction,
+            const results = await Author.update(author, {
+                fields: FIELDS_WITH_ID,
+                returning: true,
                 where: {
                     id: authorId,
-                    library_id: libraryId
-                }
+                    libraryId: libraryId,
+                },
             });
-            if (result[0] < 1) {
+            if (results[0] < 1) {
                 throw new NotFound(
-                    `authorId: Cannot update Author ${authorId}`,
-                    "AuthorServices.update");
+                    `authorId: Missing Author ${authorId}`,
+                    "AuthorServices.update",
+                );
             }
-            await transaction.commit();
-            transaction = null;
-            return await this.find(libraryId, authorId);
+            return results[1][0];
         } catch (error) {
-            if (transaction) {
-                await transaction.rollback();
+            if (error instanceof NotFound) {
+                throw error;
+            } else if (error instanceof ValidationError) {
+                throw new BadRequest(
+                    error,
+                    "AuthorServices.update"
+                );
+            } else {
+                throw new ServerError(
+                    error as Error,
+                    "AuthorServices.update"
+                );
             }
-            throw error;
         }
     }
 
     // Model-Specific Methods ------------------------------------------------
-
-    // ***** Author Lookups *****
-
-    public async active(libraryId: number, query?: any): Promise<Author[]> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "AuthorServices.active"
-            );
-        }
-        let options: FindOptions = appendQuery({
-            order: SortOrder.AUTHORS,
-            where: {
-                active: true,
-            }
-        }, query);
-        return await library.$get("authors", options);
-    }
 
     public async exact(libraryId: number, firstName: string, lastName: string, query?: any): Promise<Author> {
         const library = await Library.findByPk(libraryId);
@@ -188,13 +169,13 @@ export class AuthorServices {
                 "AuthorServices.exact"
             );
         }
-        let options: FindOptions = appendQuery({
+        let options = this.appendIncludeOptions({
             where: {
                 first_name: firstName,
                 last_name: lastName,
             }
         }, query);
-        let results = await library.$get("authors", options);
+        const results = await library.$get("authors", options);
         if (results.length !== 1) {
             throw new NotFound(
                 `name: Missing Author '${firstName} ${lastName}'`,
@@ -202,42 +183,6 @@ export class AuthorServices {
         }
         return results[0];
     }
-
-    public async name(libraryId: number, name: string, query?: any): Promise<Author[]> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "AuthorServices.name"
-            );
-        }
-        const names = name.trim().split(" ");
-        let options: FindOptions = {};
-        if (names.length < 2) {
-            options = appendQuery({
-                order: SortOrder.AUTHORS,
-                where: {
-                    [Op.or]: {
-                        first_name: {[Op.iLike]: `%${names[0]}%`},
-                        last_name: {[Op.iLike]: `%${names[0]}%`},
-                    }
-                },
-            }, query);
-        } else {
-            options = appendQuery({
-                order: SortOrder.AUTHORS,
-                where: {
-                    [Op.and]: {
-                        first_name: {[Op.iLike]: `%${names[0]}%`},
-                        last_name: {[Op.iLike]: `%${names[1]}%`},
-                    }
-                },
-            }, query);
-        }
-        return await library.$get("authors", options);
-    }
-
-    // ***** Author-Series Relationships *****
 
     public async series(libraryId: number, authorId: number, query?: any): Promise<Series[]> {
         const library = await Library.findByPk(libraryId);
@@ -250,7 +195,7 @@ export class AuthorServices {
         const author = await Author.findOne({
             where: {
                 id: authorId,
-                library_id: libraryId
+                libraryId: libraryId
             }
         })
         if (!author) {
@@ -259,19 +204,13 @@ export class AuthorServices {
                 "AuthorServices.series"
             );
         }
-        let options: FindOptions = appendQueryWithName({
+        let options: FindOptions = SeriesServices.appendMatchOptions({
             order: SortOrder.SERIES,
         }, query);
         return await author.$get("series", options);
     }
 
     public async seriesExclude(libraryId: number, authorId: number, seriesId: number): Promise<Series> {
-        logger.info({
-            context: "AuthorServices.seriesExclude",
-            libraryId: libraryId,
-            authorId: authorId,
-            seriesId: seriesId,
-        });
         const library = await Library.findByPk(libraryId);
         if (!library) {
             throw new NotFound(
@@ -282,7 +221,7 @@ export class AuthorServices {
         const author = await Author.findOne({
             where: {
                 id: authorId,
-                library_id: libraryId
+                libraryId: libraryId
             }
         })
         if (!author) {
@@ -294,7 +233,7 @@ export class AuthorServices {
         const series = await Series.findOne({
             where: {
                 id: seriesId,
-                library_id: libraryId
+                libraryId: libraryId
             }
         })
         if (!series) {
@@ -305,21 +244,14 @@ export class AuthorServices {
         }
         await AuthorSeries.destroy({
             where: {
-                author_id: authorId,
-                series_id: seriesId
+                authorId: authorId,
+                seriesId: seriesId
             }
         });
         return series;
     }
 
     public async seriesInclude(libraryId: number, authorId: number, seriesId: number, principal: boolean | null): Promise<Series> {
-        logger.info({
-            context: "AuthorServices.seriesInclude",
-            libraryId: libraryId,
-            authorId: authorId,
-            seriesId: seriesId,
-            principal: principal,
-        });
         const library = await Library.findByPk(libraryId);
         if (!library) {
             throw new NotFound(
@@ -330,7 +262,7 @@ export class AuthorServices {
         const author = await Author.findOne({
             where: {
                 id: authorId,
-                library_id: libraryId
+                libraryId: libraryId
             }
         })
         if (!author) {
@@ -342,7 +274,7 @@ export class AuthorServices {
         const series = await Series.findOne({
             where: {
                 id: seriesId,
-                library_id: libraryId
+                libraryId: libraryId
             }
         })
         if (!series) {
@@ -352,14 +284,12 @@ export class AuthorServices {
             );
         }
         await AuthorSeries.create({
-            author_id: authorId,
-            series_id: seriesId,
+            authorId: authorId,
+            seriesId: seriesId,
             principal: principal ? true : false,
         });
         return series;
     }
-
-    // ***** Author-Story Relationships *****
 
     public async stories(libraryId: number, authorId: number, query?: any): Promise<Story[]> {
         const library = await Library.findByPk(libraryId);
@@ -372,7 +302,7 @@ export class AuthorServices {
         const author = await Author.findOne({
             where: {
                 id: authorId,
-                library_id: libraryId
+                libraryId: libraryId
             }
         })
         if (!author) {
@@ -381,19 +311,13 @@ export class AuthorServices {
                 "AuthorServices.stories"
             );
         }
-        let options: FindOptions = appendQueryWithName({
+        let options: FindOptions = StoryServices.appendMatchOptions({
             order: SortOrder.STORIES,
         }, query);
         return await author.$get("stories", options);
     }
 
     public async storiesExclude(libraryId: number, authorId: number, storyId: number): Promise<Story> {
-        logger.info({
-            context: "AuthorServices.storiesExclude",
-            libraryId: libraryId,
-            authorId: authorId,
-            storyId: storyId,
-        });
         const library = await Library.findByPk(libraryId);
         if (!library) {
             throw new NotFound(
@@ -404,7 +328,7 @@ export class AuthorServices {
         const author = await Author.findOne({
             where: {
                 id: authorId,
-                library_id: libraryId
+                libraryId: libraryId
             }
         })
         if (!author) {
@@ -416,7 +340,7 @@ export class AuthorServices {
         const story = await Story.findOne({
             where: {
                 id: storyId,
-                library_id: libraryId
+                libraryId: libraryId
             }
         })
         if (!story) {
@@ -427,22 +351,15 @@ export class AuthorServices {
         }
         await AuthorStory.destroy({
             where: {
-                author_id: authorId,
-                story_id: storyId
+                authorId: authorId,
+                storyId: storyId
             }
         });
         return story;
     }
 
     public async storiesInclude(libraryId: number, authorId: number, storyId: number, principal: boolean | null): Promise<Story> {
-        logger.info({
-            context: "AuthorServices.storiesInclude",
-            libraryId: libraryId,
-            authorId: authorId,
-            storyId: storyId,
-            principal: principal,
-        });
-        const library = await Library.findByPk(libraryId);
+       const library = await Library.findByPk(libraryId);
         if (!library) {
             throw new NotFound(
                 `libraryId: Missing Library ${libraryId}`,
@@ -452,7 +369,7 @@ export class AuthorServices {
         const author = await Author.findOne({
             where: {
                 id: authorId,
-                library_id: libraryId
+                libraryId: libraryId
             }
         })
         if (!author) {
@@ -464,7 +381,7 @@ export class AuthorServices {
         const story = await Story.findOne({
             where: {
                 id: storyId,
-                library_id: libraryId
+                libraryId: libraryId
             }
         })
         if (!story) {
@@ -474,14 +391,12 @@ export class AuthorServices {
             );
         }
         await AuthorStory.create({
-            author_id: authorId,
-            story_id: storyId,
+            authorId: authorId,
+            storyId: storyId,
             principal: principal ? true : false,
         });
         return story;
     }
-
-    // ***** Author-Volume Relationships *****
 
     public async volumes(libraryId: number, authorId: number, query?: any): Promise<Volume[]> {
         const library = await Library.findByPk(libraryId);
@@ -494,7 +409,7 @@ export class AuthorServices {
         const author = await Author.findOne({
             where: {
                 id: authorId,
-                library_id: libraryId
+                libraryId: libraryId
             }
         })
         if (!author) {
@@ -503,7 +418,7 @@ export class AuthorServices {
                 "AuthorServices.volumes"
             );
         }
-        let options: FindOptions = appendQueryWithName({
+        let options: FindOptions = VolumeServices.appendMatchOptions({
             order: SortOrder.VOLUMES,
         }, query);
         return await author.$get("volumes", options);
@@ -520,7 +435,7 @@ export class AuthorServices {
         const author = await Author.findOne({
             where: {
                 id: authorId,
-                library_id: libraryId
+                libraryId: libraryId
             }
         })
         if (!author) {
@@ -532,7 +447,7 @@ export class AuthorServices {
         const volume = await Volume.findOne({
             where: {
                 id: volumeId,
-                library_id: libraryId
+                libraryId: libraryId
             }
         })
         if (!volume) {
@@ -543,21 +458,14 @@ export class AuthorServices {
         }
         await AuthorVolume.destroy({
             where: {
-                author_id: authorId,
-                volume_id: volumeId
+                authorId: authorId,
+                volumeId: volumeId
             }
         });
         return volume;
     }
 
     public async volumesInclude(libraryId: number, authorId: number, volumeId: number, principal: boolean | null): Promise<Volume> {
-        logger.info({
-            context: "AuthorServices.storiesInclude",
-            libraryId: libraryId,
-            authorId: authorId,
-            volumeId: volumeId,
-            principal: principal,
-        });
         const library = await Library.findByPk(libraryId);
         if (!library) {
             throw new NotFound(
@@ -568,7 +476,7 @@ export class AuthorServices {
         const author = await Author.findOne({
             where: {
                 id: authorId,
-                library_id: libraryId
+                libraryId: libraryId
             }
         })
         if (!author) {
@@ -580,7 +488,7 @@ export class AuthorServices {
         const volume = await Volume.findOne({
             where: {
                 id: volumeId,
-                library_id: libraryId
+                libraryId: libraryId
             }
         })
         if (!volume) {
@@ -590,11 +498,78 @@ export class AuthorServices {
             );
         }
         await AuthorVolume.create({
-            author_id: authorId,
-            volume_id: volumeId,
+            authorId: authorId,
+            volumeId: volumeId,
             principal: principal ? true : false,
         });
         return volume;
+    }
+
+    // Public Helpers --------------------------------------------------------
+
+    /**
+     * Supported include query parameters:
+     * * withLibrary                    Include parent Library
+     * * withSeries                     Include related Series
+     * * withStories                    Include related Stories
+     * * withVolumes                    Include related Volumes
+     */
+    public appendIncludeOptions(options: FindOptions, query?: any): FindOptions {
+        if (!query) {
+            return options;
+        }
+        options = appendPaginationOptions(options, query);
+        const include: any = options.include ? options.include : [];
+        if ("" === query.withLibrary) {
+            include.push(Library);
+        }
+        if ("" === query.withSeries) {
+            include.push(Series);
+        }
+        if ("" === query.withStories) {
+            include.push(Story);
+        }
+        if ("" === query.withVolumes) {
+            include.push(Volume);
+        }
+        if (include.length > 0) {
+            options.include = include;
+        }
+        return options;
+    }
+
+    /**
+     * Supported match query parameters:
+     * * active                         Select active Authors
+     * * name={wildcard}                Select Authors with name matching {wildcard}
+     */
+    public appendMatchOptions(options: FindOptions, query?: any): FindOptions {
+        options = this.appendIncludeOptions(options, query);
+        if (!query) {
+            return options;
+        }
+        let where: any = options.where ? options.where : {};
+        if ("" === query.active) {
+            where.active = true;
+        }
+        if (query.name) {
+            const names = query.name.trim().split(" ");
+            const firstMatch = names[0];
+            const lastMatch = (names.length > 1) ? names[1] : names[0];
+            where = {
+                ...where,
+                [Op.or]: {
+                    firstName: {[Op.iLike]: `%${firstMatch}%`},
+                    lastName: {[Op.iLike]: `%${lastMatch}%`},
+                }
+            }
+        }
+        const count = Object.getOwnPropertyNames(where).length
+            + Object.getOwnPropertySymbols(where).length;
+        if (count > 0) {
+            options.where = where;
+        }
+        return options;
     }
 
 }
@@ -603,7 +578,7 @@ export default new AuthorServices();
 
 // Private Objects -----------------------------------------------------------
 
-const fields: string[] = [
+const FIELDS: string[] = [
     "active",
     "first_name",
     "last_name",
@@ -611,7 +586,7 @@ const fields: string[] = [
     "notes",
 ];
 
-const fieldsWithId: string[] = [
-    ...fields,
+const FIELDS_WITH_ID: string[] = [
+    ...FIELDS,
     "id"
 ];

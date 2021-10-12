@@ -8,7 +8,7 @@ import {FindOptions, Op} from "sequelize";
 
 // Internal Modules ----------------------------------------------------------
 
-import AbstractServices from "./AbstractServices";
+import AbstractParentServices from "./AbstractParentServices";
 import Database from "../models/Database";
 import User from "../models/User";
 import * as SortOrder from "../models/SortOrder";
@@ -18,7 +18,7 @@ import {appendPaginationOptions} from "../util/QueryParameters";
 
 // Public Classes ------------------------------------------------------------
 
-export class UserServices extends AbstractServices<User> {
+export class UserServices extends AbstractParentServices<User> {
 
     // Standard CRUD Methods -------------------------------------------------
 

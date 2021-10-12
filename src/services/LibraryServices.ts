@@ -4,36 +4,39 @@
 
 // External Modules ----------------------------------------------------------
 
-import {FindOptions, Op} from "sequelize";
+import {FindOptions, Op, ValidationError} from "sequelize";
 
 // Internal Modules ----------------------------------------------------------
 
-import AbstractServices from "./AbstractServices";
+import AbstractParentServices from "./AbstractParentServices";
+import AuthorServices from "./AuthorServices";
+import SeriesServices from "./SeriesServices";
+import StoryServices from "./StoryServices";
+import VolumeServices from "./VolumeServices";
 import Author from "../models/Author";
-import Database from "../models/Database";
 import Library from "../models/Library";
 import Series from "../models/Series";
 import * as SortOrder from "../models/SortOrder";
 import Story from "../models/Story";
 import Volume from "../models/Volume";
-import {NotFound} from "../util/HttpErrors";
-import {appendQuery, appendQueryWithName, appendQueryWithNames} from "../util/QueryParameters";
+import {BadRequest, NotFound, ServerError} from "../util/HttpErrors";
+import {appendPaginationOptions} from "../util/QueryParameters";
 
 // Public Classes ------------------------------------------------------------
 
-export class LibraryServices extends AbstractServices<Library> {
+export class LibraryServices extends AbstractParentServices<Library> {
 
     // Standard CRUD Methods -------------------------------------------------
 
     public async all(query?: any): Promise<Library[]> {
-        let options: FindOptions = appendQueryWithName({
+        let options: FindOptions = this.appendMatchOptions({
             order: SortOrder.LIBRARIES
         }, query);
-        return Library.findAll(options);
+        return await Library.findAll(options);
     }
 
     public async find(libraryId: number, query?: any): Promise<Library> {
-        let options: FindOptions = appendQuery({
+        let options: FindOptions = this.appendIncludeOptions({
             where: { id: libraryId }
         }, query);
         let results = await Library.findAll(options);
@@ -47,20 +50,22 @@ export class LibraryServices extends AbstractServices<Library> {
     }
 
     public async insert(library: Library): Promise<Library> {
-        let transaction;
         try {
-            transaction = await Database.transaction();
-            const inserted: Library = await Library.create(library, {
-                fields: fields,
-                transaction: transaction
+            return await Library.create(library, {
+                fields: FIELDS,
             });
-            await transaction.commit();
-            return inserted;
         } catch (error) {
-            if (transaction) {
-                await transaction.rollback();
+            if (error instanceof ValidationError) {
+                throw new BadRequest(
+                    error,
+                    "LibraryServices.insert"
+                );
+            } else {
+                throw new ServerError(
+                    error as Error,
+                    "LibraryServices.insert"
+                );
             }
-            throw error;
         }
     }
 
@@ -71,83 +76,45 @@ export class LibraryServices extends AbstractServices<Library> {
                 `libraryId: Missing Library ${libraryId}`,
                 "LibraryServices.remove");
         }
-        let count = await Library.destroy({
+        await Library.destroy({
             where: { id: libraryId }
         });
-        if (count < 1) {
-            throw new NotFound(
-                `libraryId: Cannot remove Library ${libraryId}`,
-                "LibraryServices.remove");
-        }
         return removed;
     }
 
     public async update(libraryId: number, library: Library): Promise<Library> {
-        let transaction;
         try {
-            transaction = await Database.transaction();
-            library.id = libraryId;
-            let result: [number, Library[]] = await Library.update(library, {
-                fields: fieldsWithId,
-                transaction: transaction,
-                where: { id: libraryId }
+            library.id = libraryId; // No cheating
+            const results = await Library.update(library, {
+                fields: FIELDS_WITH_ID,
+                returning: true,
+                where: { id: libraryId },
             });
-            if (result[0] < 1) {
+            if (results[0] < 1) {
                 throw new NotFound(
-                    `libraryId: Cannot update Library ${libraryId}`,
-                    "LibraryServices.update()");
+                    `libraryId: Missing Library ${libraryId}`,
+                    "LibraryServices.update",
+                );
             }
-            await transaction.commit();
-            transaction = null;
-            return await this.find(libraryId);
+            return results[1][0];
         } catch (error) {
-            if (transaction) {
-                await transaction.rollback();
+            if (error instanceof NotFound) {
+                throw error;
+            } else if (error instanceof ValidationError) {
+                throw new BadRequest(
+                    error,
+                    "FacilityServices.update"
+                );
+            } else {
+                throw new ServerError(
+                    error as Error,
+                    "FacilityServices.update"
+                );
             }
-            throw error;
         }
     }
 
     // Model-Specific Methods ------------------------------------------------
-
-    // ***** Library Lookups *****
-
-    public async active(query?: any): Promise<Library[]> {
-        let options: FindOptions = appendQuery({
-            order: SortOrder.LIBRARIES,
-            where: {
-                active: true
-            }
-        }, query);
-        return Library.findAll(options);
-    }
-
-    public async exact(name: string, query?: any): Promise<Library> {
-        let options: FindOptions = appendQuery({
-            where: {
-                name: name
-            }
-        }, query);
-        let results = await Library.findAll(options);
-        if (results.length !== 1) {
-            throw new NotFound(
-                `name: Missing Library '${name}'`,
-                "LibraryServices.exact()");
-        }
-        return results[0];
-    }
-
-    public async name(name: string, query?: any): Promise<Library[]> {
-        let options: FindOptions = appendQuery({
-            order: SortOrder.LIBRARIES,
-            where: {
-                name: { [Op.iLike]: `%${name}%` }
-            }
-        }, query);
-        return Library.findAll(options);
-    }
-
-    // ***** Child Table Lookups *****
 
     public async authors(libraryId: number, query?: any): Promise<Author[]> {
         const library = await Library.findByPk(libraryId);
@@ -157,10 +124,25 @@ export class LibraryServices extends AbstractServices<Library> {
                 "LibraryServices.authors"
             );
         }
-        let options: FindOptions = appendQueryWithNames({
+        const options: FindOptions = AuthorServices.appendMatchOptions({
             order: SortOrder.AUTHORS,
         }, query);
         return await library.$get("authors", options);
+    }
+
+    public async exact(name: string, query?: any): Promise<Library> {
+        let options: FindOptions = this.appendIncludeOptions({
+            where: {
+                name: name
+            }
+        }, query);
+        const results = await Library.findAll(options);
+        if (results.length !== 1) {
+            throw new NotFound(
+                `name: Missing Library '${name}'`,
+                "LibraryServices.exact()");
+        }
+        return results[0];
     }
 
     public async series(libraryId: number, query?: any): Promise<Series[]> {
@@ -171,7 +153,7 @@ export class LibraryServices extends AbstractServices<Library> {
                 "LibraryServices.series"
             );
         }
-        let options: FindOptions = appendQueryWithName({
+        let options: FindOptions = SeriesServices.appendMatchOptions({
             order: SortOrder.SERIES,
         }, query);
         return await library.$get("series", options);
@@ -185,7 +167,7 @@ export class LibraryServices extends AbstractServices<Library> {
                 "LibraryServices.stories"
             );
         }
-        let options: FindOptions = appendQueryWithName({
+        let options: FindOptions = StoryServices.appendMatchOptions({
             order: SortOrder.STORIES,
         }, query);
         return await library.$get("stories", options);
@@ -199,10 +181,67 @@ export class LibraryServices extends AbstractServices<Library> {
                 "LibraryServices.volumes"
             );
         }
-        let options: FindOptions = appendQueryWithName({
+        let options: FindOptions = VolumeServices.appendMatchOptions({
             order: SortOrder.VOLUMES,
         }, query);
         return await library.$get("volumes", options);
+    }
+
+    // Public Helpers --------------------------------------------------------
+
+    /**
+     * Supported include query parameters:
+     * * withAuthors                    Include child Authors
+     * * withSeries                     Include child Series
+     * * withStories                    Include child Stories
+     * * withVolumes                    Include child Volumes
+     */
+    public appendIncludeOptions(options: FindOptions, query?: any): FindOptions {
+        if (!query) {
+            return options;
+        }
+        options = appendPaginationOptions(options, query);
+        const include: any = options.include ? options.include : [];
+        if ("" === query.withAuthors) {
+            include.push(Author);
+        }
+        if ("" === query.withSeries) {
+            include.push(Series);
+        }
+        if ("" === query.withStories) {
+            include.push(Story);
+        }
+        if ("" === query.withVolumes) {
+            include.push(Volume);
+        }
+        if (include.length > 0) {
+            options.include = include;
+        }
+        return options;
+    }
+
+    /**
+     * Supported match query parameters:
+     * * active                         Select active Libraries
+     * * name={wildcard}                Select Libraries with name matching {wildcard}
+     * * scope={scope}                  Select Libraries with scope exact matching {scope}
+     */
+    public appendMatchOptions(options: FindOptions, query?: any): FindOptions {
+        options = this.appendIncludeOptions(options, query);
+        if (!query) {
+            return options;
+        }
+        const where: any = options.where ? options.where : {};
+        if ("" === query.active) {
+            where.active = true;
+        }
+        if (query.name) {
+            where.name = { [Op.iLike]: `%${query.name}%` };
+        }
+        if (query.scope) {
+            where.scope = query.scope;
+        }
+        return options;
     }
 
 }
@@ -211,14 +250,14 @@ export default new LibraryServices();
 
 // Private Objects -----------------------------------------------------------
 
-const fields: string[] = [
+const FIELDS: string[] = [
     "active",
     "name",
     "notes",
     "scope",
 ];
 
-const fieldsWithId: string[] = [
-    ...fields,
+const FIELDS_WITH_ID: string[] = [
+    ...FIELDS,
     "id"
 ];

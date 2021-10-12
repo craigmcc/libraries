@@ -26,21 +26,6 @@ describe("LibraryServices Functional Tests", () => {
 
     // Test Methods ---------------------------------------------------------
 
-    describe("active()", () => {
-
-        it("should pass on active libraries", async () => {
-
-            try {
-                const results = await LibraryServices.active(true);
-                expect(results.length).equals(SeedData.LIBRARIES.length);
-            } catch (error) {
-                expect.fail(`Should not have thrown '${error.message}'`);
-            }
-
-        })
-
-    })
-
     describe("exact()", () => {
 
         it("should fail on invalid name", async () => {

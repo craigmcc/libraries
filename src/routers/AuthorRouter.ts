@@ -24,16 +24,6 @@ export default AuthorRouter;
 
 // Model-Specific Routes (no authorId) ---------------------------------------
 
-// GET /:libraryId/active - Find active Authors
-AuthorRouter.get("/:libraryId/active",
-    requireRegular,
-    async (req: Request, res: Response) => {
-        res.send(await AuthorServices.active(
-            parseInt(req.params.libraryId, 10),
-            req.query
-        ));
-    });
-
 // GET /:libraryId/exact/:firstName/:lastName - Find Author by exact name
 AuthorRouter.get("/:libraryId/exact/:firstName/:lastName",
     requireRegular,
@@ -42,17 +32,6 @@ AuthorRouter.get("/:libraryId/exact/:firstName/:lastName",
             parseInt(req.params.libraryId, 10),
             req.params.firstName,
             req.params.lastName,
-            req.query
-        ));
-    });
-
-// GET /:libraryId/name/:name - Find Authors by name match
-AuthorRouter.get("/:libraryId/name/:name",
-    requireRegular,
-    async (req: Request, res: Response) => {
-        res.send(await AuthorServices.name(
-            parseInt(req.params.libraryId, 10),
-            req.params.name,
             req.query
         ));
     });

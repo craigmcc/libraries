@@ -8,6 +8,10 @@ import {FindOptions, Op} from "sequelize";
 
 // Internal Modules ----------------------------------------------------------
 
+import AbstractChildServices from "./AbstractChildServices";
+import AuthorServices from "./AuthorServices";
+import SeriesServices from "./SeriesServices";
+import VolumeServices from "./VolumeServices";
 import Author from "../models/Author";
 import Database from "../models/Database";
 import Library from "../models/Library";
@@ -16,11 +20,11 @@ import Series from "../models/Series";
 import Story from "../models/Story";
 import Volume from "../models/Volume";
 import {NotFound} from "../util/HttpErrors";
-import {appendQuery, appendQueryWithName, appendQueryWithNames} from "../util/QueryParameters";
+import {appendPaginationOptions, appendQuery, appendQueryWithName, appendQueryWithNames} from "../util/QueryParameters";
 
 // Public Objects ------------------------------------------------------------
 
-export class StoryServices {
+export class StoryServices implements AbstractChildServices<Story>{
 
     // Standard CRUD Methods -------------------------------------------------
 
@@ -298,6 +302,62 @@ export class StoryServices {
             order: SortOrder.VOLUMES,
         }, query);
         return await story.$get("volumes", options);
+    }
+
+    // Public Helpers --------------------------------------------------------
+
+    /**
+     * Supported include query parameters:
+     * * withAuthors                    Include related Authors
+     * * withLibrary                    Include parent Library
+     * * withSeries                     Include related Series
+     * * withVolumes                    Include related Volumes
+     */
+    public appendIncludeOptions(options: FindOptions, query?: any): FindOptions {
+        if (!query) {
+            return options;
+        }
+        options = appendPaginationOptions(options, query);
+        const include: any = options.include ? options.include : [];
+        if ("" === query.withAuthors) {
+            include.push(Author);
+        }
+        if ("" === query.withLibrary) {
+            include.push(Library);
+        }
+        if ("" === query.withSeries) {
+            include.push(Series);
+        }
+        if ("" === query.withVolumes) {
+            include.push(Volume);
+        }
+        if (include.length > 0) {
+            options.include = include;
+        }
+        return options;
+    }
+
+    /**
+     * Supported match query parameters:
+     * * active                         Select active Stories
+     * * name={wildcard}                Select Stories name with matching {wildcard}
+     */
+    public appendMatchOptions(options: FindOptions, query?: any): FindOptions {
+        options = this.appendIncludeOptions(options, query);
+        if (!query) {
+            return options;
+        }
+        const where: any = options.where ? options.where : {};
+        if ("" === query.active) {
+            where.active = true;
+        }
+        if (query.name) {
+            where.name = { [Op.iLike]: `%${query.name}%` };
+        }
+        if (Object.keys(where).length > 0) {
+            options.where = where;
+        }
+        return options;
     }
 
 }

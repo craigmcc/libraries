@@ -1,10 +1,12 @@
-// AbstractServices ----------------------------------------------------------
+// AbstractParentServices ----------------------------------------------------
 
-// Abstract base class for Services implementations with standard CRUD methods.
+// Abstract base class for Services implementations with standard CRUD methods,
+// for Models that do not require a libraryId argument, because they are
+// top lavel and do not belong to a specific Library.
 
 // External Modules ----------------------------------------------------------
 
-import { Model } from "sequelize-typescript";
+import {Model} from "sequelize-typescript";
 
 // Internal Modules ----------------------------------------------------------
 
@@ -14,7 +16,7 @@ import { Model } from "sequelize-typescript";
  * <p>Define the standard CRUD operations that every service implementation
  * must support.</p>
  */
-export abstract class AbstractServices<M extends Model> {
+export abstract class AbstractParentServices<M extends Model> {
 
     /**
      * <p>Return all models of the specified type.</p>
@@ -55,4 +57,4 @@ export abstract class AbstractServices<M extends Model> {
 
 }
 
-export default AbstractServices;
+export default AbstractParentServices;

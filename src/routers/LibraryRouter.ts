@@ -27,30 +27,11 @@ export default LibraryRouter;
 
 // Model-Specific Routes (no libraryId) --------------------------------------
 
-// GET /active - Find active Libraries
-LibraryRouter.get("/active",
-    requireNone,    // Avoid catch-22 on initial population of LibraryContext
-    async (req: Request, res: Response) => {
-        res.send(await LibraryServices.active(
-            req.query
-        ));
-    });
-
 // GET /exact/:name - Find Library by exact name
 LibraryRouter.get("/exact/:name",
     requireAny,
     async (req: Request, res: Response) => {
         res.send(await LibraryServices.exact(
-            req.params.name,
-            req.query
-        ));
-    });
-
-// GET /name/:name - Find Libraries by name match
-LibraryRouter.get("/name/:name",
-    requireSuperuser,
-    async (req: Request, res: Response) => {
-        res.send(await LibraryServices.name(
             req.params.name,
             req.query
         ));
