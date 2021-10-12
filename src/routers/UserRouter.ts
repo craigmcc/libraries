@@ -21,30 +21,11 @@ export default UserRouter;
 
 // Model-Specific Routes (no userId) -----------------------------------------
 
-// GET /active - Find active Users
-UserRouter.get("/active",
-    requireSuperuser,
-    async (req: Request, res: Response) => {
-        res.send(await UserServices.active(
-            req.query
-        ));
-    });
-
 // GET /exact/:name - Find User by exact name
 UserRouter.get("/exact/:name",
     requireSuperuser,
     async (req: Request, res: Response) => {
         res.send(await UserServices.exact(
-            req.params.name,
-            req.query
-        ));
-    });
-
-// GET /name/:name - Find Users by name match
-UserRouter.get("/name/:name",
-    requireSuperuser,
-    async (req: Request, res: Response) => {
-        res.send(await UserServices.name(
             req.params.name,
             req.query
         ));

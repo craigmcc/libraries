@@ -10,7 +10,7 @@
 
 import {NotUnique} from "../util/HttpErrors";
 
-export class OAuthAccessToken {
+export class AccessToken {
 
     // Properties ------------------------------------------------------------
 
@@ -23,8 +23,8 @@ export class OAuthAccessToken {
     // Static Methods --------------------------------------------------------
 
     static async create
-        (oauthAccessToken: OAuthAccessToken, options?: any)
-        : Promise<OAuthAccessToken>
+        (oauthAccessToken: AccessToken, options?: any)
+        : Promise<AccessToken>
     {
         const original = ACCESS_TOKENS.get(oauthAccessToken.token);
         if (original) {
@@ -40,11 +40,11 @@ export class OAuthAccessToken {
         ACCESS_TOKENS.delete(token);
     }
 
-    static async findAll(options?: any): Promise<OAuthAccessToken[]> {
+    static async findAll(options?: any): Promise<AccessToken[]> {
         return Array.from(ACCESS_TOKENS.values());
     }
 
-    static lookup = async (token: string): Promise<OAuthAccessToken | null> => {
+    static lookup = async (token: string): Promise<AccessToken | null> => {
         const result = ACCESS_TOKENS.get(token);
         if (result) {
             return result;
@@ -55,12 +55,12 @@ export class OAuthAccessToken {
 
 }
 
-export default OAuthAccessToken;
+export default AccessToken;
 
 // Private Objects -----------------------------------------------------------
 
 let ACCESS_TOKEN_ID: number = 0;
 
 // Key = access token value
-const ACCESS_TOKENS: Map<string, OAuthAccessToken> = new Map();
+const ACCESS_TOKENS: Map<string, AccessToken> = new Map();
 

@@ -10,7 +10,7 @@
 
 import {NotUnique} from "../util/HttpErrors";
 
-export class OAuthRefreshToken {
+export class RefreshToken {
 
     // Properties ------------------------------------------------------------
 
@@ -23,8 +23,8 @@ export class OAuthRefreshToken {
     // Static Methods --------------------------------------------------------
 
     static async create
-        (oauthRefreshToken: OAuthRefreshToken, options?: any)
-        : Promise<OAuthRefreshToken>
+        (oauthRefreshToken: RefreshToken, options?: any)
+        : Promise<RefreshToken>
     {
         const original = REFRESH_TOKENS.get(oauthRefreshToken.token);
         if (original) {
@@ -36,11 +36,11 @@ export class OAuthRefreshToken {
         }
     }
 
-    static async findAll(options?: any): Promise<OAuthRefreshToken[]> {
+    static async findAll(options?: any): Promise<RefreshToken[]> {
         return Array.from(REFRESH_TOKENS.values());
     }
 
-    static lookup = async (token: string): Promise<OAuthRefreshToken | null> => {
+    static lookup = async (token: string): Promise<RefreshToken | null> => {
         const result = REFRESH_TOKENS.get(token);
         if (result) {
             return result;
@@ -51,12 +51,12 @@ export class OAuthRefreshToken {
 
 }
 
-export default OAuthRefreshToken;
+export default RefreshToken;
 
 // Private Objects -----------------------------------------------------------
 
 let REFRESH_TOKEN_ID: number = 0;
 
 // Key = refresh token value
-const REFRESH_TOKENS: Map<string, OAuthRefreshToken> = new Map();
+const REFRESH_TOKENS: Map<string, RefreshToken> = new Map();
 

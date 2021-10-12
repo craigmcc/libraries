@@ -20,8 +20,8 @@ import {
 
 // Internal Modules ----------------------------------------------------------
 
-import OAuthAccessToken from "../models/OAuthAccessToken";
-import OAuthRefreshToken from "../models/OAuthRefreshToken";
+import OAuthAccessToken from "../models/AccessToken";
+import OAuthRefreshToken from "../models/RefreshToken";
 import {generateRandomToken, verifyPassword} from "./oauth-utils";
 import OAuthUser from "../models/User";
 import {NotFound} from "../util/HttpErrors";

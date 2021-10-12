@@ -4,16 +4,17 @@
 
 // External Modules ----------------------------------------------------------
 
-import {FindOptions, Op} from "sequelize";
+import {FindOptions, Op, ValidationError} from "sequelize";
 
 // Internal Modules ----------------------------------------------------------
 
 import AbstractParentServices from "./AbstractParentServices";
-import Database from "../models/Database";
+import AccessToken from "../models/AccessToken";
+import RefreshToken from "../models/RefreshToken";
 import User from "../models/User";
 import * as SortOrder from "../models/SortOrder";
 import {hashPassword} from "../oauth/oauth-utils";
-import {NotFound} from "../util/HttpErrors";
+import {BadRequest, NotFound, ServerError} from "../util/HttpErrors";
 import {appendPaginationOptions} from "../util/QueryParameters";
 
 // Public Classes ------------------------------------------------------------
@@ -23,7 +24,7 @@ export class UserServices extends AbstractParentServices<User> {
     // Standard CRUD Methods -------------------------------------------------
 
     public async all(query?: any): Promise<User[]> {
-        let options: FindOptions = appendQuery({
+        let options: FindOptions = this.appendMatchOptions({
             order: SortOrder.USERS
         }, query);
         const results: User[] = await User.findAll(options);
@@ -35,7 +36,7 @@ export class UserServices extends AbstractParentServices<User> {
     }
 
     public async find(userId: number, query?: any): Promise<User> {
-        let options: FindOptions = appendQuery({
+        let options: FindOptions = this.appendIncludeOptions({
             where: { id: userId }
         }, query);
         let results = await User.findAll(options);
@@ -51,102 +52,85 @@ export class UserServices extends AbstractParentServices<User> {
     }
 
     public async insert(user: User): Promise<User> {
-        const newUser: Partial<User> = {
-            ...user,
-            password: await hashPassword(user.password)
+        if (!user.password) {
+            throw new BadRequest(
+                `password: Is required`,
+                "UserServices.insert"
+            );
         }
-        let transaction;
+        user.password = await hashPassword(user.password); // TODO - leaked back to caller
         try {
-            transaction = await Database.transaction();
-            const inserted: User = await User.create(newUser, {
-                fields: fields,
-                transaction: transaction
+            const inserted: User = await User.create(user, {
+                fields: FIELDS,
             });
             inserted.password = "";
-            await transaction.commit();
             return inserted;
         } catch (error) {
-            if (transaction) {
-                await transaction.rollback();
+            if (error instanceof ValidationError) {
+                throw new BadRequest(
+                    error,
+                    "UserServices.insert"
+                );
+            } else {
+                throw new ServerError(
+                    error as Error,
+                    "UserServices.insert"
+                );
             }
-            throw error;
         }
     }
 
     public async remove(userId: number): Promise<User> {
-        let removed = await User.findByPk(userId);
+        const removed = await User.findByPk(userId);
         if (!removed) {
             throw new NotFound(
                 `userId: Missing User ${userId}`,
                 "UserServices.remove");
         }
-        let count = await User.destroy({
+        await User.destroy({
             where: { id: userId }
         });
-        if (count < 1) {
-            throw new NotFound(
-                `userId: Cannot remove User ${userId}`,
-                "UserServices.remove");
-        }
         return removed;
     }
 
     public async update(userId: number, user: User): Promise<User> {
-        const original = await User.findByPk(userId);
-        if (!original) {
-            throw new NotFound(`userId: Missing user ID ${userId}`);
-        }
-        const updatedUser: Partial<User> = {
-            ...user
-        }
         if (user.password && (user.password.length > 0)) {
-            updatedUser.password = await hashPassword(user.password);
+            user.password = await hashPassword(user.password); // TODO - leaked back to caller
         } else {
-            updatedUser.password = original.password;
+            // @ts-ignore
+            delete user.password; // TODO - this might be broken
         }
-        let transaction;
         try {
-            transaction = await Database.transaction();
-            updatedUser.id = userId;
-            let results: [number, User[]] = await User.update(updatedUser, {
-                fields: fieldsWithId,
-                transaction: transaction,
+            const found = await User.findByPk(userId);
+            if (!found) {
+                throw new NotFound(`userId: Missing User ${userId}`);
+            }
+            user.id = userId; // No cheating
+            const result = await User.update(user, {
+                fields: FIELDS_WITH_ID,
                 where: { id: userId }
             });
-            await transaction.commit();
-            transaction = null;
-            if (results[0] < 1) {
-                throw new NotFound(
-                    `userId: Cannot update User ${userId}`,
-                    "UserServices.update()");
-            }
             return await this.find(userId);
         } catch (error) {
-            if (transaction) {
-                await transaction.rollback();
+            if (error instanceof NotFound) {
+                throw error;
+            } else if (error instanceof ValidationError) {
+                throw new BadRequest(
+                    error,
+                    "UserServices.update"
+                );
+            } else {
+                throw new ServerError(
+                    error as Error,
+                    "UserServices.update"
+                );
             }
-            throw error;
         }
     }
 
     // Model-Specific Methods ------------------------------------------------
 
-    // ***** User Lookups *****
-
-    public async active(query?: any): Promise<User[]> {
-        let options: FindOptions = appendQuery({
-            order: SortOrder.USERS,
-            where: {
-                active: true
-            }
-        }, query);
-        const results = await User.findAll(options);
-        results.forEach(result => {
-            // @ts-ignore
-            result.password = "";
-        });
-        return results;
-    }
+    // TODO: accessTokens(userId: number, query?: any): Promise<AccessToken[]>
 
     public async exact(name: string, query?: any): Promise<User> {
         let options: FindOptions = appendQuery({
@@ -165,20 +149,57 @@ export class UserServices extends AbstractParentServices<User> {
         return results[0];
     }
 
-    public async name(name: string, query?: any): Promise<User[]> {
-        let options: FindOptions = appendQuery({
-            order: SortOrder.USERS,
-            where: {
-                username: { [Op.iLike]: `%${name}%` }
-            }
-        }, query);
-        const results = await User.findAll(options);
-        results.forEach(result => {
-            // @ts-ignore
-            result.password = "";
-        })
-        return results;
+    // TODO: refreshTokens(userId: number, query?: any): Promise<AccessToken[]>
+
+    // Public Helpers --------------------------------------------------------
+
+    /**
+     * Supported include query parameters:
+     * * withAccessTokens               Include child AccessTokens
+     * * withRefreshTokens              Include child RefreshTokens
+     */
+    public appendIncludeOptions(options: FindOptions, query?: any): FindOptions {
+        if (!query) {
+            return options;
+        }
+        options = appendPaginationOptions(options, query);
+        const include: any = options.include ? options.include : [];
+        if ("" === query.withAccessTokens) {
+            include.push(AccessToken);
+        }
+        if ("" === query.withRefreshTokens) {
+            include.push(RefreshToken);
+        }
+        if (include.length > 0) {
+            options.include = include;
+        }
+        return options;
     }
+
+    /*
+     * Supported match query parameters:
+     * * active                         Select active Users
+     * * username={wildcard}            Select Users with usernames matching {wildcard}
+     */
+    public appendMatchOptions(options: FindOptions, query?: any): FindOptions {
+        options = this.appendIncludeOptions(options, query);
+        if (!query) {
+            return options;
+        }
+        const where: any = options.where ? options.where : {};
+        if ("" === query.active) {
+            where.active = true;
+        }
+        if (query.username) {
+            where.username = {[Op.iLike]: `%${query.username}%`}
+        }
+        if (Object.keys(where).length > 0) {
+            options.where = where;
+        }
+        return options;
+    }
+
+    // TODO - private helpers for token include/match stuff
 
 }
 
@@ -199,14 +220,14 @@ const appendQuery = (options: FindOptions, query?: any): FindOptions => {
 
 }
 
-const fields: string[] = [
+const FIELDS: string[] = [
     "active",
     "password",
     "scope",
     "username",
 ];
 
-const fieldsWithId: string[] = [
-    ...fields,
+const FIELDS_WITH_ID: string[] = [
+    ...FIELDS,
     "id"
 ];

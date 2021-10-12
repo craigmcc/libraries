@@ -22,8 +22,8 @@ import {
     requireNotProduction,
     requireSuperuser
 } from "./oauth-middleware";
-import OAuthAccessToken from "../models/OAuthAccessToken";
-import OAuthRefreshToken from "../models/OAuthRefreshToken";
+import AccessToken from "../models/AccessToken";
+import RefreshToken from "../models/RefreshToken";
 import {OAuthOrchestrator} from "../server";
 import User from "../models/User";
 import {BadRequest, NotFound, ServerError} from "../util/HttpErrors";
@@ -64,7 +64,7 @@ OAuthTokenRouter.delete("/",
 OAuthTokenRouter.get("/",
     requireAny,
     async (req: Request, res: Response) => {
-        const accessToken = await OAuthAccessToken.lookup(res.locals.token);
+        const accessToken = await AccessToken.lookup(res.locals.token);
         if (accessToken) {
             const user = await User.findByPk(accessToken.userId);
             if (user) {
@@ -134,14 +134,14 @@ OAuthTokenRouter.get("/accessTokens",
     requireNotProduction,
     requireSuperuser,
     async (req: Request, res: Response) => {
-        res.send(await OAuthAccessToken.findAll());
+        res.send(await AccessToken.findAll());
     })
 
 OAuthTokenRouter.get("/refreshTokens",
     requireNotProduction,
     requireSuperuser,
     async (req: Request, res: Response) => {
-        res.send(await OAuthRefreshToken.findAll());
+        res.send(await RefreshToken.findAll());
     })
 
 export default OAuthTokenRouter;
