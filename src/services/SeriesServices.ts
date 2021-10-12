@@ -16,8 +16,8 @@ import SeriesStory from "../models/SeriesStory";
 import * as SortOrder from "../models/SortOrder";
 import Story from "../models/Story";
 import {NotFound} from "../util/HttpErrors";
-import {appendQuery, appendQueryWithName, appendQueryWithNames} from "../util/query-parameters";
-import logger from "../util/server-logger";
+import {appendQuery, appendQueryWithName, appendQueryWithNames} from "../util/QueryParameters";
+import logger from "../util/ServerLogger";
 
 // Public Objects ------------------------------------------------------------
 

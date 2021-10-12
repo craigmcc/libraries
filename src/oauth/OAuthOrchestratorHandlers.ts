@@ -25,7 +25,7 @@ import OAuthRefreshToken from "./OAuthRefreshToken";
 import {generateRandomToken, verifyPassword} from "./oauth-utils";
 import OAuthUser from "../models/User";
 import {NotFound} from "../util/HttpErrors";
-import logger from "../util/server-logger";
+import logger from "../util/ServerLogger";
 
 // Private Objects -----------------------------------------------------------
 

@@ -9,7 +9,7 @@ import {Request, Response, Router} from "express";
 // Internal Modules ----------------------------------------------------------
 
 import LogServices from "../services/LogServices";
-import logger from "../util/server-logger";
+import logger from "../util/ServerLogger";
 
 // Public Objects ------------------------------------------------------------
 

@@ -12,11 +12,11 @@ import Author from "../models/Author";
 import Database from "../models/Database";
 import Library from "../models/Library";
 import * as SortOrder from "../models/SortOrder";
+import Series from "../models/Series";
 import Story from "../models/Story";
 import Volume from "../models/Volume";
 import {NotFound} from "../util/HttpErrors";
-import {appendQuery, appendQueryWithName, appendQueryWithNames} from "../util/query-parameters";
-import Series from "../models/Series";
+import {appendQuery, appendQueryWithName, appendQueryWithNames} from "../util/QueryParameters";
 
 // Public Objects ------------------------------------------------------------
 
@@ -206,7 +206,6 @@ export class StoryServices {
                 "StoryServices.name"
             );
         }
-        const names = name.trim().split(" ");
         let options: FindOptions = {};
         options = appendQuery({
             order: SortOrder.STORIES,

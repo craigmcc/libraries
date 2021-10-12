@@ -13,7 +13,7 @@ import Library from"../models/Library";
 import Series from "../models/Series";
 import Story from "../models/Story";
 import Volume from "../models/Volume";
-import logger from "../util/server-logger";
+import logger from "../util/ServerLogger";
 import {reloadTestData} from "../util/TestUtils";
 
 // Public Objects ------------------------------------------------------------

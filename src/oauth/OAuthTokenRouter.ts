@@ -27,7 +27,7 @@ import OAuthRefreshToken from "./OAuthRefreshToken";
 import {OAuthOrchestrator} from "../server";
 import User from "../models/User";
 import {BadRequest, NotFound, ServerError} from "../util/HttpErrors";
-import logger from "../util/server-logger";
+import logger from "../util/ServerLogger";
 
 // Public Objects ------------------------------------------------------------
 

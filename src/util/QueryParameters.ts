@@ -1,4 +1,4 @@
-// query-parameters ----------------------------------------------------------
+// QueryParameters -----------------------------------------------------------
 
 // Utility methods for appending to Sequelize options based on query parameters.
 
@@ -20,7 +20,7 @@ import Volume from "../models/Volume";
  * Append standard pagination query parameters (if present), and return the
  * updated options.
  */
-export const appendPagination = (options: FindOptions, query: any): FindOptions => {
+export const appendPaginationOptions = (options: FindOptions, query: any): FindOptions => {
     if (query.limit) {
         let value = parseInt(query.limit, 10);
         if (isNaN(value)) {
@@ -43,12 +43,13 @@ export const appendPagination = (options: FindOptions, query: any): FindOptions 
 /**
  * Append pagination and inclusion parameters, and return the updated options.
  */
+// TODO - will be distributed across Service classes.
 export const appendQuery = (options: FindOptions, query: any): FindOptions => {
 
     if (!query) {
         return options;
     }
-    options = appendPagination(options, query);
+    options = appendPaginationOptions(options, query);
 
     // Inclusion parameters
     let include = [];
@@ -79,6 +80,7 @@ export const appendQuery = (options: FindOptions, query: any): FindOptions => {
  * Append pagination and inclusion parameters, plus name matching parameter (if any),
  * and return the updated options.
 */
+// TODO - will be distributed across Service classes.
 export const appendQueryWithName = (options: FindOptions, query?: any): FindOptions => {
     options = appendQuery(options, query);
     if (query.name) {
@@ -96,6 +98,7 @@ export const appendQueryWithName = (options: FindOptions, query?: any): FindOpti
  * Append pagination and inclusion parameters, plus name matching parameter
  * for first_name/last_name fields (if any), and return the updated options.
  */
+// TODO - will be distributed across Service classes.
 export const appendQueryWithNames = (options: FindOptions, query?: any): FindOptions => {
     options = appendQuery(options, query);
     if (query.name) {

@@ -14,7 +14,7 @@ import User from "../models/User";
 import * as SortOrder from "../models/SortOrder";
 import {hashPassword} from "../oauth/oauth-utils";
 import {NotFound} from "../util/HttpErrors";
-import {appendPagination} from "../util/query-parameters";
+import {appendPaginationOptions} from "../util/QueryParameters";
 
 // Public Classes ------------------------------------------------------------
 
@@ -191,7 +191,7 @@ const appendQuery = (options: FindOptions, query?: any): FindOptions => {
     if (!query) {
         return options;
     }
-    options = appendPagination(options, query);
+    options = appendPaginationOptions(options, query);
 
     // Inclusion parameters - none
 

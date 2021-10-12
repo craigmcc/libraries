@@ -16,7 +16,7 @@ import ExpressApplication from "./routers/ExpressApplication";
 import OAuthOrchestratorHandlers from "./oauth/OAuthOrchestratorHandlers";
 export const OAuthOrchestrator: Orchestrator
     = new Orchestrator(OAuthOrchestratorHandlers);
-import logger from "./util/server-logger";
+import logger from "./util/ServerLogger";
 
 // Configure Models and Associations -----------------------------------------
 

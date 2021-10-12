@@ -17,7 +17,7 @@ import * as SortOrder from "../models/SortOrder";
 import Story from "../models/Story";
 import Volume from "../models/Volume";
 import {NotFound} from "../util/HttpErrors";
-import {appendQuery, appendQueryWithName, appendQueryWithNames} from "../util/query-parameters";
+import {appendQuery, appendQueryWithName, appendQueryWithNames} from "../util/QueryParameters";
 
 // Public Classes ------------------------------------------------------------
 
