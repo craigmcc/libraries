@@ -14,7 +14,7 @@ import Series from "../models/Series";
 import Story from "../models/Story";
 import Volume from "../models/Volume";
 import logger from "../util/server-logger";
-import {reloadTestData} from "../util/test-utils";
+import {reloadTestData} from "../util/TestUtils";
 
 // Public Objects ------------------------------------------------------------
 

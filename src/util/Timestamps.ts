@@ -1,4 +1,4 @@
-// timestamps ----------------------------------------------------------------
+// Timestamps ----------------------------------------------------------------
 
 // Utility methods to deal with native Javascript Date objects and return
 // string representations suitable for use in log files.

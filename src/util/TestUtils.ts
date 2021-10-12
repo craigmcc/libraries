@@ -1,4 +1,4 @@
-// test-utils ----------------------------------------------------------------
+// TestUtils -----------------------------------------------------------------
 
 // Generic utility methods for tests.
 
@@ -8,7 +8,7 @@ import {Op} from "sequelize";
 
 // Internal Modules ----------------------------------------------------------
 
-import * as SeedData from "./seed-data";
+import * as SeedData from "./SeedData";
 import Author from "../models/Author";
 import Database from "../models/Database";
 import Library from "../models/Library";

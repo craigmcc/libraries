@@ -9,7 +9,7 @@ const rfs = require("rotating-file-stream");
 
 // Internal Modules ----------------------------------------------------------
 
-import { nowLocalISO } from "./timestamps";
+import {nowLocalISO} from "./Timestamps";
 
 // Private Objects -----------------------------------------------------------
 
