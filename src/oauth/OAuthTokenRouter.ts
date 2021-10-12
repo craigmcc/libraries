@@ -22,8 +22,8 @@ import {
     requireNotProduction,
     requireSuperuser
 } from "./oauth-middleware";
-import OAuthAccessToken from "./OAuthAccessToken";
-import OAuthRefreshToken from "./OAuthRefreshToken";
+import OAuthAccessToken from "../models/OAuthAccessToken";
+import OAuthRefreshToken from "../models/OAuthRefreshToken";
 import {OAuthOrchestrator} from "../server";
 import User from "../models/User";
 import {BadRequest, NotFound, ServerError} from "../util/HttpErrors";
