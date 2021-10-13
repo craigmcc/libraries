@@ -134,8 +134,8 @@ export class SeriesServices implements AbstractChildServices<Series> {
     public async stories(libraryId: number, seriesId: number, query?: any): Promise<Story[]> {
         const library = await LibraryServices.findLibrary("SeriesServices.stories", libraryId);
         const series = await this.findSeries("SeriesServices.stories", libraryId, seriesId);
-        const options: FindOptions = AuthorServices.appendMatchOptions({
-            order: SortOrder.AUTHORS,
+        const options: FindOptions = StoryServices.appendMatchOptions({
+            order: SortOrder.STORIES,
         }, query);
         return await series.$get("stories", options);
     }
@@ -154,9 +154,9 @@ export class SeriesServices implements AbstractChildServices<Series> {
     }
 
     public async storiesInclude(libraryId: number, seriesId: number, storyId: number, ordinal: number | null): Promise<Story> {
-        await Library.findByPk(libraryId);
-        await this.findSeries("SeriesServices.storiesExclude", libraryId, seriesId);
-        const story = await StoryServices.findStory("SeriesServices.storiesExclude", libraryId, storyId);
+        await LibraryServices.findLibrary("SeriesServices.storiesInclude", libraryId);
+        await this.findSeries("SeriesServices.storiesInclude", libraryId, seriesId);
+        const story = await StoryServices.findStory("SeriesServices.storiesInclude", libraryId, storyId);
         await SeriesStory.create({
             seriesId: seriesId,
             storyId: storyId,

@@ -24,32 +24,11 @@ export default StoryRouter;
 
 // Model-Specific Routes (no storyId) ---------------------------------------
 
-// GET /:libraryId/active - Find active Stories
-StoryRouter.get("/:libraryId/active",
-    requireRegular,
-    async (req: Request, res: Response) => {
-        res.send(await StoryServices.active(
-            parseInt(req.params.libraryId, 10),
-            req.query
-        ));
-    });
-
 // GET /:libraryId/exact/:name - Find Story by exact name
 StoryRouter.get("/:libraryId/exact/:name",
     requireRegular,
     async (req: Request, res: Response) => {
         res.send(await StoryServices.exact(
-            parseInt(req.params.libraryId, 10),
-            req.params.name,
-            req.query
-        ));
-    });
-
-// GET /:libraryId/name/:name - Find Stories by name match
-StoryRouter.get("/:libraryId/name/:name",
-    requireRegular,
-    async (req: Request, res: Response) => {
-        res.send(await StoryServices.name(
             parseInt(req.params.libraryId, 10),
             req.params.name,
             req.query

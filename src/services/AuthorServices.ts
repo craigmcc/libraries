@@ -9,6 +9,7 @@ import {FindOptions, Op, ValidationError} from "sequelize";
 // Internal Modules ----------------------------------------------------------
 
 import AbstractChildServices from "./AbstractChildServices";
+import LibraryServices from "./LibraryServices";
 import SeriesServices from "./SeriesServices";
 import StoryServices from "./StoryServices";
 import VolumeServices from "./VolumeServices";
@@ -31,50 +32,19 @@ export class AuthorServices implements AbstractChildServices<Author>{
     // Standard CRUD Methods -------------------------------------------------
 
     public async all(libraryId: number, query?: any): Promise<Author[]> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "AuthorServices.all"
-            );
-        }
-        let options: FindOptions = this.appendMatchOptions({
+        const library = await LibraryServices.findLibrary("AuthorServices.all", libraryId);
+        const options: FindOptions = this.appendMatchOptions({
             order: SortOrder.AUTHORS,
         }, query);
         return await library.$get("authors", options);
     }
 
     public async find(libraryId: number, authorId: number, query?: any): Promise<Author> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "AuthorServices.find"
-            );
-        }
-        let options: FindOptions = this.appendIncludeOptions({
-            where: {
-                id: authorId,
-            }
-        }, query);
-        let results = await library.$get("authors", options);
-        if (results.length === 1) {
-            return results[0];
-        } else {
-            throw new NotFound(
-                `authorId: Missing Author ${authorId}`,
-                "AuthorServices.find");
-        }
+        return await this.findAuthor("AuthorServices.find", libraryId, authorId, query);
     }
 
     public async insert(libraryId: number, author: Author): Promise<Author> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "AuthorServices.insert"
-            );
-        }
+        const library = await LibraryServices.findLibrary("AuthorServices.insert", libraryId);
         try {
             author.libraryId = libraryId; // No cheating
             return await Author.create(author, {
@@ -96,37 +66,18 @@ export class AuthorServices implements AbstractChildServices<Author>{
     }
 
     public async remove(libraryId: number, authorId: number): Promise<Author> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "AuthorServices.remove"
-            );
-        }
-        const results = await library.$get("authors", {
-            where: { id: authorId },
-        });
-        if (results.length !== 1) {
-            throw new NotFound(
-                `authorId: Missing Author ${authorId}`,
-                "AuthorServices.remove",
-            );
-        }
+        const library = await LibraryServices.findLibrary("AuthorServices.remove", libraryId);
+        const author = await this.findAuthor("AuthorServices.remove", libraryId, authorId);
         await Author.destroy({
             where: { id: authorId },
         });
-        return results[0];
+        return author;
     }
 
     public async update(libraryId: number, authorId: number, author: Author): Promise<Author> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "AuthorServices.update"
-            );
-        }
+        const library = await LibraryServices.findLibrary("AuthorServices.update", libraryId);
         try {
+            author.libraryId = libraryId; // No cheating
             const results = await Author.update(author, {
                 fields: FIELDS_WITH_ID,
                 returning: true,
@@ -162,14 +113,8 @@ export class AuthorServices implements AbstractChildServices<Author>{
     // Model-Specific Methods ------------------------------------------------
 
     public async exact(libraryId: number, firstName: string, lastName: string, query?: any): Promise<Author> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "AuthorServices.exact"
-            );
-        }
-        let options = this.appendIncludeOptions({
+        const library = await LibraryServices.findLibrary("AuthorServices.exact", libraryId);
+        const options = this.appendIncludeOptions({
             where: {
                 first_name: firstName,
                 last_name: lastName,
@@ -185,322 +130,105 @@ export class AuthorServices implements AbstractChildServices<Author>{
     }
 
     public async series(libraryId: number, authorId: number, query?: any): Promise<Series[]> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "AuthorServices.series"
-            );
-        }
-        const author = await Author.findOne({
-            where: {
-                id: authorId,
-                libraryId: libraryId
-            }
-        })
-        if (!author) {
-            throw new NotFound(
-                `authorId: Missing Author ${authorId}`,
-                "AuthorServices.series"
-            );
-        }
-        let options: FindOptions = SeriesServices.appendMatchOptions({
+        const library = await LibraryServices.findLibrary("AuthorServices.series", libraryId);
+        const author = await this.findAuthor("AuthorSeries.series", libraryId, authorId);
+        const options: FindOptions = SeriesServices.appendIncludeOptions({
             order: SortOrder.SERIES,
         }, query);
         return await author.$get("series", options);
     }
 
     public async seriesExclude(libraryId: number, authorId: number, seriesId: number): Promise<Series> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "AuthorServices.seriesExclude"
-            );
-        }
-        const author = await Author.findOne({
-            where: {
-                id: authorId,
-                libraryId: libraryId
-            }
-        })
-        if (!author) {
-            throw new NotFound(
-                `authorId: Missing Author ${authorId}`,
-                "AuthorServices.seriesExclude"
-            );
-        }
-        const series = await Series.findOne({
-            where: {
-                id: seriesId,
-                libraryId: libraryId
-            }
-        })
-        if (!series) {
-            throw new NotFound(
-                `seriesId: Missing Series ${seriesId}`,
-                "AuthorServices.seriesExclude"
-            );
-        }
+        await LibraryServices.findLibrary("AuthorServices.seriesExclude", libraryId);
+        await this.findAuthor("AuthorServices.seriesExclude", libraryId, authorId);
+        const series = await SeriesServices.findSeries("AuthorServices.seriesExclude", libraryId, seriesId);
         await AuthorSeries.destroy({
             where: {
                 authorId: authorId,
-                seriesId: seriesId
+                seriesId: seriesId,
             }
         });
         return series;
     }
 
     public async seriesInclude(libraryId: number, authorId: number, seriesId: number, principal: boolean | null): Promise<Series> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "AuthorServices.seriesInclude"
-            );
-        }
-        const author = await Author.findOne({
+        await LibraryServices.findLibrary("AuthorServices.seriesInclude", libraryId);
+        await this.findAuthor("AuthorServices.seriesInclude", libraryId, authorId);
+        const series = await SeriesServices.findSeries("AuthorServices.seriesInclude", libraryId, seriesId);
+        await AuthorSeries.destroy({
             where: {
-                id: authorId,
-                libraryId: libraryId
+                authorId: authorId,
+                seriesId: seriesId,
+                principal: principal,
             }
-        })
-        if (!author) {
-            throw new NotFound(
-                `authorId: Missing Author ${authorId}`,
-                "AuthorServices.seriesInclude"
-            );
-        }
-        const series = await Series.findOne({
-            where: {
-                id: seriesId,
-                libraryId: libraryId
-            }
-        })
-        if (!series) {
-            throw new NotFound(
-                `seriesId: Missing Series ${seriesId}`,
-                "AuthorServices.seriesInclude"
-            );
-        }
-        await AuthorSeries.create({
-            authorId: authorId,
-            seriesId: seriesId,
-            principal: principal ? true : false,
         });
         return series;
     }
 
     public async stories(libraryId: number, authorId: number, query?: any): Promise<Story[]> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "AuthorServices.stories"
-            );
-        }
-        const author = await Author.findOne({
-            where: {
-                id: authorId,
-                libraryId: libraryId
-            }
-        })
-        if (!author) {
-            throw new NotFound(
-                `authorId: Missing Author ${authorId}`,
-                "AuthorServices.stories"
-            );
-        }
-        let options: FindOptions = StoryServices.appendMatchOptions({
+        const library = await LibraryServices.findLibrary("AuthorServices.stories", libraryId);
+        const author = await this.findAuthor("AuthorServices.stories", libraryId, authorId);
+        const options: FindOptions = StoryServices.appendMatchOptions({
             order: SortOrder.STORIES,
         }, query);
         return await author.$get("stories", options);
     }
 
     public async storiesExclude(libraryId: number, authorId: number, storyId: number): Promise<Story> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "AuthorServices.storiesExclude"
-            );
-        }
-        const author = await Author.findOne({
-            where: {
-                id: authorId,
-                libraryId: libraryId
-            }
-        })
-        if (!author) {
-            throw new NotFound(
-                `authorId: Missing Author ${authorId}`,
-                "AuthorServices.storiesExclude"
-            );
-        }
-        const story = await Story.findOne({
-            where: {
-                id: storyId,
-                libraryId: libraryId
-            }
-        })
-        if (!story) {
-            throw new NotFound(
-                `storyId: Missing Story ${storyId}`,
-                "AuthorServices.storiesExclude"
-            );
-        }
+        await LibraryServices.findLibrary("AuthorServices.storiesExclude", libraryId);
+        await this.findAuthor("AuthorServices.storiesExclude", libraryId, authorId);
+        const story = await StoryServices.findStory("AuthorServices.storiesExclude", libraryId, storyId);
         await AuthorStory.destroy({
             where: {
                 authorId: authorId,
-                storyId: storyId
+                storyId: storyId,
             }
         });
         return story;
     }
 
     public async storiesInclude(libraryId: number, authorId: number, storyId: number, principal: boolean | null): Promise<Story> {
-       const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "AuthorServices.storiesInclude"
-            );
-        }
-        const author = await Author.findOne({
-            where: {
-                id: authorId,
-                libraryId: libraryId
-            }
-        })
-        if (!author) {
-            throw new NotFound(
-                `authorId: Missing Author ${authorId}`,
-                "AuthorServices.storiesInclude"
-            );
-        }
-        const story = await Story.findOne({
-            where: {
-                id: storyId,
-                libraryId: libraryId
-            }
-        })
-        if (!story) {
-            throw new NotFound(
-                `storyId: Missing Story ${storyId}`,
-                "AuthorServices.storiesInclude"
-            );
-        }
+        await LibraryServices.findLibrary("AuthorServices.storiesInclude", libraryId);
+        await this.findAuthor("AuthorServices.storiesInclude", libraryId, authorId);
+        const story = await StoryServices.findStory("AuthorServices.storiesInclude", libraryId, storyId);
         await AuthorStory.create({
             authorId: authorId,
             storyId: storyId,
-            principal: principal ? true : false,
+            principal: principal,
         });
         return story;
     }
 
     public async volumes(libraryId: number, authorId: number, query?: any): Promise<Volume[]> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "AuthorServices.volumes"
-            );
-        }
-        const author = await Author.findOne({
-            where: {
-                id: authorId,
-                libraryId: libraryId
-            }
-        })
-        if (!author) {
-            throw new NotFound(
-                `authorId: Missing Author ${authorId}`,
-                "AuthorServices.volumes"
-            );
-        }
-        let options: FindOptions = VolumeServices.appendMatchOptions({
+        const library = await LibraryServices.findLibrary("AuthorServices.volumes", libraryId);
+        const author = await this.findAuthor("AuthorServices.volumes", libraryId, authorId);
+        const options: FindOptions = VolumeServices.appendMatchOptions({
             order: SortOrder.VOLUMES,
         }, query);
         return await author.$get("volumes", options);
     }
 
     public async volumesExclude(libraryId: number, authorId: number, volumeId: number): Promise<Volume> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "AuthorServices.volumesExclude"
-            );
-        }
-        const author = await Author.findOne({
-            where: {
-                id: authorId,
-                libraryId: libraryId
-            }
-        })
-        if (!author) {
-            throw new NotFound(
-                `authorId: Missing Author ${authorId}`,
-                "AuthorServices.volumesExclude"
-            );
-        }
-        const volume = await Volume.findOne({
-            where: {
-                id: volumeId,
-                libraryId: libraryId
-            }
-        })
-        if (!volume) {
-            throw new NotFound(
-                `volumeId: Missing Volume ${volumeId}`,
-                "AuthorServices.volumesExclude"
-            );
-        }
+        await LibraryServices.findLibrary("AuthorServices.volumesExclude", libraryId);
+        await this.findAuthor("AuthorServices.volumesExclude", libraryId, authorId);
+        const volume = await VolumeServices.findVolume("AuthorServices.volumesExclude", libraryId, volumeId);
         await AuthorVolume.destroy({
             where: {
                 authorId: authorId,
-                volumeId: volumeId
+                volumeId: volumeId,
             }
         });
         return volume;
     }
 
     public async volumesInclude(libraryId: number, authorId: number, volumeId: number, principal: boolean | null): Promise<Volume> {
-        const library = await Library.findByPk(libraryId);
-        if (!library) {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                "AuthorServices.volumesInclude"
-            );
-        }
-        const author = await Author.findOne({
-            where: {
-                id: authorId,
-                libraryId: libraryId
-            }
-        })
-        if (!author) {
-            throw new NotFound(
-                `authorId: Missing Author ${authorId}`,
-                "AuthorServices.volumesInclude"
-            );
-        }
-        const volume = await Volume.findOne({
-            where: {
-                id: volumeId,
-                libraryId: libraryId
-            }
-        })
-        if (!volume) {
-            throw new NotFound(
-                `volumeId: Missing Volume ${volumeId}`,
-                "AuthorServices.volumesInclude"
-            );
-        }
+        await LibraryServices.findLibrary("AuthorServices.volumesInclude", libraryId);
+        await this.findAuthor("AuthorServices.volumesInclude", libraryId, authorId);
+        const volume = await VolumeServices.findVolume("AuthorServices.volumesInclude", libraryId, volumeId);
         await AuthorVolume.create({
             authorId: authorId,
             volumeId: volumeId,
-            principal: principal ? true : false,
+            principal: principal,
         });
         return volume;
     }
