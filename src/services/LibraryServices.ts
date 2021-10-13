@@ -36,7 +36,7 @@ export class LibraryServices extends AbstractParentServices<Library> {
     }
 
     public async find(libraryId: number, query?: any): Promise<Library> {
-        return await this.findLibrary("LibraryServices.find", libraryId, query);
+        return await this.read("LibraryServices.find", libraryId, query);
     }
 
     public async insert(library: Library): Promise<Library> {
@@ -60,7 +60,7 @@ export class LibraryServices extends AbstractParentServices<Library> {
     }
 
     public async remove(libraryId: number): Promise<Library> {
-        const library = await this.findLibrary("LibraryServices.remove", libraryId);
+        const library = await this.read("LibraryServices.remove", libraryId);
         await Library.destroy({
             where: { id: libraryId }
         });
@@ -102,7 +102,7 @@ export class LibraryServices extends AbstractParentServices<Library> {
     // Model-Specific Methods ------------------------------------------------
 
     public async authors(libraryId: number, query?: any): Promise<Author[]> {
-        const library = await this.findLibrary("LibraryServices.authors", libraryId);
+        const library = await this.read("LibraryServices.authors", libraryId);
         const options: FindOptions = AuthorServices.appendMatchOptions({
             order: SortOrder.AUTHORS,
         }, query);
@@ -125,7 +125,7 @@ export class LibraryServices extends AbstractParentServices<Library> {
     }
 
     public async series(libraryId: number, query?: any): Promise<Series[]> {
-        const library = await this.findLibrary("LibraryServices.series", libraryId);
+        const library = await this.read("LibraryServices.series", libraryId);
         const options: FindOptions = SeriesServices.appendMatchOptions({
             order: SortOrder.SERIES,
         }, query);
@@ -133,7 +133,7 @@ export class LibraryServices extends AbstractParentServices<Library> {
     }
 
     public async stories(libraryId: number, query?: any): Promise<Story[]> {
-        const library = await this.findLibrary("LibraryServices.stories", libraryId);
+        const library = await this.read("LibraryServices.stories", libraryId);
         const options: FindOptions = StoryServices.appendMatchOptions({
             order: SortOrder.STORIES,
         }, query);
@@ -141,7 +141,7 @@ export class LibraryServices extends AbstractParentServices<Library> {
     }
 
     public async volumes(libraryId: number, query?: any): Promise<Volume[]> {
-        const library = await this.findLibrary("LibraryServices.volumes", libraryId);
+        const library = await this.read("LibraryServices.volumes", libraryId);
         const options: FindOptions = VolumeServices.appendMatchOptions({
             order: SortOrder.VOLUMES,
         }, query);
@@ -211,7 +211,7 @@ export class LibraryServices extends AbstractParentServices<Library> {
      * @param libraryId                 ID of requested Library
      * @param query                     Optional include query parameters
      */
-    public async findLibrary(context: string, libraryId: number, query?: any): Promise<Library> {
+    public async read(context: string, libraryId: number, query?: any): Promise<Library> {
         const options: FindOptions = this.appendIncludeOptions({
             where: { id: libraryId }
         }, query);

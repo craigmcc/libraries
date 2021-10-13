@@ -32,7 +32,7 @@ export class AuthorServices implements AbstractChildServices<Author>{
     // Standard CRUD Methods -------------------------------------------------
 
     public async all(libraryId: number, query?: any): Promise<Author[]> {
-        const library = await LibraryServices.findLibrary("AuthorServices.all", libraryId);
+        const library = await LibraryServices.read("AuthorServices.all", libraryId);
         const options: FindOptions = this.appendMatchOptions({
             order: SortOrder.AUTHORS,
         }, query);
@@ -40,11 +40,11 @@ export class AuthorServices implements AbstractChildServices<Author>{
     }
 
     public async find(libraryId: number, authorId: number, query?: any): Promise<Author> {
-        return await this.findAuthor("AuthorServices.find", libraryId, authorId, query);
+        return await this.read("AuthorServices.find", libraryId, authorId, query);
     }
 
     public async insert(libraryId: number, author: Author): Promise<Author> {
-        const library = await LibraryServices.findLibrary("AuthorServices.insert", libraryId);
+        const library = await LibraryServices.read("AuthorServices.insert", libraryId);
         try {
             author.libraryId = libraryId; // No cheating
             return await Author.create(author, {
@@ -66,8 +66,8 @@ export class AuthorServices implements AbstractChildServices<Author>{
     }
 
     public async remove(libraryId: number, authorId: number): Promise<Author> {
-        const library = await LibraryServices.findLibrary("AuthorServices.remove", libraryId);
-        const author = await this.findAuthor("AuthorServices.remove", libraryId, authorId);
+        const library = await LibraryServices.read("AuthorServices.remove", libraryId);
+        const author = await this.read("AuthorServices.remove", libraryId, authorId);
         await Author.destroy({
             where: { id: authorId },
         });
@@ -75,7 +75,7 @@ export class AuthorServices implements AbstractChildServices<Author>{
     }
 
     public async update(libraryId: number, authorId: number, author: Author): Promise<Author> {
-        const library = await LibraryServices.findLibrary("AuthorServices.update", libraryId);
+        const library = await LibraryServices.read("AuthorServices.update", libraryId);
         try {
             author.libraryId = libraryId; // No cheating
             const results = await Author.update(author, {
@@ -113,7 +113,7 @@ export class AuthorServices implements AbstractChildServices<Author>{
     // Model-Specific Methods ------------------------------------------------
 
     public async exact(libraryId: number, firstName: string, lastName: string, query?: any): Promise<Author> {
-        const library = await LibraryServices.findLibrary("AuthorServices.exact", libraryId);
+        const library = await LibraryServices.read("AuthorServices.exact", libraryId);
         const options = this.appendIncludeOptions({
             where: {
                 first_name: firstName,
@@ -130,8 +130,8 @@ export class AuthorServices implements AbstractChildServices<Author>{
     }
 
     public async series(libraryId: number, authorId: number, query?: any): Promise<Series[]> {
-        const library = await LibraryServices.findLibrary("AuthorServices.series", libraryId);
-        const author = await this.findAuthor("AuthorSeries.series", libraryId, authorId);
+        const library = await LibraryServices.read("AuthorServices.series", libraryId);
+        const author = await this.read("AuthorSeries.series", libraryId, authorId);
         const options: FindOptions = SeriesServices.appendIncludeOptions({
             order: SortOrder.SERIES,
         }, query);
@@ -139,9 +139,9 @@ export class AuthorServices implements AbstractChildServices<Author>{
     }
 
     public async seriesExclude(libraryId: number, authorId: number, seriesId: number): Promise<Series> {
-        await LibraryServices.findLibrary("AuthorServices.seriesExclude", libraryId);
-        await this.findAuthor("AuthorServices.seriesExclude", libraryId, authorId);
-        const series = await SeriesServices.findSeries("AuthorServices.seriesExclude", libraryId, seriesId);
+        await LibraryServices.read("AuthorServices.seriesExclude", libraryId);
+        await this.read("AuthorServices.seriesExclude", libraryId, authorId);
+        const series = await SeriesServices.read("AuthorServices.seriesExclude", libraryId, seriesId);
         await AuthorSeries.destroy({
             where: {
                 authorId: authorId,
@@ -152,9 +152,9 @@ export class AuthorServices implements AbstractChildServices<Author>{
     }
 
     public async seriesInclude(libraryId: number, authorId: number, seriesId: number, principal: boolean | null): Promise<Series> {
-        await LibraryServices.findLibrary("AuthorServices.seriesInclude", libraryId);
-        await this.findAuthor("AuthorServices.seriesInclude", libraryId, authorId);
-        const series = await SeriesServices.findSeries("AuthorServices.seriesInclude", libraryId, seriesId);
+        await LibraryServices.read("AuthorServices.seriesInclude", libraryId);
+        await this.read("AuthorServices.seriesInclude", libraryId, authorId);
+        const series = await SeriesServices.read("AuthorServices.seriesInclude", libraryId, seriesId);
         await AuthorSeries.destroy({
             where: {
                 authorId: authorId,
@@ -166,8 +166,8 @@ export class AuthorServices implements AbstractChildServices<Author>{
     }
 
     public async stories(libraryId: number, authorId: number, query?: any): Promise<Story[]> {
-        const library = await LibraryServices.findLibrary("AuthorServices.stories", libraryId);
-        const author = await this.findAuthor("AuthorServices.stories", libraryId, authorId);
+        const library = await LibraryServices.read("AuthorServices.stories", libraryId);
+        const author = await this.read("AuthorServices.stories", libraryId, authorId);
         const options: FindOptions = StoryServices.appendMatchOptions({
             order: SortOrder.STORIES,
         }, query);
@@ -175,9 +175,9 @@ export class AuthorServices implements AbstractChildServices<Author>{
     }
 
     public async storiesExclude(libraryId: number, authorId: number, storyId: number): Promise<Story> {
-        await LibraryServices.findLibrary("AuthorServices.storiesExclude", libraryId);
-        await this.findAuthor("AuthorServices.storiesExclude", libraryId, authorId);
-        const story = await StoryServices.findStory("AuthorServices.storiesExclude", libraryId, storyId);
+        await LibraryServices.read("AuthorServices.storiesExclude", libraryId);
+        await this.read("AuthorServices.storiesExclude", libraryId, authorId);
+        const story = await StoryServices.read("AuthorServices.storiesExclude", libraryId, storyId);
         await AuthorStory.destroy({
             where: {
                 authorId: authorId,
@@ -188,9 +188,9 @@ export class AuthorServices implements AbstractChildServices<Author>{
     }
 
     public async storiesInclude(libraryId: number, authorId: number, storyId: number, principal: boolean | null): Promise<Story> {
-        await LibraryServices.findLibrary("AuthorServices.storiesInclude", libraryId);
-        await this.findAuthor("AuthorServices.storiesInclude", libraryId, authorId);
-        const story = await StoryServices.findStory("AuthorServices.storiesInclude", libraryId, storyId);
+        await LibraryServices.read("AuthorServices.storiesInclude", libraryId);
+        await this.read("AuthorServices.storiesInclude", libraryId, authorId);
+        const story = await StoryServices.read("AuthorServices.storiesInclude", libraryId, storyId);
         await AuthorStory.create({
             authorId: authorId,
             storyId: storyId,
@@ -200,8 +200,8 @@ export class AuthorServices implements AbstractChildServices<Author>{
     }
 
     public async volumes(libraryId: number, authorId: number, query?: any): Promise<Volume[]> {
-        const library = await LibraryServices.findLibrary("AuthorServices.volumes", libraryId);
-        const author = await this.findAuthor("AuthorServices.volumes", libraryId, authorId);
+        const library = await LibraryServices.read("AuthorServices.volumes", libraryId);
+        const author = await this.read("AuthorServices.volumes", libraryId, authorId);
         const options: FindOptions = VolumeServices.appendMatchOptions({
             order: SortOrder.VOLUMES,
         }, query);
@@ -209,9 +209,9 @@ export class AuthorServices implements AbstractChildServices<Author>{
     }
 
     public async volumesExclude(libraryId: number, authorId: number, volumeId: number): Promise<Volume> {
-        await LibraryServices.findLibrary("AuthorServices.volumesExclude", libraryId);
-        await this.findAuthor("AuthorServices.volumesExclude", libraryId, authorId);
-        const volume = await VolumeServices.findVolume("AuthorServices.volumesExclude", libraryId, volumeId);
+        await LibraryServices.read("AuthorServices.volumesExclude", libraryId);
+        await this.read("AuthorServices.volumesExclude", libraryId, authorId);
+        const volume = await VolumeServices.read("AuthorServices.volumesExclude", libraryId, volumeId);
         await AuthorVolume.destroy({
             where: {
                 authorId: authorId,
@@ -222,9 +222,9 @@ export class AuthorServices implements AbstractChildServices<Author>{
     }
 
     public async volumesInclude(libraryId: number, authorId: number, volumeId: number, principal: boolean | null): Promise<Volume> {
-        await LibraryServices.findLibrary("AuthorServices.volumesInclude", libraryId);
-        await this.findAuthor("AuthorServices.volumesInclude", libraryId, authorId);
-        const volume = await VolumeServices.findVolume("AuthorServices.volumesInclude", libraryId, volumeId);
+        await LibraryServices.read("AuthorServices.volumesInclude", libraryId);
+        await this.read("AuthorServices.volumesInclude", libraryId, authorId);
+        const volume = await VolumeServices.read("AuthorServices.volumesInclude", libraryId, volumeId);
         await AuthorVolume.create({
             authorId: authorId,
             volumeId: volumeId,
@@ -307,7 +307,7 @@ export class AuthorServices implements AbstractChildServices<Author>{
      * @param authorId                  ID of requested Author
      * @param query                     Optional include query parameters
      */
-    public async findAuthor(context: string, libraryId: number, authorId: number, query?: any): Promise<Author> {
+    public async read(context: string, libraryId: number, authorId: number, query?: any): Promise<Author> {
         const options: FindOptions = this.appendIncludeOptions({
             where: {
                 id: authorId,

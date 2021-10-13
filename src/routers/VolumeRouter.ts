@@ -24,32 +24,11 @@ export default VolumeRouter;
 
 // Model-Specific Routes (no volumeId) ---------------------------------------
 
-// GET /:libraryId/active - Find active Volumes
-VolumeRouter.get("/:libraryId/active",
-    requireRegular,
-    async (req: Request, res: Response) => {
-        res.send(await VolumeServices.active(
-            parseInt(req.params.libraryId, 10),
-            req.query
-        ));
-    });
-
 // GET /:libraryId/exact/:name - Find Volume by exact name
 VolumeRouter.get("/:libraryId/exact/:name",
     requireRegular,
     async (req: Request, res: Response) => {
         res.send(await VolumeServices.exact(
-            parseInt(req.params.libraryId, 10),
-            req.params.name,
-            req.query
-        ));
-    });
-
-// GET /:libraryId/name/:name - Find Volumes by name match
-VolumeRouter.get("/:libraryId/name/:name",
-    requireRegular,
-    async (req: Request, res: Response) => {
-        res.send(await VolumeServices.name(
             parseInt(req.params.libraryId, 10),
             req.params.name,
             req.query
