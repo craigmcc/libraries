@@ -22,8 +22,9 @@ import logger from "./util/ServerLogger";
 
 logger.info({
     context: "Startup",
-    msg: "Initialize Sequelize Models",
+    msg: "Sequelize models initialized",
     dialect: `${Database.getDialect()}`,
+    name: `${Database.getDatabaseName()}`,
 });
 
 // Configure and Start Server ------------------------------------------------
