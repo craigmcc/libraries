@@ -1,62 +1,91 @@
-// OAuthRefreshToken ---------------------------------------------------------
+// RefreshToken --------------------------------------------------------------
 
-// Pseudo-database model for refresh tokens
+// OAuth refresh token created by @craigmcc/oauth-orchestrator.
 
 // External Modules ----------------------------------------------------------
 
+import {BelongsTo, Column, DataType, ForeignKey, Table} from "sequelize-typescript";
+
 // Internal Modules ----------------------------------------------------------
+
+import AbstractModel from "./AbstractModel";
+import User from "./User";
+import {validateRefreshTokenTokenUnique} from "../util/AsyncValidators";
+import {BadRequest} from "../util/HttpErrors";
 
 // Public Objects ------------------------------------------------------------
 
-import {NotUnique} from "../util/HttpErrors";
-
-export class RefreshToken {
-
-    // Properties ------------------------------------------------------------
-
-    accessToken!: string;       // Access token this refresh token belongs to
-    id?: number;                // Pseudo primary key
-    expires!: Date;             // Expiration timestamp
-    token!: string;             // Refresh token value for this refresh token
-    userId!: number;            // Primary key of owning user
-
-    // Static Methods --------------------------------------------------------
-
-    static async create
-        (oauthRefreshToken: RefreshToken, options?: any)
-        : Promise<RefreshToken>
-    {
-        const original = REFRESH_TOKENS.get(oauthRefreshToken.token);
-        if (original) {
-            throw new NotUnique(`token: Refresh token '${oauthRefreshToken.token}' is already in use`);
-        } else {
-            oauthRefreshToken.id = ++REFRESH_TOKEN_ID;
-            REFRESH_TOKENS.set(oauthRefreshToken.token, oauthRefreshToken);
-            return oauthRefreshToken;
+@Table({
+    modelName: "refreshToken",
+    tableName: "refresh_tokens",
+    validate: {
+        isTokenUnique: async function(this: RefreshToken): Promise<void> {
+            if (!(await validateRefreshTokenTokenUnique(this))) {
+                throw new BadRequest(`token: Token '${this.token}' is already in use`);
+            }
         }
     }
+})
+class RefreshToken extends AbstractModel<RefreshToken> {
 
-    static async findAll(options?: any): Promise<RefreshToken[]> {
-        return Array.from(REFRESH_TOKENS.values());
-    }
-
-    static lookup = async (token: string): Promise<RefreshToken | null> => {
-        const result = REFRESH_TOKENS.get(token);
-        if (result) {
-            return result;
-        } else {
-            return null;
+    @Column({
+        allowNull: false,
+        field: "access_token",
+        type: DataType.TEXT,
+        validate: {
+            notNull: {
+                msg: "accessToken: Is required",
+            }
         }
-    }
+    })
+    accessToken!: string;
+
+    @Column({
+        allowNull: false,
+        field: "expires",
+        type: DataType.DATE,
+        validate: {
+            notNull: {
+                msg: "expires: Is required",
+            }
+        }
+    })
+    expires!: Date;
+
+    @Column({
+        allowNull: false,
+        field: "token",
+        type: DataType.TEXT,
+        validate: {
+            notNull: {
+                msg: "token: Is required",
+            }
+        }
+    })
+    token!: string;
+
+    @BelongsTo(() => User, {
+        foreignKey: {
+            allowNull: false,
+        },
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+    })
+    user!: User;
+
+    @ForeignKey(() => User)
+    @Column({
+        allowNull: false,
+        field: "user_id",
+        type: DataType.INTEGER,
+        validate: {
+            notNull: {
+                msg: "userId: Is required",
+            }
+        }
+    })
+    userId!: number;
 
 }
 
 export default RefreshToken;
-
-// Private Objects -----------------------------------------------------------
-
-let REFRESH_TOKEN_ID: number = 0;
-
-// Key = refresh token value
-const REFRESH_TOKENS: Map<string, RefreshToken> = new Map();
-

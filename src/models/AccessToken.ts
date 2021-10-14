@@ -1,66 +1,91 @@
-// OAuthAccessToken ----------------------------------------------------------
+// AccessToken ---------------------------------------------------------------
 
-// Pseudo-database model for access tokens
+// OAuth access token created by @craigmcc/oauth-orchestrator.
 
 // External Modules ----------------------------------------------------------
 
+import {BelongsTo, Column, DataType, ForeignKey, Table} from "sequelize-typescript";
+
 // Internal Modules ----------------------------------------------------------
+
+import AbstractModel from "./AbstractModel";
+import User from "./User";
+import {validateAccessTokenTokenUnique} from "../util/AsyncValidators";
+import {BadRequest} from "../util/HttpErrors";
 
 // Public Objects ------------------------------------------------------------
 
-import {NotUnique} from "../util/HttpErrors";
-
-export class AccessToken {
-
-    // Properties ------------------------------------------------------------
-
-    expires!: Date;             // Expiration timestamp
-    id?: number;                // Pseudo primary key
-    scope!: string;             // Authorized scopes (space separated)
-    token!: string;             // Access token value for this access token
-    userId!: number;            // Primary key of owning user
-
-    // Static Methods --------------------------------------------------------
-
-    static async create
-        (oauthAccessToken: AccessToken, options?: any)
-        : Promise<AccessToken>
-    {
-        const original = ACCESS_TOKENS.get(oauthAccessToken.token);
-        if (original) {
-            throw new NotUnique(`token: Access token '${oauthAccessToken.token}' is already in use`);
-        } else {
-            oauthAccessToken.id = ++ACCESS_TOKEN_ID;
-            ACCESS_TOKENS.set(oauthAccessToken.token, oauthAccessToken);
-            return oauthAccessToken;
+@Table({
+    modelName: "accessToken",
+    tableName: "access_tokens",
+    validate: {
+        isTokenUnique: async function(this: AccessToken): Promise<void> {
+            if (!(await validateAccessTokenTokenUnique(this))) {
+                throw new BadRequest(`token: Token '${this.token}' is already in use`);
+            }
         }
     }
+})
+class AccessToken extends AbstractModel<AccessToken> {
 
-    static destroy = async (token: string): Promise<void> => {
-        ACCESS_TOKENS.delete(token);
-    }
-
-    static async findAll(options?: any): Promise<AccessToken[]> {
-        return Array.from(ACCESS_TOKENS.values());
-    }
-
-    static lookup = async (token: string): Promise<AccessToken | null> => {
-        const result = ACCESS_TOKENS.get(token);
-        if (result) {
-            return result;
-        } else {
-            return null;
+    @Column({
+        allowNull: false,
+        field: "expires",
+        type: DataType.DATE,
+        validate: {
+            notNull: {
+                msg: "expires: Is required",
+            }
         }
-    }
+    })
+    expires!: Date;
+
+    @Column({
+        allowNull: false,
+        field: "scope",
+        type: DataType.TEXT,
+        validate: {
+            notNull: {
+                msg: "scope: Is required",
+            }
+        }
+    })
+    scope!: string;
+
+    @Column({
+        allowNull: false,
+        field: "token",
+        type: DataType.TEXT,
+        validate: {
+            notNull: {
+                msg: "token: Is required",
+            }
+        }
+    })
+    token!: string
+
+    @BelongsTo(() => User, {
+        foreignKey: {
+            allowNull: false,
+        },
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+    })
+    user!: User;
+
+    @ForeignKey(() => User)
+    @Column({
+        allowNull: false,
+        field: "user_id",
+        type: DataType.INTEGER,
+        validate: {
+            notNull: {
+                msg: "userId: Is required",
+            }
+        }
+    })
+    userId!: number;
 
 }
 
 export default AccessToken;
-
-// Private Objects -----------------------------------------------------------
-
-let ACCESS_TOKEN_ID: number = 0;
-
-// Key = access token value
-const ACCESS_TOKENS: Map<string, AccessToken> = new Map();
-

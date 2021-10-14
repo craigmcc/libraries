@@ -87,7 +87,7 @@ const createAccessToken: CreateAccessToken
     } else {
         incomingId = userId;
     }
-    const incoming: OAuthAccessToken = {
+    const incoming: Partial<OAuthAccessToken> = {
         expires: expires,
         scope: scope,
         token: await generateRandomToken(),
@@ -119,7 +119,7 @@ const createRefreshToken: CreateRefreshToken
     } else {
         incomingId = userId;
     }
-    const incoming: OAuthRefreshToken = {
+    const incoming: Partial<OAuthRefreshToken> = {
         accessToken: accessToken,
         expires: expires,
         token: await generateRandomToken(),
@@ -145,13 +145,9 @@ const retrieveAccessToken: RetrieveAccessToken
 {
 
     // Look up the specified token
-/*
-    const oauthAccessToken: OAuthAccessToken | null
-        = await OAuthAccessToken.findOne({
+    const oauthAccessToken = await OAuthAccessToken.findOne({
         where: { token: token }
     });
-*/
-    const oauthAccessToken = await OAuthAccessToken.lookup(token);
     if (!oauthAccessToken) {
         throw new NotFound("token: Missing or invalid token");
     }
@@ -171,13 +167,9 @@ const retrieveRefreshToken: RetrieveRefreshToken
 {
 
     // Look up the specified token
-/*
-    const oauthRefreshToken: OAuthRefreshToken | null
-        = await OAuthRefreshToken.findOne({
+    const oauthRefreshToken = await OAuthRefreshToken.findOne({
         where: { token: token }
     });
-*/
-    const oauthRefreshToken = await OAuthRefreshToken.lookup(token);
     if (!oauthRefreshToken) {
         throw new NotFound("token: Missing or invalid token");
     }
@@ -195,38 +187,25 @@ const retrieveRefreshToken: RetrieveRefreshToken
 const revokeAccessToken: RevokeAccessToken = async (token: string): Promise<void> => {
 
     // Look up the specified token
-    logger.info({
-        context: "OAuthOrchestratorHandlers.revokeAccessToken",
-        token: token
-    });
-/*
-    const oauthAccessToken: OAuthAccessToken | null
-        = await OAuthAccessToken.findOne({
+    const oauthAccessToken = await OAuthAccessToken.findOne({
         where: { token: token }
     });
-*/
-    const oauthAccessToken = await OAuthAccessToken.lookup(token);
     if (!oauthAccessToken) {
         throw new NotFound(
             "token: Missing or invalid token",
-            "OAuthOrchestratorHandlers.revokeAccessToken()"
+            "OAuthOrchestratorHandlers.revokeAccessToken"
         );
     }
 
     // Revoke any associated refresh tokens
-/* TODO - not implemented
     await OAuthRefreshToken.destroy({
         where: { accessToken: token }
     });
-*/
 
     // Revoke the access token as well
-/*
     await OAuthAccessToken.destroy({
         where: { token: token }
     });
-*/
-    await OAuthAccessToken.destroy(token);
 
 }
 

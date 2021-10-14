@@ -11,11 +11,32 @@ import {Op} from "sequelize";
 
 // Internal Modules ----------------------------------------------------------
 
+import AccessToken from "../models/AccessToken";
 import Author from "../models/Author";
 import Library from "../models/Library";
+import RefreshToken from "../models/RefreshToken";
 import User from "../models/User";
 
 // Public Objects ------------------------------------------------------------
+
+export const validateAccessTokenTokenUnique
+    = async (accessToken: AccessToken): Promise<boolean> =>
+{
+    if (accessToken && accessToken.token) {
+        let options: any = {
+            where: {
+                token: accessToken.token,
+            }
+        }
+        if (accessToken.id && (accessToken.id > 0)) {
+            options.where.id = { [Op.ne]: accessToken.id }
+        }
+        const results = await AccessToken.findAll(options);
+        return (results.length === 0);
+    } else {
+        return true;
+    }
+}
 
 export const validateAuthorId
     = async (libraryId: number, authorId: number | undefined): Promise<boolean> =>
@@ -108,6 +129,25 @@ export const validateLibraryScopeUnique
             }
         }
         let results = await Library.findAll(options);
+        return (results.length === 0);
+    } else {
+        return true;
+    }
+}
+
+export const validateRefreshTokenTokenUnique
+    = async (refreshToken: RefreshToken): Promise<boolean> =>
+{
+    if (refreshToken && refreshToken.token) {
+        let options: any = {
+            where: {
+                token: refreshToken.token,
+            }
+        }
+        if (refreshToken.id && (refreshToken.id > 0)) {
+            options.where.id = { [Op.ne]: refreshToken.id }
+        }
+        const results = await RefreshToken.findAll(options);
         return (results.length === 0);
     } else {
         return true;
