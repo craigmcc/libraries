@@ -11,7 +11,7 @@ import {Request, Response, Router} from "express";
 import {
     requireAdmin,
     requireRegular,
-} from "../oauth/oauth-middleware";
+} from "../oauth/OAuthMiddleware";
 import VolumeServices from "../services/VolumeServices";
 
 // Public Objects ------------------------------------------------------------

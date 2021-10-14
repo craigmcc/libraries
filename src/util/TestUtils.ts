@@ -17,7 +17,7 @@ import Story from "../models/Story";
 import Volume from "../models/Volume";
 import SeriesStory from "../models/SeriesStory";
 import User from "../models/User";
-import {hashPassword} from "../oauth/oauth-utils";
+import {hashPassword} from "../oauth/OAuthUtils";
 import {NotFound} from "./HttpErrors";
 
 // Public Objects ------------------------------------------------------------

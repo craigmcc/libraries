@@ -22,7 +22,7 @@ import {
 
 import OAuthAccessToken from "../models/AccessToken";
 import OAuthRefreshToken from "../models/RefreshToken";
-import {generateRandomToken, verifyPassword} from "./oauth-utils";
+import {generateRandomToken, verifyPassword} from "./OAuthUtils";
 import OAuthUser from "../models/User";
 import {NotFound} from "../util/HttpErrors";
 import logger from "../util/ServerLogger";

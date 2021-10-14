@@ -14,7 +14,7 @@ const rfs = require("rotating-file-stream");
 // Internal Modules ----------------------------------------------------------
 
 import ApiRouter from "./ApiRouter";
-import {handleOAuthError} from "../oauth/oauth-middleware";
+import {handleOAuthError} from "../oauth/OAuthMiddleware";
 import OAuthRouter from "../oauth/OAuthRouter";
 import {handleHttpError, handleServerError, handleValidationError} from "../util/Middleware";
 import logger from "../util/ServerLogger";

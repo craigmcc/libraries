@@ -21,7 +21,7 @@ import {
     requireAny,
     requireNotProduction,
     requireSuperuser
-} from "./oauth-middleware";
+} from "./OAuthMiddleware";
 import AccessToken from "../models/AccessToken";
 import RefreshToken from "../models/RefreshToken";
 import {OAuthOrchestrator} from "../server";
@@ -58,27 +58,6 @@ OAuthTokenRouter.delete("/",
                 "revokeToken");
         }
     });
-
-// Return the user object for the (validated) access token
-// that was used to authorize this request.
-OAuthTokenRouter.get("/",
-    requireAny,
-    async (req: Request, res: Response) => {
-        const accessToken = await AccessToken.lookup(res.locals.token);
-        if (accessToken) {
-            const user = await User.findByPk(accessToken.userId);
-            if (user) {
-                user.password = "*REDACTED*";
-                logger.info({
-                    context: "OAuthTokenRouter.me",
-                    msg: "Returning user",
-                    user: JSON.stringify(user),
-                })
-                return user;
-            }
-        }
-        throw new NotFound(`token: No user found for this token`);
-    })
 
 // Request access token and optional refresh token.
 OAuthTokenRouter.post("/",
@@ -129,19 +108,5 @@ OAuthTokenRouter.post("/",
         }
 
     });
-
-OAuthTokenRouter.get("/accessTokens",
-    requireNotProduction,
-    requireSuperuser,
-    async (req: Request, res: Response) => {
-        res.send(await AccessToken.findAll());
-    })
-
-OAuthTokenRouter.get("/refreshTokens",
-    requireNotProduction,
-    requireSuperuser,
-    async (req: Request, res: Response) => {
-        res.send(await RefreshToken.findAll());
-    })
 
 export default OAuthTokenRouter;

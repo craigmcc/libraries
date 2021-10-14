@@ -8,7 +8,7 @@ import {Request, Response, Router} from "express";
 
 // Internal Modules ----------------------------------------------------------
 
-import {requireNotProduction, requireSuperuser} from "../oauth/oauth-middleware";
+import {requireNotProduction, requireSuperuser} from "../oauth/OAuthMiddleware";
 import DevModeServices from "../services/DevModeServices";
 
 // Public Objects ------------------------------------------------------------

@@ -13,7 +13,7 @@ import AccessToken from "../models/AccessToken";
 import RefreshToken from "../models/RefreshToken";
 import User from "../models/User";
 import * as SortOrder from "../models/SortOrder";
-import {hashPassword} from "../oauth/oauth-utils";
+import {hashPassword} from "../oauth/OAuthUtils";
 import {BadRequest, NotFound} from "../util/HttpErrors";
 import {appendPaginationOptions} from "../util/QueryParameters";
 

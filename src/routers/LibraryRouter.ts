@@ -14,7 +14,7 @@ import {
     requireNone,
     requireRegular,
     requireSuperuser,
-} from "../oauth/oauth-middleware";
+} from "../oauth/OAuthMiddleware";
 import LibraryServices from "../services/LibraryServices";
 
 // Public Objects ------------------------------------------------------------
