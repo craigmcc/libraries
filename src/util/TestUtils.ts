@@ -19,78 +19,148 @@ import SeriesStory from "../models/SeriesStory";
 import User from "../models/User";
 import {hashPassword} from "../oauth/OAuthUtils";
 import {NotFound} from "./HttpErrors";
+import {PasswordTokenRequest} from "@craigmcc/oauth-orchestrator";
+import {OAuthOrchestrator} from "../server";
 
 // Public Objects ------------------------------------------------------------
 
-export const findLibraryByName = async (name: string): Promise<Library> => {
+export const authorization = async (username: string): Promise<string> => {
+    const user = await lookupUser(username);
+    const request: PasswordTokenRequest = {
+        grant_type: "password",
+        password: user.username, // For tests, we hashed the username as the password
+        scope: user.scope,
+        username: user.username,
+    }
+    const response = await OAuthOrchestrator.token(request);
+    return `Bearer ${response.access_token}`;
+}
+
+export type OPTIONS = {
+    withAccessTokens: boolean,
+    withAuthors: boolean,
+    withLibraries: boolean,
+    withRefreshTokens: boolean,
+    withSeries: boolean,
+    withStories: boolean,
+    withUsers: boolean,
+    withVolumes: boolean,
+}
+
+export const loadTestData = async (options: Partial<OPTIONS> = {}): Promise<void> => {
+
+    // Create tables (if necessary), and erase current contents
+    await Database.sync({
+        force: true,
+    });
+
+    // Load users (and tokens) if requested
+    if (options.withUsers) {
+        // TODO - loadUsers()
+    }
+    const user: User = await loadUser();  // TODO - replace by loading from SeedData
+
+    // If libraries are not requested, nothing else will be loaded
+    let libraries: Library[] = [];
+    if (options.withLibraries) {
+        libraries = await loadLibraries(SeedData.LIBRARIES);
+    } else {
+        return;
+    }
+
+    // Storage for detailed data (if loaded)
+    let authors0: Author[] = [];
+    let authors1: Author[] = [];
+    let series0: Series[] = [];
+    let series1: Series[] = [];
+    let stories0: Story[] = [];
+    let stories1: Story[] = [];
+    let volumes0: Volume[] = [];
+    let volumes1: Volume[] = [];
+
+    // Load top level detailed data as requested
+    if (options.withAuthors) {
+        authors0 = await loadAuthors(libraries[0], SeedData.AUTHORS_LIBRARY0);
+        authors1 = await loadAuthors(libraries[1], SeedData.AUTHORS_LIBRARY1);
+    }
+    if (options.withSeries) {
+        series0 = await loadSeries(libraries[0], SeedData.SERIES_LIBRARY0);
+        series1 = await loadSeries(libraries[1], SeedData.SERIES_LIBRARY1);
+    }
+    if (options.withStories) {
+        stories0 = await loadStories(libraries[0], SeedData.STORIES_LIBRARY0);
+        stories1 = await loadStories(libraries[1], SeedData.STORIES_LIBRARY1);
+    }
+    if (options.withVolumes) {
+        volumes0 = await loadVolumes(libraries[0], SeedData.VOLUMES_LIBRARY0);
+        volumes1 = await loadVolumes(libraries[1], SeedData.VOLUMES_LIBRARY1);
+    }
+
+    // Load relationships if both related tables were requested
+    if (options.withAuthors && options.withSeries) {
+        loadAuthorSeries(authors0[0], [series0[0]]);
+        loadAuthorSeries(authors0[1], [series0[0]]);
+        loadAuthorSeries(authors1[0], [series1[0]]);
+        loadAuthorSeries(authors1[1], [series1[0]]);
+    }
+    if (options.withAuthors && options.withStories) {
+        loadAuthorStories(authors0[0], [stories0[0], stories0[2]]);
+        loadAuthorStories(authors0[1], [stories0[1], stories0[2]]);
+        loadAuthorStories(authors1[0], [stories1[0], stories1[2]]);
+        loadAuthorStories(authors1[1], [stories1[1], stories1[2]]);
+    }
+    if (options.withAuthors && options.withVolumes) {
+        loadAuthorVolumes(authors0[0], [volumes0[0], volumes0[2]]);
+        loadAuthorVolumes(authors0[1], [volumes0[1], volumes0[2]]);
+        loadAuthorVolumes(authors1[0], [volumes1[0], volumes1[2]]);
+        loadAuthorVolumes(authors1[1], [volumes1[1], volumes1[2]]);
+    }
+    if (options.withSeries && options.withStories) {
+        loadSeriesStory(series0[0], stories0[0], 1);
+        loadSeriesStory(series0[0], stories0[1], 2);
+        loadSeriesStory(series0[0], stories0[2], 3);
+        loadSeriesStory(series1[0], stories1[0], 3);
+        loadSeriesStory(series1[0], stories1[1], 2);
+        loadSeriesStory(series1[0], stories1[2], 1);
+    }
+    if (options.withVolumes && options.withStories) {
+        loadVolumeStories(volumes0[0], [stories0[0]]);
+        loadVolumeStories(volumes0[1], [stories0[1]]);
+        loadVolumeStories(volumes0[2], [stories0[0], stories0[1], stories0[2]]);
+        loadVolumeStories(volumes1[0], [stories1[0]]);
+        loadVolumeStories(volumes1[1], [stories1[1]]);
+        loadVolumeStories(volumes1[2], [stories1[0], stories1[1], stories1[2]]);
+    }
+
+}
+
+export const lookupLibrary = async (name: string): Promise<Library> => {
     const result = await Library.findOne({
-        where: { name: name },
+        where: { name: name }
     });
     if (result) {
         return result;
     } else {
-        throw new NotFound(`name: Should have found Library '${name}'`);
+        throw new NotFound(`name: Should have found Library for '${name}'`);
     }
 }
 
-export const reloadTestData = async (): Promise<void> => {
-
-    // Synchronize database to create tables if needed
-    await Database.sync();
-
-    // Reload test data in top-down order
-
-    await removeLibraries(SeedData.LIBRARIES);
-    const libraries: Library[] = await reloadLibraries(SeedData.LIBRARIES);
-    const authors0: Author[] = await reloadAuthors(libraries[0], SeedData.AUTHORS_LIBRARY0);
-    const authors1: Author[] = await reloadAuthors(libraries[1], SeedData.AUTHORS_LIBRARY1);
-    const series0: Series[] = await reloadSeries(libraries[0], SeedData.SERIES_LIBRARY0);
-    const series1: Series[] = await reloadSeries(libraries[1], SeedData.SERIES_LIBRARY1);
-    const stories0: Story[] = await reloadStories(libraries[0], SeedData.STORIES_LIBRARY0);
-    const stories1: Story[] = await reloadStories(libraries[1], SeedData.STORIES_LIBRARY1);
-    const volumes0: Volume[] = await reloadVolumes(libraries[0], SeedData.VOLUMES_LIBRARY0);
-    const volumes1: Volume[] = await reloadVolumes(libraries[1], SeedData.VOLUMES_LIBRARY1);
-    const user: User = await reloadUser();
-
-    // Establish many-many relationships (requires knowledge of seed data content)
-
-    reloadAuthorSeries(authors0[0], [series0[0]]);
-    reloadAuthorSeries(authors0[1], [series0[0]]);
-    reloadAuthorSeries(authors1[0], [series1[0]]);
-    reloadAuthorSeries(authors1[1], [series1[0]]);
-
-    reloadAuthorStories(authors0[0], [stories0[0], stories0[2]]);
-    reloadAuthorStories(authors0[1], [stories0[1], stories0[2]]);
-    reloadAuthorStories(authors1[0], [stories1[0], stories1[2]]);
-    reloadAuthorStories(authors1[1], [stories1[1], stories1[2]]);
-
-    reloadAuthorVolumes(authors0[0], [volumes0[0], volumes0[2]]);
-    reloadAuthorVolumes(authors0[1], [volumes0[1], volumes0[2]]);
-    reloadAuthorVolumes(authors1[0], [volumes1[0], volumes1[2]]);
-    reloadAuthorVolumes(authors1[1], [volumes1[1], volumes1[2]]);
-
-    reloadSeriesStory(series0[0], stories0[0], 1);
-    reloadSeriesStory(series0[0], stories0[1], 2);
-    reloadSeriesStory(series0[0], stories0[2], 3);
-    reloadSeriesStory(series1[0], stories1[0], 3);
-    reloadSeriesStory(series1[0], stories1[1], 2);
-    reloadSeriesStory(series1[0], stories1[2], 1);
-
-    reloadVolumeStories(volumes0[0], [stories0[0]]);
-    reloadVolumeStories(volumes0[1], [stories0[1]]);
-    reloadVolumeStories(volumes0[2], [stories0[0], stories0[1], stories0[2]]);
-    reloadVolumeStories(volumes1[0], [stories1[0]]);
-    reloadVolumeStories(volumes1[1], [stories1[1]]);
-    reloadVolumeStories(volumes1[2], [stories1[0], stories1[1], stories1[2]]);
-
+export const lookupUser = async (username: string): Promise<User> => {
+    const result = await User.findOne({
+        where: { username: username }
+    });
+    if (result) {
+        return result;
+    } else {
+        throw new NotFound(`username: Should have found User for '${username}'`);
+    }
 }
 
 // Private Objects -----------------------------------------------------------
 
-const reloadAuthors
+const loadAuthors
     = async (library: Library, authors: Partial<Author>[]): Promise<Author[]> =>
 {
-//    console.info(`Reloading Authors for Library: ${JSON.stringify(library)}`);
     authors.forEach(author => {
         author.libraryId = library.id;
     });
@@ -101,32 +171,30 @@ const reloadAuthors
         console.info("  Reloading Authors ERROR", error);
         throw error;
     }
-//    console.info("Reloading Authors Results:", results);
     return results;
 }
 
-const reloadAuthorSeries
+const loadAuthorSeries
     = async (author: Author, series: Series[]): Promise<void> =>
 {
     await author.$add("series", series);
 }
 
-const reloadAuthorStories
+const loadAuthorStories
     = async (author: Author, stories: Story[]): Promise<void> =>
 {
     await author.$add("stories", stories);
 }
 
-const reloadAuthorVolumes
+const loadAuthorVolumes
     = async (author: Author, volumes: Volume[]): Promise<void> =>
 {
     await author.$add("volumes", volumes);
 }
 
-const reloadLibraries
+const loadLibraries
     = async (libraries: Partial<Library>[]): Promise<Library[]> =>
 {
-//    console.info("Reloading Libraries:", libraries);
     let results: Library[] = [];
     try {
         results = await Library.bulkCreate(libraries);
@@ -134,14 +202,12 @@ const reloadLibraries
         console.info("  Reloading Libraries ERROR", error);
         throw error;
     }
-//    console.info("Reloading Libraries Results:", results);
     return results;
 }
 
-const reloadSeries
+const loadSeries
     = async (library: Library, series: Partial<Series>[]): Promise<Series[]> =>
 {
-//    console.info(`Reloading Series for Library: ${JSON.stringify(library)}`);
     series.forEach(aSeries => {
         aSeries.libraryId = library.id;
     });
@@ -152,11 +218,10 @@ const reloadSeries
         console.info("  Reloading Series ERROR", error);
         throw error;
     }
-//    console.info("Reloading Series Results:", results);
     return results;
 }
 
-const reloadSeriesStory
+const loadSeriesStory
     = async (series: Series, story: Story, ordinal: number): Promise<void> =>
 {
     await SeriesStory.create({
@@ -166,10 +231,9 @@ const reloadSeriesStory
     });
 }
 
-const reloadStories
+const loadStories
     = async (library: Library, stories: Partial<Story>[]): Promise<Story[]> =>
 {
-//    console.info(`Reloading Stories for Library: ${JSON.stringify(library)}`);
     stories.forEach(story => {
         story.libraryId = library.id;
     });
@@ -180,11 +244,10 @@ const reloadStories
         console.info("  Reloading Stories ERROR", error);
         throw error;
     }
-//    console.info("Reloading Stories Results:", results);
     return results;
 }
 
-const reloadUser = async (): Promise<User> => {
+const loadUser = async (): Promise<User> => {
     const found = await User.findOne({
         where: { username: "superuser" }
     });
@@ -203,10 +266,29 @@ const reloadUser = async (): Promise<User> => {
     return await User.create(user);
 }
 
-const reloadVolumes
+const hashedPassword = async (password: string | undefined): Promise<string> => {
+    return await hashPassword(password ? password : "");
+}
+
+const loadUsers = async (users: Partial<User>[]): Promise<User[]> => {
+    // For tests, the unhashed password is the same as the username
+    const promises = await users.map(user => hashedPassword(user.username));
+    const hashedPasswords: string[] = await Promise.all(promises);
+    for(let i = 0; i < users.length; i++) {
+        users[i].password = hashedPasswords[i];
+    }
+    try {
+        const results = await User.bulkCreate(users);
+        return results;
+    } catch (error) {
+        console.info("  Reloading Users ERROR", error);
+        throw error;
+    }
+}
+
+const loadVolumes
     = async (library: Library, volumes: Partial<Volume>[]): Promise<Volume[]> =>
 {
-//    console.info(`Reloading Volumes for Library: ${JSON.stringify(library)}`);
     volumes.forEach(volume => {
         volume.libraryId = library.id;
     });
@@ -217,30 +299,11 @@ const reloadVolumes
         console.info("  Reloading Volumes ERROR", error);
         throw error;
     }
-//    console.info("Reloading Volumes Results:", results);
     return results;
 }
 
-const reloadVolumeStories
+const loadVolumeStories
     = async (volume: Volume, stories: Story[]): Promise<void> =>
 {
     await volume.$add("stories", stories);
-}
-
-const removeLibraries = async (libraries: Partial<Library>[]): Promise<void> => {
-    const names: string[] = [];
-    libraries.forEach(library => {
-        // @ts-ignore
-        names.push(library.name);
-    })
-//    console.info("Removing Libraries:", names);
-    try {
-        await Library.destroy({
-            where: {name: {[Op.in]: names}}
-        });
-    } catch (error) {
-        console.info("  Removing Libraries ERROR", error);
-        throw error;
-    }
-//    console.info("Removing Libraries Complete");
 }

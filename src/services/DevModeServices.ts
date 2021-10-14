@@ -14,7 +14,7 @@ import Series from "../models/Series";
 import Story from "../models/Story";
 import Volume from "../models/Volume";
 import logger from "../util/ServerLogger";
-import {reloadTestData} from "../util/TestUtils";
+import {loadTestData} from "../util/TestUtils";
 
 // Public Objects ------------------------------------------------------------
 
@@ -30,7 +30,7 @@ export class DevModeServices {
             msg: "Reloading started"
         });
 */
-        await reloadTestData();
+        await loadTestData();
 /*
         logger.info({
             context: "DevModeServices.reloadTestData",

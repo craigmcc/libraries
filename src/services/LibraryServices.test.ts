@@ -11,7 +11,7 @@ const expect = chai.expect;
 
 import {BadRequest, NotFound} from "../util/HttpErrors";
 import * as SeedData from "../util/SeedData";
-import {reloadTestData} from "../util/TestUtils";
+import {loadTestData} from "../util/TestUtils";
 import LibraryServices from "./LibraryServices";
 
 // Test Specifications ------------------------------------------------------
@@ -21,7 +21,9 @@ describe("LibraryServices Functional Tests", () => {
     // Test Hooks -----------------------------------------------------------
 
     beforeEach("#beforeEach", async () => {
-        await reloadTestData();
+        await loadTestData({
+            withLibraries: true,
+        });
     })
 
     // Test Methods ---------------------------------------------------------
