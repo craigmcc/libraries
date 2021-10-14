@@ -33,7 +33,7 @@ export const LIBRARIES: Partial<Library>[] = [
 
 // ***** Authors *****
 
-// For FIRST_LIBRARY (library_id to be interpolated)
+// For FIRST_LIBRARY (libraryId to be interpolated)
 export const AUTHORS_LIBRARY0: Partial<Author>[] = [
     {
         firstName: "Fred",
@@ -45,7 +45,7 @@ export const AUTHORS_LIBRARY0: Partial<Author>[] = [
     },
 ];
 
-// For SECOND_LIBRARY (library_id to be interpolated)
+// For SECOND_LIBRARY (libraryId to be interpolated)
 export const AUTHORS_LIBRARY1: Partial<Author>[] = [
     {
         firstName: "Barney",
@@ -112,7 +112,7 @@ export const SERIES_LIBRARY1: Partial<Series>[] = [
 
 // ***** Stories *****
 
-// For FIRST_LIBRARY (library_id to be interpolated)
+// For FIRST_LIBRARY (libraryId to be interpolated)
 export const STORIES_LIBRARY0: Partial<Story>[] = [
     {
         "name": "Fred Story",
@@ -125,7 +125,7 @@ export const STORIES_LIBRARY0: Partial<Story>[] = [
     }
 ];
 
-// For SECOND_LIBRARY (library_id to be interpolated)
+// For SECOND_LIBRARY (libraryId to be interpolated)
 export const STORIES_LIBRARY1: Partial<Story>[] = [
     {
         "name": "Barney Story",
@@ -140,7 +140,7 @@ export const STORIES_LIBRARY1: Partial<Story>[] = [
 
 // ***** Volumes *****
 
-// For FIRST_LIBRARY (library_id to be interpolated)
+// For FIRST_LIBRARY (libraryId to be interpolated)
 export const VOLUMES_LIBRARY0: Partial<Volume>[] = [
     {
         "name": "Fred Volume",
@@ -156,7 +156,7 @@ export const VOLUMES_LIBRARY0: Partial<Volume>[] = [
     }
 ];
 
-// For SECOND_LIBRARY (library_id to be interpolated)
+// For SECOND_LIBRARY (libraryId to be interpolated)
 export const VOLUMES_LIBRARY1: Partial<Volume>[] = [
     {
         "name": "Barney Volume",

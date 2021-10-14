@@ -36,7 +36,7 @@ import {BadRequest} from "../util/HttpErrors";
         isLibraryIdValid: async function(this: Story): Promise<void> {
             if (!(await validateLibraryId(this.libraryId))) {
                 throw new BadRequest
-                    (`libraryId: Invalid library_id ${this.libraryId}`);
+                    (`libraryId: Invalid libraryId ${this.libraryId}`);
             }
         },
     },

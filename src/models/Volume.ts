@@ -27,7 +27,7 @@ import {BadRequest} from "../util/HttpErrors";
         isLibraryIdValid: async function(this: Volume): Promise<void> {
             if (!(await validateLibraryId(this.libraryId))) {
                 throw new BadRequest
-                    (`library_id: Invalid library_id ${this.libraryId}`);
+                    (`libraryId: Invalid libraryId ${this.libraryId}`);
             }
         },
         isValidLocation: function(this: Volume): void {
@@ -92,7 +92,7 @@ export class Volume extends AbstractModel<Volume> {
         type: DataType.INTEGER,
         validate: {
             notNull: {
-                msg: "library_id: Is required"
+                msg: "libraryId: Is required"
             }
         },
     })

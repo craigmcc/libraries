@@ -7,15 +7,11 @@
 
 require("custom-env").env(true);
 export const NODE_ENV = process.env.NODE_ENV ? process.env.NODE_ENV : "production";
-import {Orchestrator} from "@craigmcc/oauth-orchestrator";
 
 // Internal Modules ----------------------------------------------------------
 
 import Database from "./models/Database";
 import ExpressApplication from "./routers/ExpressApplication";
-import OAuthOrchestratorHandlers from "./oauth/OAuthOrchestratorHandlers";
-export const OAuthOrchestrator: Orchestrator
-    = new Orchestrator(OAuthOrchestratorHandlers);
 import logger from "./util/ServerLogger";
 
 // Configure Models and Associations -----------------------------------------

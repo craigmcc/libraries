@@ -59,9 +59,9 @@ export const validateAuthorNameUnique
     if (author) {
         let options: any = {
             where: {
-                first_name: author.firstName,
-                last_name: author.lastName,
-                library_id: author.libraryId,
+                firstName: author.firstName,
+                lastName: author.lastName,
+                libraryId: author.libraryId,
             }
         }
         if (author.id) {
