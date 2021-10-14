@@ -19,7 +19,7 @@ import {appendPaginationOptions} from "../util/QueryParameters";
 
 // Public Classes ------------------------------------------------------------
 
-export class UserServices extends BaseParentServices<User> {
+class UserServices extends BaseParentServices<User> {
 
     constructor () {
         super(new User(), SortOrder.USERS, [

@@ -4,11 +4,11 @@
 
 // External Modules ----------------------------------------------------------
 
-import {FindOptions, Op, ValidationError} from "sequelize";
+import {FindOptions, Op} from "sequelize";
 
 // Internal Modules ----------------------------------------------------------
 
-import AbstractChildServices from "./AbstractChildServices";
+import BaseChildServices from "./BaseChildServices";
 import LibraryServices from "./LibraryServices";
 import SeriesServices from "./SeriesServices";
 import StoryServices from "./StoryServices";
@@ -22,92 +22,21 @@ import Series from "../models/Series";
 import * as SortOrder from "../models/SortOrder";
 import Story from "../models/Story";
 import Volume from "../models/Volume";
-import {BadRequest, NotFound, ServerError} from "../util/HttpErrors";
+import {NotFound} from "../util/HttpErrors";
 import {appendPaginationOptions} from "../util/QueryParameters";
 
 // Public Objects ------------------------------------------------------------
 
-export class AuthorServices implements AbstractChildServices<Author>{
+class AuthorServices extends BaseChildServices<Author, Library>{
 
-    // Standard CRUD Methods -------------------------------------------------
-
-    public async all(libraryId: number, query?: any): Promise<Author[]> {
-        const library = await LibraryServices.read("AuthorServices.all", libraryId);
-        const options: FindOptions = this.appendMatchOptions({
-            order: SortOrder.AUTHORS,
-        }, query);
-        return await library.$get("authors", options);
-    }
-
-    public async find(libraryId: number, authorId: number, query?: any): Promise<Author> {
-        return await this.read("AuthorServices.find", libraryId, authorId, query);
-    }
-
-    public async insert(libraryId: number, author: Author): Promise<Author> {
-        const library = await LibraryServices.read("AuthorServices.insert", libraryId);
-        try {
-            author.libraryId = libraryId; // No cheating
-            return await Author.create(author, {
-                fields: FIELDS,
-            });
-        } catch (error) {
-            if (error instanceof ValidationError) {
-                throw new BadRequest(
-                    error,
-                    "AuthorServices.insert"
-                );
-            } else {
-                throw new ServerError(
-                    error as Error,
-                    "AuthorServices.insert"
-                );
-            }
-        }
-    }
-
-    public async remove(libraryId: number, authorId: number): Promise<Author> {
-        const library = await LibraryServices.read("AuthorServices.remove", libraryId);
-        const author = await this.read("AuthorServices.remove", libraryId, authorId);
-        await Author.destroy({
-            where: { id: authorId },
-        });
-        return author;
-    }
-
-    public async update(libraryId: number, authorId: number, author: Author): Promise<Author> {
-        const library = await LibraryServices.read("AuthorServices.update", libraryId);
-        try {
-            author.libraryId = libraryId; // No cheating
-            const results = await Author.update(author, {
-                fields: FIELDS_WITH_ID,
-                returning: true,
-                where: {
-                    id: authorId,
-                    libraryId: libraryId,
-                },
-            });
-            if (results[0] < 1) {
-                throw new NotFound(
-                    `authorId: Missing Author ${authorId}`,
-                    "AuthorServices.update",
-                );
-            }
-            return results[1][0];
-        } catch (error) {
-            if (error instanceof NotFound) {
-                throw error;
-            } else if (error instanceof ValidationError) {
-                throw new BadRequest(
-                    error,
-                    "AuthorServices.update"
-                );
-            } else {
-                throw new ServerError(
-                    error as Error,
-                    "AuthorServices.update"
-                );
-            }
-        }
+    constructor () {
+        super(new Library(), new Author(), SortOrder.AUTHORS, [
+            "active",
+            "firstName",
+            "lastName",
+            "libraryId",
+            "notes",
+        ]);
     }
 
     // Model-Specific Methods ------------------------------------------------
@@ -300,46 +229,6 @@ export class AuthorServices implements AbstractChildServices<Author>{
         return options;
     }
 
-    /**
-     * Find and return the specified Author.
-     * @param context                   Call context for errors
-     * @param libraryId                 ID of owning Library
-     * @param authorId                  ID of requested Author
-     * @param query                     Optional include query parameters
-     */
-    public async read(context: string, libraryId: number, authorId: number, query?: any): Promise<Author> {
-        const options: FindOptions = this.appendIncludeOptions({
-            where: {
-                id: authorId,
-                libraryId: libraryId,
-            }
-        }, query);
-        const author = await Author.findOne(options);
-        if (author) {
-            return author;
-        } else {
-            throw new NotFound(
-                `authorId: Missing Author ${authorId}`,
-                context
-            )
-        }
-    }
-
 }
 
 export default new AuthorServices();
-
-// Private Objects -----------------------------------------------------------
-
-const FIELDS: string[] = [
-    "active",
-    "firstName",
-    "lastName",
-    "libraryId",
-    "notes",
-];
-
-const FIELDS_WITH_ID: string[] = [
-    ...FIELDS,
-    "id"
-];

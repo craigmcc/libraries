@@ -19,7 +19,7 @@ import Series from "../models/Series";
 import * as SortOrder from "../models/SortOrder";
 import Story from "../models/Story";
 import Volume from "../models/Volume";
-import {BadRequest, NotFound, ServerError} from "../util/HttpErrors";
+import {NotFound} from "../util/HttpErrors";
 import {appendPaginationOptions} from "../util/QueryParameters";
 
 // Public Classes ------------------------------------------------------------

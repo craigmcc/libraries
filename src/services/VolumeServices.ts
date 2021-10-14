@@ -4,11 +4,11 @@
 
 // External Modules ----------------------------------------------------------
 
-import {FindOptions, Op, ValidationError} from "sequelize";
+import {FindOptions, Op} from "sequelize";
 
 // Internal Modules ----------------------------------------------------------
 
-import AbstractChildServices from "./AbstractChildServices";
+import BaseChildServices from "./BaseChildServices";
 import AuthorServices from "./AuthorServices";
 import LibraryServices from "./LibraryServices";
 import StoryServices from "./StoryServices";
@@ -18,92 +18,25 @@ import * as SortOrder from "../models/SortOrder";
 import Story from "../models/Story";
 import Volume from "../models/Volume";
 import VolumeStory from "../models/VolumeStory";
-import {BadRequest, NotFound, ServerError} from "../util/HttpErrors";
+import {NotFound} from "../util/HttpErrors";
 import {appendPaginationOptions} from "../util/QueryParameters";
 
 // Public Objects ------------------------------------------------------------
 
-export class VolumeServices extends AbstractChildServices<Volume> {
+export class VolumeServices extends BaseChildServices<Volume, Library> {
 
-    // Standard CRUD Methods -------------------------------------------------
-
-    public async all(libraryId: number, query?: any): Promise<Volume[]> {
-        const library = await LibraryServices.read("VolumeServices.all", libraryId);
-        const options: FindOptions = this.appendMatchOptions({
-            order: SortOrder.VOLUMES,
-        }, query);
-        return await library.$get("volumes", options);
-    }
-
-    public async find(libraryId: number, volumeId: number, query?: any): Promise<Volume> {
-        return await this.read("VolumeServices.find", libraryId, volumeId, query);
-    }
-
-    public async insert(libraryId: number, volume: Volume): Promise<Volume> {
-        const library = await LibraryServices.read("VolumeServices.insert", libraryId);
-        try {
-            volume.libraryId = libraryId; // No cheating
-            return await Volume.create(volume, {
-                fields: FIELDS,
-            });
-        } catch (error) {
-            if (error instanceof ValidationError) {
-                throw new BadRequest(
-                    error,
-                    "VolumeServices.insert"
-                );
-            } else {
-                throw new ServerError(
-                    error as Error,
-                    "VolumeServices.insert"
-                );
-            }
-        }
-    }
-
-    public async remove(libraryId: number, volumeId: number): Promise<Volume> {
-        const library = await LibraryServices.read("VolumeServices.remove", libraryId);
-        const volume = await this.read("VolumeServices.remove", libraryId, volumeId);
-        await Volume.destroy({
-            where: { id: volumeId },
-        });
-        return volume;
-    }
-
-    public async update(libraryId: number, volumeId: number, volume: Volume): Promise<Volume> {
-        const library = await LibraryServices.read("VolumeServices.update", libraryId);
-        try {
-            volume.libraryId = libraryId; // No cheating
-            const results = await Volume.update(volume, {
-                fields: FIELDS_WITH_ID,
-                returning: true,
-                where: {
-                    id: volumeId,
-                    libraryId: libraryId,
-                },
-            });
-            if (results[0] < 1) {
-                throw new NotFound(
-                    `volumeId: Missing Volume ${volumeId}`,
-                    "AuthorServices.update",
-                );
-            }
-            return results[1][0];
-        } catch (error) {
-            if (error instanceof NotFound) {
-                throw error;
-            } else if (error instanceof ValidationError) {
-                throw new BadRequest(
-                    error,
-                    "VolumeServices.update"
-                );
-            } else {
-                throw new ServerError(
-                    error as Error,
-                    "VolumeServices.update"
-                );
-            }
-        }
+    constructor () {
+        super(new Library(), new Volume(), SortOrder.VOLUMES, [
+            "active",
+            "copyright",
+            "isbn",
+            "libraryId",
+            "location",
+            "name",
+            "notes",
+            "read",
+            "type",
+        ]);
     }
 
     // Model-Specific Methods ------------------------------------------------
@@ -216,50 +149,6 @@ export class VolumeServices extends AbstractChildServices<Volume> {
         return options;
     }
 
-    /**
-     * Find and return the specified Volume.
-     * @param context                   Call context for errors
-     * @param libraryId                 ID of owning Library
-     * @param volumeId                  ID of requested Volume
-     * @param query                     Optional include query parameters
-     */
-    public async read(context: string, libraryId: number, volumeId: number, query?: any): Promise<Volume> {
-        const options: FindOptions = this.appendIncludeOptions({
-            where: {
-                id: volumeId,
-                libraryId: libraryId,
-            }
-        }, query);
-        const volume = await Volume.findOne(options);
-        if (volume) {
-            return volume;
-        } else {
-            throw new NotFound(
-                `volumeId: Missing Volume ${volumeId}`,
-                context
-            )
-        }
-    }
-
 }
 
 export default new VolumeServices();
-
-// Private Objects -----------------------------------------------------------
-
-const FIELDS: string[] = [
-    "active",
-    "copyright",
-    "isbn",
-    "libraryId",
-    "location",
-    "name",
-    "notes",
-    "read",
-    "type",
-];
-
-const FIELDS_WITH_ID: string[] = [
-    ...FIELDS,
-    "id"
-];

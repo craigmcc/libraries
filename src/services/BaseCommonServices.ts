@@ -17,9 +17,9 @@ import {Model} from "sequelize-typescript";
 abstract class BaseCommonServices<M extends Model> {
 
     /**
-     * Construct a new services instance for the specified Sequelize Model.
+     * Construct a new Services instance for the specified Sequelize Model.
      *
-     * @param model                     Model class being supported
+     * @param model                     Model instance being supported
      * @param order                     Order object for standard sorting order
      * @param fields                    List of field names for this Model (no "id")
      */
@@ -29,7 +29,7 @@ abstract class BaseCommonServices<M extends Model> {
             ...fields,
             "id",
         ];
-        this.key = Object.getPrototypeOf(model).constructor.name.toLowerCase + "Id";
+        this.key = Object.getPrototypeOf(model).constructor.name.toLowerCase() + "Id";
         this.model = model;
         this.name = Object.getPrototypeOf(model).constructor.name;
         this.order = order;
@@ -51,7 +51,7 @@ abstract class BaseCommonServices<M extends Model> {
     protected readonly key: string;
 
     /**
-     * The Sequelize Model object this service class will operate on.
+     * Sequelize Model instance this service class will operate on.
      */
     protected readonly model: M;
 

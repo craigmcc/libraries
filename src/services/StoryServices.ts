@@ -8,7 +8,7 @@ import {FindOptions, Op, ValidationError} from "sequelize";
 
 // Internal Modules ----------------------------------------------------------
 
-import AbstractChildServices from "./AbstractChildServices";
+import BaseChildServices from "./BaseChildServices";
 import AuthorServices from "./AuthorServices";
 import LibraryServices from "./LibraryServices";
 import SeriesServices from "./SeriesServices";
@@ -19,92 +19,21 @@ import Series from "../models/Series";
 import * as SortOrder from "../models/SortOrder";
 import Story from "../models/Story";
 import Volume from "../models/Volume";
-import {BadRequest, NotFound, ServerError} from "../util/HttpErrors";
+import {NotFound} from "../util/HttpErrors";
 import {appendPaginationOptions} from "../util/QueryParameters";
 
 // Public Objects ------------------------------------------------------------
 
-export class StoryServices implements AbstractChildServices<Story>{
+export class StoryServices extends BaseChildServices<Story, Library>{
 
-    // Standard CRUD Methods -------------------------------------------------
-
-    public async all(libraryId: number, query?: any): Promise<Story[]> {
-        const library = await LibraryServices.read("StoryServices.all", libraryId);
-        const options: FindOptions = this.appendMatchOptions({
-            order: SortOrder.STORIES,
-        }, query);
-        return await library.$get("stories", options);
-    }
-
-    public async find(libraryId: number, storyId: number, query?: any): Promise<Story> {
-        return await this.read("StoryServices.find", libraryId, storyId, query);
-    }
-
-    public async insert(libraryId: number, story: Story): Promise<Story> {
-        const library = await LibraryServices.read("StoryServices.insert", libraryId);
-        try {
-            story.libraryId = libraryId; // No cheating
-            return await Story.create(story, {
-                fields: FIELDS,
-            });
-        } catch (error) {
-            if (error instanceof ValidationError) {
-                throw new BadRequest(
-                    error,
-                    "StoryServices.insert"
-                );
-            } else {
-                throw new ServerError(
-                    error as Error,
-                    "StoryServices.insert"
-                );
-            }
-        }
-    }
-
-    public async remove(libraryId: number, storyId: number): Promise<Story> {
-        const library = await LibraryServices.read("StoryServices.remove", libraryId);
-        const story = await this.read("StoryServices.remove", libraryId, storyId);
-        await Story.destroy({
-            where: { id: storyId },
-        });
-        return story;
-    }
-
-    public async update(libraryId: number, storyId: number, story: Story): Promise<Story> {
-        const library = await LibraryServices.read("StoryServices.update", libraryId);
-        try {
-            story.libraryId = libraryId; // No cheating
-            const results = await Story.update(story, {
-                fields: FIELDS_WITH_ID,
-                returning: true,
-                where: {
-                    id: storyId,
-                    libraryId: libraryId,
-                },
-            });
-            if (results[0] < 1) {
-                throw new NotFound(
-                    `stroyId: Missing Story ${storyId}`,
-                    "StoryServices.update",
-                );
-            }
-            return results[1][0];
-        } catch (error) {
-            if (error instanceof NotFound) {
-                throw error;
-            } else if (error instanceof ValidationError) {
-                throw new BadRequest(
-                    error,
-                    "StoryServices.update"
-                );
-            } else {
-                throw new ServerError(
-                    error as Error,
-                    "StoryServices.update"
-                );
-            }
-        }
+    constructor () {
+        super(new Library(), new Story(), SortOrder.STORIES, [
+            "active",
+            "copyright",
+            "libraryId",
+            "name",
+            "notes",
+        ]);
     }
 
     // Model-Specific Methods ------------------------------------------------
@@ -208,46 +137,6 @@ export class StoryServices implements AbstractChildServices<Story>{
         return options;
     }
 
-    /**
-     * Find and return the specified Story.
-     * @param context                   Call context for errors
-     * @param libraryId                 ID of owning Library
-     * @param storyId                   ID of requested Story
-     * @param query                     Optional include query parameters
-     */
-    public async read(context: string, libraryId: number, storyId: number, query?: any): Promise<Story> {
-        const options: FindOptions = this.appendIncludeOptions({
-            where: {
-                id: storyId,
-                libraryId: libraryId,
-            }
-        }, query);
-        const story = await Story.findOne(options);
-        if (story) {
-            return story;
-        } else {
-            throw new NotFound(
-                `storyId: Missing Story ${storyId}`,
-                context
-            )
-        }
-    }
-
 }
 
 export default new StoryServices();
-
-// Private Objects -----------------------------------------------------------
-
-const FIELDS: string[] = [
-    "active",
-    "copyright",
-    "libraryId",
-    "name",
-    "notes",
-];
-
-const FIELDS_WITH_ID: string[] = [
-    ...FIELDS,
-    "id"
-];

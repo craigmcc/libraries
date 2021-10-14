@@ -1,7 +1,7 @@
 // BaseParentServices --------------------------------------------------------
 
-// Abstract base class for Services implementations for a parent Model class
-// (one that does not require a libraryId parameter for dependent children).
+// Abstract base class for Services implementations for a Model class
+// (one that does not require a parent instance for ownership).
 
 // External Modules ----------------------------------------------------------
 
@@ -23,7 +23,7 @@ abstract class BaseParentServices<M extends Model> extends BaseCommonServices<M>
     /**
      * Construct a new services instance for the specified Sequelize Model.
      *
-     * @param model                     Model class being supported
+     * @param model                     Model instance being supported
      * @param fields                    List of field names for this Model (no "id")
      * @param order                     Order object for standard sorting order
      *
@@ -43,25 +43,25 @@ abstract class BaseParentServices<M extends Model> extends BaseCommonServices<M>
      */
     public async all(query?: object): Promise<M[]> {
         const options: FindOptions = this.appendMatchOptions({
-            order: super.order,
+            order: this.order,
         }, query);
-        return await Object.getPrototypeOf(super.model).constructor.findAll(options);
+        return await Object.getPrototypeOf(this.model).constructor.findAll(options);
     }
 
     /**
      * Return the model instance with the specified ID.
      *
-     * @param parentId                  ID of the requested parent model instance
+     * @param modelId                   ID of the requested model instance
      * @param query                     Optional include query parameters from the HTTP request
      *
-     * @returns Requested model
+     * @returns Requested model instance
      *
      * @throws NotFound if the requested model instance cannot be found
      */
-    public async find(parentId: number, query?: any): Promise<M> {
+    public async find(modelId: number, query?: any): Promise<M> {
         return await this.read(
-            `${super.name}.find`,
-            parentId,
+            `${this.name}Services.find`,
+            modelId,
             query
         );
     }
@@ -69,19 +69,19 @@ abstract class BaseParentServices<M extends Model> extends BaseCommonServices<M>
     /**
      * Insert and return a new model instance with the specified contents.
      *
-     * @param parent                    Object containing fields for the inserted instance
+     * @param model                     Object containing fields for the inserted instance
      *
-     * @returns Inserted model (with "id" field)
+     * @returns Inserted model instance (with "id" field)
      *
      * @throws BadRequest if validation error(s) occur
      * @throws NotFound if the specified model instance does not exist
      * @throws NotUnique if a unique key violation is attempted
      * @throws ServerError if some other error occurs
      */
-    public async insert(parent: M): Promise<M> {
+    public async insert(model: M): Promise<M> {
         try {
-            return await Object.getPrototypeOf(super.model).constructor.create(parent, {
-                fields: super.fields,
+            return await Object.getPrototypeOf(this.model).constructor.create(model, {
+                fields: this.fields,
             });
         } catch (error) {
             if (error instanceof BadRequest) {
@@ -93,12 +93,12 @@ abstract class BaseParentServices<M extends Model> extends BaseCommonServices<M>
             } else if (error instanceof ValidationError) {
                 throw new BadRequest(
                     error,
-                    `${super.name}.insert`
+                    `${this.name}Services.insert`
                 );
             } else {
                 throw new ServerError(
                     error as Error,
-                    `${super.name}.insert`
+                    `${this.name}Services.insert`
                 );
             }
         }
@@ -107,43 +107,45 @@ abstract class BaseParentServices<M extends Model> extends BaseCommonServices<M>
     /**
      * Remove and return an existing model instance.
      *
-     * @param parentId                  ID of the specified model instance
+     * @param modelId                   ID of the specified model instance
      *
-     * @returns Removed model
+     * @returns Removed model instance
      *
      * @throws NotFound if the specified model instance does not exist
      */
-    public async remove(parentId: number): Promise<M> {
-        const model: M = await this.read(`${super.name}.remove`, parentId);
-        await Object.getPrototypeOf(super.model).constructor.destroy({
-            where: { id: parentId }
+    public async remove(modelId: number): Promise<M> {
+        const model: M = await this.read(`${this.name}Services.remove`, modelId);
+        await Object.getPrototypeOf(this.model).constructor.destroy({
+            where: { id: modelId }
         });
         return model;
     }
 
     /**
-     * Update and return an existing model.
+     * Update and return an existing model instance.
      *
-     * @param parentId                  ID of the specified model
-     * @param parent                    Object containing fields to be updated
+     * @param modelId                  ID of the specified model instance
+     * @param model                    Object containing fields to be updated
+     *
+     * @returns Updated model instance
      *
      * @throws BadRequest if validation error(s) occur
      * @throws NotFound if the specified model instance does not exist
      * @throws NotUnique if a unique key violation is attempted
      * @throws ServerError if some other error occurs
      */
-    public async update(parentId: number, parent: M): Promise<M> {
+    public async update(modelId: number, model: M): Promise<M> {
         try {
-            parent.id = parentId; // No cheating
-            const results = await Object.getPrototypeOf(super.model).constructor.update(parent, {
-                fields: super.fieldsWithId,
+            model.id = modelId; // No cheating
+            const results = await Object.getPrototypeOf(this.model).constructor.update(model, {
+                fields: this.fieldsWithId,
                 returning: true,
-                where: {id: parentId},
+                where: {id: modelId},
             });
             if (results[0] < 1) {
                 throw new NotFound(
-                    `${super.key}: Missing ${super.name} ${parentId}`,
-                    `${super.name}.update`
+                    `${this.key}: Missing ${this.name} ${modelId}`,
+                    `${this.name}.update`
                 );
             }
             return results[1][0];
@@ -157,12 +159,12 @@ abstract class BaseParentServices<M extends Model> extends BaseCommonServices<M>
             } else if (error instanceof ValidationError) {
                 throw new BadRequest(
                     error,
-                    `${super.name}.insert`
+                    `${this.name}.update`
                 );
             } else {
                 throw new ServerError(
                     error as Error,
-                    `${super.name}.insert`
+                    `${this.name}Services.update`
                 );
             }
         }
@@ -171,26 +173,26 @@ abstract class BaseParentServices<M extends Model> extends BaseCommonServices<M>
     // Public Helper Methods -------------------------------------------------
 
     /**
-     * Find and return the requested parent model.
+     * Find and return the requested model instance.
      *
      * @param context                   Call context for error messages
-     * @param parentId                  ID of the requested parent model
+     * @param modelId                   ID of the requested model instance
      * @param query                     Optional include query parameters
      *
-     * @returns Requested model
+     * @returns Requested model instance
      *
-     * @throws BadRequest if this model does not exist
+     * @throws NotFound if this model instance does not exist
      */
-    public async read(context: string, parentId: number, query?: any): Promise<M> {
+    public async read(context: string, modelId: number, query?: any): Promise<M> {
         const options: FindOptions = this.appendIncludeOptions({
-            where: { id: parentId }
+            where: { id: modelId }
         }, query);
-        const parent = await Object.getPrototypeOf(super.model).constructor.findOne(options);
+        const parent = await Object.getPrototypeOf(this.model).constructor.findOne(options);
         if (parent) {
             return parent;
         } else {
             throw new NotFound(
-                `${super.key}: Missing ${super.name} ${parentId}`,
+                `${this.key}: Missing ${this.name} ${modelId}`,
                 context,
             );
         }
