@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 13.2
--- Dumped by pg_dump version 13.2
+-- Dumped from database version 13.4
+-- Dumped by pg_dump version 13.4
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -68,6 +68,39 @@ $$;
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
+
+--
+-- Name: access_tokens; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.access_tokens (
+    id integer NOT NULL,
+    expires timestamp with time zone NOT NULL,
+    scope text NOT NULL,
+    token text NOT NULL,
+    user_id integer NOT NULL
+);
+
+
+--
+-- Name: access_tokens_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.access_tokens_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: access_tokens_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.access_tokens_id_seq OWNED BY public.access_tokens.id;
+
 
 --
 -- Name: authors; Type: TABLE; Schema: public; Owner: -
@@ -370,6 +403,39 @@ CREATE SEQUENCE public.libraries_id_seq
 --
 
 ALTER SEQUENCE public.libraries_id_seq OWNED BY public.libraries.id;
+
+
+--
+-- Name: refresh_tokens; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.refresh_tokens (
+    id integer NOT NULL,
+    access_token text NOT NULL,
+    expires timestamp with time zone NOT NULL,
+    token text NOT NULL,
+    user_id integer NOT NULL
+);
+
+
+--
+-- Name: refresh_tokens_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.refresh_tokens_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: refresh_tokens_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.refresh_tokens_id_seq OWNED BY public.refresh_tokens.id;
 
 
 --
@@ -717,6 +783,13 @@ ALTER SEQUENCE public.volumes_stories_volume_id_seq OWNED BY public.volumes_stor
 
 
 --
+-- Name: access_tokens id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.access_tokens ALTER COLUMN id SET DEFAULT nextval('public.access_tokens_id_seq'::regclass);
+
+
+--
 -- Name: authors id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -798,6 +871,13 @@ ALTER TABLE ONLY public.authors_volumes ALTER COLUMN volume_id SET DEFAULT nextv
 --
 
 ALTER TABLE ONLY public.libraries ALTER COLUMN id SET DEFAULT nextval('public.libraries_id_seq'::regclass);
+
+
+--
+-- Name: refresh_tokens id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.refresh_tokens ALTER COLUMN id SET DEFAULT nextval('public.refresh_tokens_id_seq'::regclass);
 
 
 --
@@ -892,6 +972,14 @@ ALTER TABLE ONLY public.volumes_stories ALTER COLUMN story_id SET DEFAULT nextva
 
 
 --
+-- Name: access_tokens access_tokens_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.access_tokens
+    ADD CONSTRAINT access_tokens_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: authors authors_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -929,6 +1017,14 @@ ALTER TABLE ONLY public.authors_volumes
 
 ALTER TABLE ONLY public.libraries
     ADD CONSTRAINT libraries_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: refresh_tokens refresh_tokens_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.refresh_tokens
+    ADD CONSTRAINT refresh_tokens_pkey PRIMARY KEY (id);
 
 
 --
@@ -980,6 +1076,13 @@ ALTER TABLE ONLY public.volumes_stories
 
 
 --
+-- Name: access_tokens_token_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX access_tokens_token_key ON public.access_tokens USING btree (token);
+
+
+--
 -- Name: ix_series_library_id_name; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -998,6 +1101,13 @@ CREATE INDEX ix_stories_library_id_name ON public.stories USING btree (library_i
 --
 
 CREATE INDEX ix_volumes_library_id_name ON public.volumes USING btree (library_id, name);
+
+
+--
+-- Name: refresh_tokens_token_key; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX refresh_tokens_token_key ON public.refresh_tokens USING btree (token);
 
 
 --
@@ -1089,6 +1199,14 @@ CREATE UNIQUE INDEX uk_volumes_stories_story_id_volume_id ON public.volumes_stor
 --
 
 CREATE UNIQUE INDEX uk_volumes_stories_volume_id_story_id ON public.volumes_stories USING btree (volume_id, story_id);
+
+
+--
+-- Name: access_tokens access_tokens_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.access_tokens
+    ADD CONSTRAINT access_tokens_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
@@ -1201,6 +1319,14 @@ ALTER TABLE ONLY public.volumes_stories
 
 ALTER TABLE ONLY public.volumes_stories
     ADD CONSTRAINT fk_volumes_stories_volume_id FOREIGN KEY (volume_id) REFERENCES public.volumes(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: refresh_tokens refresh_tokens_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.refresh_tokens
+    ADD CONSTRAINT refresh_tokens_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
 --
