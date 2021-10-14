@@ -4,51 +4,46 @@
 
 // External Modules ----------------------------------------------------------
 
-import {FindOptions, Op, ValidationError} from "sequelize";
+import {FindOptions, Op} from "sequelize";
 
 // Internal Modules ----------------------------------------------------------
 
-import AbstractParentServices from "./AbstractParentServices";
+import BaseParentServices from "./BaseParentServices";
 import AccessToken from "../models/AccessToken";
 import RefreshToken from "../models/RefreshToken";
 import User from "../models/User";
 import * as SortOrder from "../models/SortOrder";
 import {hashPassword} from "../oauth/oauth-utils";
-import {BadRequest, NotFound, ServerError} from "../util/HttpErrors";
+import {BadRequest, NotFound} from "../util/HttpErrors";
 import {appendPaginationOptions} from "../util/QueryParameters";
 
 // Public Classes ------------------------------------------------------------
 
-export class UserServices extends AbstractParentServices<User> {
+export class UserServices extends BaseParentServices<User> {
+
+    constructor () {
+        super(new User(), SortOrder.USERS, [
+            "active",
+            "password",
+            "scope",
+            "username",
+        ]);
+    }
 
     // Standard CRUD Methods -------------------------------------------------
 
     public async all(query?: any): Promise<User[]> {
-        let options: FindOptions = this.appendMatchOptions({
-            order: SortOrder.USERS
-        }, query);
-        const results: User[] = await User.findAll(options);
+        const results: User[] = await super.all(query);
         results.forEach(result => {
-            // @ts-ignore
             result.password = "";
         })
         return results;
     }
 
     public async find(userId: number, query?: any): Promise<User> {
-        let options: FindOptions = this.appendIncludeOptions({
-            where: { id: userId }
-        }, query);
-        let results = await User.findAll(options);
-        if (results.length === 1) {
-            // @ts-ignore
-            results[0].password = "";
-            return results[0];
-        } else {
-            throw new NotFound(
-                `userId: Missing User ${userId}`,
-                "UserServices.find");
-        }
+        const result: User = await super.find(userId, query);
+        result.password = "";
+        return result;
     }
 
     public async insert(user: User): Promise<User> {
@@ -59,38 +54,15 @@ export class UserServices extends AbstractParentServices<User> {
             );
         }
         user.password = await hashPassword(user.password); // TODO - leaked back to caller
-        try {
-            const inserted: User = await User.create(user, {
-                fields: FIELDS,
-            });
-            inserted.password = "";
-            return inserted;
-        } catch (error) {
-            if (error instanceof ValidationError) {
-                throw new BadRequest(
-                    error,
-                    "UserServices.insert"
-                );
-            } else {
-                throw new ServerError(
-                    error as Error,
-                    "UserServices.insert"
-                );
-            }
-        }
+        const result: User = await super.insert(user);
+        result.password = "";
+        return result;
     }
 
     public async remove(userId: number): Promise<User> {
-        const removed = await User.findByPk(userId);
-        if (!removed) {
-            throw new NotFound(
-                `userId: Missing User ${userId}`,
-                "UserServices.remove");
-        }
-        await User.destroy({
-            where: { id: userId }
-        });
-        return removed;
+        const result: User = await super.remove(userId);
+        result.password = "";
+        return result;
     }
 
     public async update(userId: number, user: User): Promise<User> {
@@ -100,32 +72,9 @@ export class UserServices extends AbstractParentServices<User> {
             // @ts-ignore
             delete user.password; // TODO - this might be broken
         }
-        try {
-            const found = await User.findByPk(userId);
-            if (!found) {
-                throw new NotFound(`userId: Missing User ${userId}`);
-            }
-            user.id = userId; // No cheating
-            const result = await User.update(user, {
-                fields: FIELDS_WITH_ID,
-                where: { id: userId }
-            });
-            return await this.find(userId);
-        } catch (error) {
-            if (error instanceof NotFound) {
-                throw error;
-            } else if (error instanceof ValidationError) {
-                throw new BadRequest(
-                    error,
-                    "UserServices.update"
-                );
-            } else {
-                throw new ServerError(
-                    error as Error,
-                    "UserServices.update"
-                );
-            }
-        }
+        const result: User = await super.update(userId, user);
+        result.password = "";
+        return result;
     }
 
     // Model-Specific Methods ------------------------------------------------
@@ -133,18 +82,17 @@ export class UserServices extends AbstractParentServices<User> {
     // TODO: accessTokens(userId: number, query?: any): Promise<AccessToken[]>
 
     public async exact(name: string, query?: any): Promise<User> {
-        let options: FindOptions = appendQuery({
+        let options: FindOptions = appendPaginationOptions({
             where: {
                 username: name
             }
         }, query);
-        let results = await User.findAll(options);
+        let results: User[] = await User.findAll(options);
         if (results.length !== 1) {
             throw new NotFound(
                 `name: Missing User '${name}'`,
                 "UserServices.exact()");
         }
-        // @ts-ignore
         results[0].password = "";
         return results[0];
     }
@@ -204,30 +152,3 @@ export class UserServices extends AbstractParentServices<User> {
 }
 
 export default new UserServices();
-
-// Private Objects -----------------------------------------------------------
-
-const appendQuery = (options: FindOptions, query?: any): FindOptions => {
-
-    if (!query) {
-        return options;
-    }
-    options = appendPaginationOptions(options, query);
-
-    // Inclusion parameters - none
-
-    return options;
-
-}
-
-const FIELDS: string[] = [
-    "active",
-    "password",
-    "scope",
-    "username",
-];
-
-const FIELDS_WITH_ID: string[] = [
-    ...FIELDS,
-    "id"
-];

@@ -4,11 +4,11 @@
 
 // External Modules ----------------------------------------------------------
 
-import {FindOptions, Op, ValidationError} from "sequelize";
+import {FindOptions, Op} from "sequelize";
 
 // Internal Modules ----------------------------------------------------------
 
-import AbstractParentServices from "./AbstractParentServices";
+import BaseParentServices from "./BaseParentServices";
 import AuthorServices from "./AuthorServices";
 import SeriesServices from "./SeriesServices";
 import StoryServices from "./StoryServices";
@@ -24,79 +24,15 @@ import {appendPaginationOptions} from "../util/QueryParameters";
 
 // Public Classes ------------------------------------------------------------
 
-export class LibraryServices extends AbstractParentServices<Library> {
+class LibraryServices extends BaseParentServices<Library> {
 
-    // Standard CRUD Methods -------------------------------------------------
-
-    public async all(query?: any): Promise<Library[]> {
-        let options: FindOptions = this.appendMatchOptions({
-            order: SortOrder.LIBRARIES
-        }, query);
-        return await Library.findAll(options);
-    }
-
-    public async find(libraryId: number, query?: any): Promise<Library> {
-        return await this.read("LibraryServices.find", libraryId, query);
-    }
-
-    public async insert(library: Library): Promise<Library> {
-        try {
-            return await Library.create(library, {
-                fields: FIELDS,
-            });
-        } catch (error) {
-            if (error instanceof ValidationError) {
-                throw new BadRequest(
-                    error,
-                    "LibraryServices.insert"
-                );
-            } else {
-                throw new ServerError(
-                    error as Error,
-                    "LibraryServices.insert"
-                );
-            }
-        }
-    }
-
-    public async remove(libraryId: number): Promise<Library> {
-        const library = await this.read("LibraryServices.remove", libraryId);
-        await Library.destroy({
-            where: { id: libraryId }
-        });
-        return library;
-    }
-
-    public async update(libraryId: number, library: Library): Promise<Library> {
-        try {
-            library.id = libraryId; // No cheating
-            const results = await Library.update(library, {
-                fields: FIELDS_WITH_ID,
-                returning: true,
-                where: { id: libraryId },
-            });
-            if (results[0] < 1) {
-                throw new NotFound(
-                    `libraryId: Missing Library ${libraryId}`,
-                    "LibraryServices.update",
-                );
-            }
-            return results[1][0];
-        } catch (error) {
-            if (error instanceof NotFound) {
-                throw error;
-            } else if (error instanceof ValidationError) {
-                throw new BadRequest(
-                    error,
-                    "FacilityServices.update"
-                );
-            } else {
-                throw new ServerError(
-                    error as Error,
-                    "FacilityServices.update"
-                );
-            }
-        }
+    constructor () {
+        super(new Library(), SortOrder.LIBRARIES, [
+            "active",
+            "name",
+            "notes",
+            "scope",
+        ]);
     }
 
     // Model-Specific Methods ------------------------------------------------
@@ -205,40 +141,6 @@ export class LibraryServices extends AbstractParentServices<Library> {
         return options;
     }
 
-    /**
-     * Find and return the requested Library.
-     * @param context                   Call context for errors
-     * @param libraryId                 ID of requested Library
-     * @param query                     Optional include query parameters
-     */
-    public async read(context: string, libraryId: number, query?: any): Promise<Library> {
-        const options: FindOptions = this.appendIncludeOptions({
-            where: { id: libraryId }
-        }, query);
-        const library = await Library.findOne(options);
-        if (library) {
-            return library;
-        } else {
-            throw new NotFound(
-                `libraryId: Missing Library ${libraryId}`,
-                context);
-        }
-    }
-
 }
 
 export default new LibraryServices();
-
-// Private Objects -----------------------------------------------------------
-
-const FIELDS: string[] = [
-    "active",
-    "name",
-    "notes",
-    "scope",
-];
-
-const FIELDS_WITH_ID: string[] = [
-    ...FIELDS,
-    "id"
-];
