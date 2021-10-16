@@ -20,6 +20,8 @@ import SeriesStory from "../models/SeriesStory";
 import User from "../models/User";
 import OAuthOrchestrator from "../oauth/OAuthOrchestrator";
 import {hashPassword} from "../oauth/OAuthUtils";
+import AccessToken from "../models/AccessToken";
+import RefreshToken from "../models/RefreshToken";
 
 // Public Objects ------------------------------------------------------------
 
@@ -55,9 +57,15 @@ export const loadTestData = async (options: Partial<OPTIONS> = {}): Promise<void
 
     // Load users (and tokens) if requested
     if (options.withUsers) {
-        // TODO - loadUsers()
+        await loadUsers(SeedData.USERS);
+        const userSuperuser = await lookupUser(SeedData.USER_USERNAME_SUPERUSER);
+        if (options.withAccessTokens) {
+            await loadAccessTokens(userSuperuser, SeedData.ACCESS_TOKENS_SUPERUSER);
+        }
+        if (options.withRefreshTokens) {
+            await loadRefreshTokens(userSuperuser, SeedData.REFRESH_TOKENS_SUPERUSER);
+        }
     }
-    const user: User = await loadUser();  // TODO - replace by loading from SeedData
 
     // If libraries are not requested, nothing else will be loaded
     let libraries: Library[] = [];
@@ -157,6 +165,21 @@ export const lookupUser = async (username: string): Promise<User> => {
 
 // Private Objects -----------------------------------------------------------
 
+const loadAccessTokens
+    = async (user: User, accessTokens: Partial<AccessToken>[]): Promise<AccessToken[]> => {
+    accessTokens.forEach(accessToken => {
+        accessToken.userId = user.id;
+    });
+    let results: AccessToken[] = [];
+    try {
+        results = await AccessToken.bulkCreate(accessTokens);
+        return results;
+    } catch (error) {
+        console.info(`  Reloading AccessTokens for User '${user.username}' ERROR`, error);
+        throw error;
+    }
+}
+
 const loadAuthors
     = async (library: Library, authors: Partial<Author>[]): Promise<Author[]> =>
 {
@@ -246,23 +269,19 @@ const loadStories
     return results;
 }
 
-const loadUser = async (): Promise<User> => {
-    const found = await User.findOne({
-        where: { username: "superuser" }
+const loadRefreshTokens
+    = async (user: User, refreshTokens: Partial<RefreshToken>[]): Promise<RefreshToken[]> => {
+    refreshTokens.forEach(refreshToken => {
+        refreshToken.userId = user.id;
     });
-    if (found) {
-        return found;
+    let results: RefreshToken[] = [];
+    try {
+        results = await RefreshToken.bulkCreate(refreshTokens);
+        return results;
+    } catch (error) {
+        console.info(`  Reloading RefreshTokens for User '${user.username}' ERROR`, error);
+        throw error;
     }
-    const SUPERUSER_PASSWORD = process.env.SUPERUSER_PASSWORD
-        ? process.env.SUPERUSER_PASSWORD
-        : "superuser";
-    const user: Partial<User> = {
-        active: true,
-        password: await hashPassword(SUPERUSER_PASSWORD),
-        scope: "superuser",
-        username: "superuser",
-    }
-    return await User.create(user);
 }
 
 const hashedPassword = async (password: string | undefined): Promise<string> => {

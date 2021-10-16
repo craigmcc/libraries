@@ -6,10 +6,13 @@
 
 // Internal Modules ----------------------------------------------------------
 
+import AccessToken from "../models/AccessToken";
 import Author from "../models/Author";
 import Library from "../models/Library";
+import RefreshToken from "../models/RefreshToken";
 import Series from "../models/Series";
 import Story from "../models/Story";
+import User from "../models/User";
 import Volume from "../models/Volume";
 
 // Seed Data -----------------------------------------------------------------
@@ -28,6 +31,25 @@ export const LIBRARIES: Partial<Library>[] = [
     {
         name: SECOND_LIBRARY,
         scope: "test2",
+    },
+];
+
+// *** Access Tokens ***
+
+const ONE_DAY = 24 * 60 * 60 * 1000;    // One day (milliseconds)
+
+export const ACCESS_TOKENS_SUPERUSER: Partial<AccessToken>[] = [
+    {
+        expires: new Date(new Date().getTime() + ONE_DAY),
+        scope: "superuser",
+        token: "superuser_access_1",
+        // userId must be seeded
+    },
+    {
+        expires: new Date(new Date().getTime() - ONE_DAY),
+        scope: "superuser",
+        token: "superuser_access_2",
+        // userId must be seeded
     },
 ];
 
@@ -57,44 +79,22 @@ export const AUTHORS_LIBRARY1: Partial<Author>[] = [
     },
 ];
 
-// OAuth Users (TODO - encrypt passwords)
-export const OAUTH_USERS = [
+// *** Refresh Tokens ***
+
+export const REFRESH_TOKENS_SUPERUSER: Partial<RefreshToken>[] = [
     {
-        active: true,
-        name: "Superuser User",
-        password: "superuser",
-        scope: "superuser",
-        username: "superuser",
+        accessToken: "superuser_access_1",
+        expires: new Date(new Date().getTime() + ONE_DAY),
+        token: "superuser_refresh_1",
+        // userId must be seeded
     },
     {
-        active: true,
-        name: "First Library Admin",
-        password: "testadmin",
-        scope: "test1:admin",
-        username: "testadmin",
+        accessToken: "superuser_access_2",
+        expires: new Date(new Date().getTime() - ONE_DAY),
+        token: "superuser_refresh_2",
+        // userId must be seeded
     },
-    {
-        active: true,
-        name: "First Library Regular",
-        password: "testregular",
-        scope: "test1:regular",
-        username: "testregular",
-    },
-    {
-        active: true,
-        name: "Second Library Admin",
-        password: "extraadmin",
-        scope: "test2:admin",
-        username: "extraadmin",
-    },
-    {
-        active: true,
-        name: "Second Library Regular",
-        password: "extraregular",
-        scope: "test2:regular",
-        username: "extraregular",
-    },
-]
+];
 
 // ***** Series *****
 
@@ -135,6 +135,42 @@ export const STORIES_LIBRARY1: Partial<Story>[] = [
     },
     {
         "name": "Rubble Story",
+    }
+];
+
+// ***** Users *****
+
+export const USER_USERNAME_SUPERUSER = "superuser";
+export const USER_USERNAME_FIRST_ADMIN = "firstadmin";
+export const USER_USERNAME_FIRST_REGULAR = "firstregular";
+export const USER_USERNAME_SECOND_ADMIN = "secondadmin";
+export const USER_USERNAME_SECOND_REGULAR = "secondregular";
+
+export const USERS: Partial<User>[] = [
+    {
+        active: true,
+        scope: "first:admin",
+        username: USER_USERNAME_FIRST_ADMIN,
+    },
+    {
+        active: true,
+        scope: "first:regular",
+        username: USER_USERNAME_FIRST_REGULAR,
+    },
+    {
+        active: false,
+        scope: "second:admin",
+        username: USER_USERNAME_SECOND_ADMIN,
+    },
+    {
+        active: false,
+        scope: "second:regular",
+        username: USER_USERNAME_SECOND_REGULAR,
+    },
+    {
+        active: true,
+        scope: "superuser",
+        username: USER_USERNAME_SUPERUSER,
     }
 ];
 
