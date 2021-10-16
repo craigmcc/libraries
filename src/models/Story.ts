@@ -11,7 +11,6 @@ import {
     Column,
     DataType,
     ForeignKey,
-    Index,
     Table
 } from "sequelize-typescript";
 
@@ -70,11 +69,11 @@ export class Story extends AbstractModel<Story> {
     library!: Library;
 
     @ForeignKey(() => Library)
-    @Index("ix_stories_library_id_name")
     @Column({
         allowNull: false,
         field: "library_id",
         type: DataType.INTEGER,
+        unique: "uniqueNameWithinLibrary",
         validate: {
             notNull: {
                 msg: "library_id: Is required"
@@ -83,11 +82,11 @@ export class Story extends AbstractModel<Story> {
     })
     libraryId!: number;
 
-    @Index("ix_stories_library_id_name")
     @Column({
         allowNull: false,
         field: "name",
         type: DataType.STRING,
+        unique: "uniqueNameWithinLibrary",
         validate: {
             notNull: {
                 msg: "name: Is required"

@@ -42,23 +42,17 @@ export const Database = new Sequelize(DATABASE_URL, {
         });
 
 Database.addModels([
-/*
     AccessToken,
-*/
     Author,
     AuthorSeries,
     AuthorStory,
     AuthorVolume,
     Library,
-/*
     RefreshToken,
-*/
     Series,
     SeriesStory,
     Story,
-/*
     User,
-*/
     Volume,
     VolumeStory,
 ]);

@@ -5,7 +5,7 @@
 
 // External Modules ----------------------------------------------------------
 
-import {BelongsTo, BelongsToMany, Column, DataType, ForeignKey, HasMany, Index, Table} from "sequelize-typescript";
+import {BelongsTo, BelongsToMany, Column, DataType, ForeignKey, Table} from "sequelize-typescript";
 
 // Internal Modules ----------------------------------------------------------
 
@@ -85,11 +85,11 @@ export class Volume extends AbstractModel<Volume> {
     library!: Library;
 
     @ForeignKey(() => Library)
-    @Index("ix_volumes_library_id_name")
     @Column({
         allowNull: false,
         field: "library_id",
         type: DataType.INTEGER,
+        unique: "uniqueNameWithinLibrary",
         validate: {
             notNull: {
                 msg: "libraryId: Is required"
@@ -105,11 +105,11 @@ export class Volume extends AbstractModel<Volume> {
     })
     location?: string;
 
-    @Index("ix_volumes_library_id_name")
     @Column({
         allowNull: false,
         field: "name",
         type: DataType.STRING,
+        unique: "uniqueNameWithinLibrary",
         validate: {
             notNull: {
                 msg: "name: Is required"

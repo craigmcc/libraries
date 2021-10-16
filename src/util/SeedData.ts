@@ -23,11 +23,11 @@ export const SECOND_LIBRARY = "Extra Library";
 export const LIBRARIES: Partial<Library>[] = [
     {
         name: FIRST_LIBRARY,
-        scope: "test",
+        scope: "test1",
     },
     {
         name: SECOND_LIBRARY,
-        scope: "test",
+        scope: "test2",
     },
 ];
 
@@ -70,28 +70,28 @@ export const OAUTH_USERS = [
         active: true,
         name: "First Library Admin",
         password: "testadmin",
-        scope: "test admin regular",
+        scope: "test1:admin",
         username: "testadmin",
     },
     {
         active: true,
         name: "First Library Regular",
         password: "testregular",
-        scope: "test regular",
+        scope: "test1:regular",
         username: "testregular",
     },
     {
         active: true,
         name: "Second Library Admin",
         password: "extraadmin",
-        scope: "extra admin regular",
+        scope: "test2:admin",
         username: "extraadmin",
     },
     {
         active: true,
         name: "Second Library Regular",
         password: "extraregular",
-        scope: "extra regular",
+        scope: "test2:regular",
         username: "extraregular",
     },
 ]
