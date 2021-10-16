@@ -28,7 +28,7 @@ export class VolumeStory extends AbstractModel<VolumeStory> {
         type: DataType.INTEGER,
     })
     @ForeignKey(() => Story)
-    story_id!: number;
+    storyId!: number;
 
     @BelongsTo(() => Volume)
     volume!: Volume;
@@ -39,7 +39,7 @@ export class VolumeStory extends AbstractModel<VolumeStory> {
         type: DataType.INTEGER,
     })
     @ForeignKey(() => Volume)
-    volume_id!: number;
+    volumeId!: number;
 
 }
 

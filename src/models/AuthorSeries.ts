@@ -28,7 +28,7 @@ export class AuthorSeries extends AbstractModel<AuthorSeries> {
         type: DataType.INTEGER,
     })
     @ForeignKey(() => Author)
-    author_id!: number;
+    authorId!: number;
 
     @Column({
         allowNull: false,
@@ -47,7 +47,7 @@ export class AuthorSeries extends AbstractModel<AuthorSeries> {
         type: DataType.INTEGER,
     })
     @ForeignKey(() => Series)
-    series_id!: number;
+    seriesId!: number;
 
 }
 

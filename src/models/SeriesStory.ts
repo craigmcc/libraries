@@ -35,7 +35,7 @@ export class SeriesStory extends AbstractModel<SeriesStory> {
         type: DataType.INTEGER,
     })
     @ForeignKey(() => Series)
-    series_id!: number;
+    seriesId!: number;
 
     @BelongsTo(() => Story)
     story!: Story;
@@ -46,7 +46,7 @@ export class SeriesStory extends AbstractModel<SeriesStory> {
         type: DataType.INTEGER,
     })
     @ForeignKey(() => Story)
-    story_id!: number;
+    storyId!: number;
 
 }
 

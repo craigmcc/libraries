@@ -224,8 +224,8 @@ const loadSeriesStory
     = async (series: Series, story: Story, ordinal: number): Promise<void> =>
 {
     await SeriesStory.create({
-        series_id: series.id,
-        story_id: story.id,
+        seriesId: series.id,
+        storyId: story.id,
         ordinal: ordinal,
     });
 }

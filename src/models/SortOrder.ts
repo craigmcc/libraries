@@ -9,9 +9,9 @@ import { Order } from "sequelize";
 // Public Objects ------------------------------------------------------------
 
 export const AUTHORS: Order  = [
-    [ "library_id", "ASC" ],
-    [ "last_name", "ASC" ],
-    [ "first_name", "ASC" ],
+    [ "libraryId", "ASC" ],
+    [ "lastName", "ASC" ],
+    [ "firstFame", "ASC" ],
 ];
 
 export const LIBRARIES: Order = [
@@ -19,12 +19,12 @@ export const LIBRARIES: Order = [
 ];
 
 export const SERIES: Order = [
-    [ "library_id", "ASC" ],
+    [ "libraryId", "ASC" ],
     [ "name", "ASC" ],
 ];
 
 export const STORIES: Order = [
-    [ "library_id", "ASC" ],
+    [ "libraryId", "ASC" ],
     [ "name", "ASC" ],
 ];
 
@@ -33,6 +33,6 @@ export const USERS: Order = [
 ];
 
 export const VOLUMES: Order = [
-    [ "library_id", "ASC" ],
+    [ "libraryId", "ASC" ],
     [ "name", "ASC" ],
 ];
