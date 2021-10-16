@@ -23,7 +23,7 @@ export abstract class AbstractModel<Model> extends Model {
         primaryKey: true,
         type: DataType.INTEGER
     })
-    id?: number;
+    id!: number;
 
 }
 

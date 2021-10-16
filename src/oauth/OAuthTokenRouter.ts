@@ -10,24 +10,16 @@ import {
     TokenRequest,
     TokenResponse,
 } from "@craigmcc/oauth-orchestrator";
-import { Request, Response, Router } from "express";
+import {Request, Response, Router} from "express";
 
 const PASSWORD_GRANT_TYPE = "password";
 const REFRESH_GRANT_TYPE = "refresh_token";
 
 // Internal Modules ----------------------------------------------------------
 
-import {
-    requireAny,
-    requireNotProduction,
-    requireSuperuser
-} from "./OAuthMiddleware";
-import AccessToken from "../models/AccessToken";
-import RefreshToken from "../models/RefreshToken";
-import {OAuthOrchestrator} from "../server";
-import User from "../models/User";
-import {BadRequest, NotFound, ServerError} from "../util/HttpErrors";
-import logger from "../util/ServerLogger";
+import {requireAny} from "./OAuthMiddleware";
+import OAuthOrchestrator from "./OAuthOrchestrator";
+import {BadRequest, ServerError} from "../util/HttpErrors";
 
 // Public Objects ------------------------------------------------------------
 
@@ -98,11 +90,6 @@ OAuthTokenRouter.post("/",
                 = await OAuthOrchestrator.token(tokenRequest);
             res.send(tokenResponse);
         } catch (error) {
-            logger.error({
-                context: "OAuthTokenRouter.token",
-                input: input,
-                error: error,
-            });
             // Handle errors with standard middleware
             throw error;
         }

@@ -1,4 +1,4 @@
-// oauth-handlers ------------------------------------------------------------
+// OAuthOrchestratorHandlers -------------------------------------------------
 
 // Handlers for use by @craigmcc/oauth-orchestrator.
 
@@ -6,9 +6,6 @@
 
 import {
     Identifier,
-    AccessToken,
-    RefreshToken,
-    User,
     OrchestratorHandlers,
     AuthenticateUser,
     CreateAccessToken,
@@ -20,28 +17,20 @@ import {
 
 // Internal Modules ----------------------------------------------------------
 
+import {generateRandomToken, verifyPassword} from "./OAuthUtils";
 import OAuthAccessToken from "../models/AccessToken";
 import OAuthRefreshToken from "../models/RefreshToken";
-import {generateRandomToken, verifyPassword} from "./OAuthUtils";
 import OAuthUser from "../models/User";
 import {NotFound} from "../util/HttpErrors";
-import logger from "../util/ServerLogger";
 
 // Private Objects -----------------------------------------------------------
 
 const authenticateUser: AuthenticateUser
-    = async (username: string, password: string): Promise<User> =>
+    = async (username: string, password: string) =>
 {
 
-    logger.info({
-        context: "OAuthOrchestratorHandlers.authenticateUser",
-        username: username,
-        password: "*REDACTED*",
-    });
-
     // Look up the specified user
-    const oauthUser: OAuthUser | null
-        = await OAuthUser.findOne({
+    const oauthUser = await OAuthUser.findOne({
         where: { username: username }
     });
     if (!oauthUser) {
@@ -70,7 +59,6 @@ const authenticateUser: AuthenticateUser
     // Return the requested result
     return {
         scope: oauthUser.scope,
-        // @ts-ignore
         userId: oauthUser.id
     }
 
@@ -95,15 +83,14 @@ const createAccessToken: CreateAccessToken
     }
 
     // Create the access token and return the relevant data
-    const outgoing: OAuthAccessToken
-        = await OAuthAccessToken.create(incoming, {
+    const outgoing = await OAuthAccessToken.create(incoming, {
         fields: [ "expires", "scope", "token", "userId" ]
     });
     return {
         expires: outgoing.expires,
         scope: outgoing.scope,
         token: outgoing.token,
-        userId: outgoing.id ? outgoing.id : 0 // Will never happen
+        userId: outgoing.id,
     };
 
 }
@@ -127,29 +114,29 @@ const createRefreshToken: CreateRefreshToken
     }
 
     // Create the refresh token and return the relevant data
-    const outgoing: OAuthRefreshToken
-        = await OAuthRefreshToken.create(incoming, {
+    const outgoing = await OAuthRefreshToken.create(incoming, {
         fields: [ "accessToken", "expires", "token", "userId" ]
     });
     return {
         accessToken: outgoing.accessToken,
         expires: outgoing.expires,
         token: outgoing.token,
-        userId: outgoing.id ? outgoing.id : 0 // Will never happen
+        userId: outgoing.id,
     };
 
 }
 
-const retrieveAccessToken: RetrieveAccessToken
-    = async (token: string): Promise<AccessToken> =>
-{
+const retrieveAccessToken: RetrieveAccessToken = async (token: string) => {
 
     // Look up the specified token
     const oauthAccessToken = await OAuthAccessToken.findOne({
         where: { token: token }
     });
     if (!oauthAccessToken) {
-        throw new NotFound("token: Missing or invalid token");
+        throw new NotFound(
+            "token: Missing or invalid token",
+            "OAuthOrchestratorHandlers.retrieveAccessToken"
+        );
     }
 
     // Return the requested result
@@ -162,16 +149,17 @@ const retrieveAccessToken: RetrieveAccessToken
 
 }
 
-const retrieveRefreshToken: RetrieveRefreshToken
-    = async (token: string): Promise<RefreshToken> =>
-{
+const retrieveRefreshToken: RetrieveRefreshToken = async (token: string) => {
 
     // Look up the specified token
     const oauthRefreshToken = await OAuthRefreshToken.findOne({
         where: { token: token }
     });
     if (!oauthRefreshToken) {
-        throw new NotFound("token: Missing or invalid token");
+        throw new NotFound(
+            "token: Missing or invalid token",
+            "OAuthOrchestratorHandlers.retrieveRefreshToken"
+        );
     }
 
     // Return the requested result

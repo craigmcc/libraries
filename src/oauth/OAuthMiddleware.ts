@@ -1,11 +1,10 @@
-// oauth-middleware ----------------------------------------------------------
+// OAuthMiddleware -----------------------------------------------------------
 
 // Express middleware to enforce OAuth scope limits.
 
 // External Modules ----------------------------------------------------------
 
-require("custom-env").env(true);
-import { OAuthError } from "@craigmcc/oauth-orchestrator";
+import {InvalidScopeError, OAuthError} from "@craigmcc/oauth-orchestrator";
 import {
     ErrorRequestHandler,
     NextFunction,
@@ -16,7 +15,8 @@ import {
 
 // Internal Modules ----------------------------------------------------------
 
-import {OAuthOrchestrator} from "../server";
+import OAuthOrchestrator from "./OAuthOrchestrator";
+import LibraryServices from "../services/LibraryServices";
 import {Forbidden} from "../util/HttpErrors";
 import logger from "../util/ServerLogger";
 
@@ -88,7 +88,7 @@ export const requireAdmin: RequestHandler =
                     "OAuthMiddleware.requireAdmin"
                 );
             }
-            const required = mapLibraryId(req) + " admin";
+            const required = (await mapLibraryId(req)) + ":admin";
             await authorizeToken(token, required);
             res.locals.token = token;
             next();
@@ -106,13 +106,13 @@ export const requireAdmin: RequestHandler =
 export const requireAny: RequestHandler =
     async (req: Request, res: Response, next: NextFunction) => {
         const token = extractToken(req);
-        if (!token) {
-            throw new Forbidden(
-                "No access token presented",
-                "OAuthMiddleware.requireAny"
-            );
-        }
         if (oauthEnabled) {
+            if (!token) {
+                throw new Forbidden(
+                    "No access token presented",
+                    "OAuthMiddleware.requireAny"
+                );
+            }
             const required = "";
             await authorizeToken(token, required);
             res.locals.token = token;
@@ -137,14 +137,18 @@ export const requireNone: RequestHandler =
 export const requireNotProduction: RequestHandler =
     async (req: Request, res: Response, next: NextFunction) => {
         if ("production" === NODE_ENV) {
-            throw new Forbidden("This request is not allowed in production mode");
+            throw new Forbidden(
+                "This request is not allowed in production mode",
+                "OAuthMiddleware.requireNotProduction"
+            );
         } else {
             next();
         }
     }
 
 /**
- * Require "regular" scope (for a specific library) to handle this request.
+ * Require "regular" scope (for a specific Library) to handle this request.
+ * If the token has "admin" scope on this Library, it will also pass.
  */
 export const requireRegular: RequestHandler =
     async (req: Request, res: Response, next: NextFunction) => {
@@ -157,7 +161,15 @@ export const requireRegular: RequestHandler =
                 );
             }
             const required = mapLibraryId(req) + " regular";
-            await authorizeToken(token, required);
+            try {
+                await authorizeToken(token, required);
+            } catch (error) {
+                if (error instanceof InvalidScopeError) {
+                    await authorizeToken(token, required.replace("regular","admin"));
+                } else {
+                    throw error;
+                }
+            }
             res.locals.token = token;
             next();
         } else {
@@ -232,8 +244,15 @@ const extractToken = (req: Request) : string | null => {
     return fields[1];
 }
 
-// TODO - need to dynamically load the libraryId->scope information
-// TODO - and keep it up to date
+// TODO - keep it up to date when libraries info changes
+const mapping = new Map<number, string>();
+
+const mapLibrariesLoad = async (): Promise<void> => {
+    const libraries = await LibraryServices.all();
+    libraries.forEach(library => {
+        mapping.set(library.id, library.name);
+    });
+}
 
 /**
  * Map the libraryId parameter on this request to a corresponding scope value
@@ -243,7 +262,10 @@ const extractToken = (req: Request) : string | null => {
  *
  * @returns scope value to be included in the authorize request.
  */
-const mapLibraryId = (req: Request): string => {
+const mapLibraryId = async (req: Request): Promise<string> => {
+    if (mapping.size === 0) {
+        await mapLibrariesLoad();
+    }
     const libraryId: string | null = req.params.libraryId;
     if (!libraryId) {
         return "notincluded";
