@@ -24,9 +24,8 @@ abstract class BaseParentServices<M extends Model> extends BaseCommonServices<M>
      * Construct a new services instance for the specified Sequelize Model.
      *
      * @param model                     Model instance being supported
-     * @param fields                    List of field names for this Model (no "id")
      * @param order                     Order object for standard sorting order
-     *
+     * @param fields                    List of field names for this Model (no "id")
      */
     constructor (model: M, order: Order, fields: string[]) {
         super(model, order, fields);

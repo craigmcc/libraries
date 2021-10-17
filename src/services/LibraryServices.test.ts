@@ -9,10 +9,11 @@ const expect = chai.expect;
 
 // Internal Modules ----------------------------------------------------------
 
+import LibraryServices from "./LibraryServices";
+import Library from "../models/Library";
 import {BadRequest, NotFound} from "../util/HttpErrors";
 import * as SeedData from "../util/SeedData";
 import {loadTestData} from "../util/TestUtils";
-import LibraryServices from "./LibraryServices";
 
 // Test Specifications ------------------------------------------------------
 
@@ -22,7 +23,11 @@ describe("LibraryServices Functional Tests", () => {
 
     beforeEach("#beforeEach", async () => {
         await loadTestData({
+            withAuthors: true,
             withLibraries: true,
+            withSeries: true,
+            withStories: true,
+            withVolumes: true,
         });
     })
 
@@ -40,9 +45,9 @@ describe("LibraryServices Functional Tests", () => {
             } catch (error) {
                 if (error instanceof NotFound) {
                     expect(error.message).includes
-                    (`Missing Library '${INVALID_NAME}'`);
+                        (`Missing Library '${INVALID_NAME}'`);
                 } else {
-                    expect.fail(`Should have thrown NotFound, but threw '${error.message}'`);
+                    expect.fail(`Should not have thrown '${error.message}'`);
                 }
             }
         })
